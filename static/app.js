@@ -351,22 +351,19 @@
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão.</div>'; return; }
     target.innerHTML = state.cards.map(card => {
       const theme = bankTheme(card.issuer);
-      const nickname = card.name && card.name !== card.issuer ? card.name : 'Cartão de crédito';
       const archived = card.active === false;
       return '<article class="bank-card-entry ' + (archived ? 'is-archived' : '') + '">' +
-        '<div class="bank-card-face" data-issuer="' + escapeHtml(card.issuer || 'Outro') + '" style="--bank-color:' + theme.color + ';--bank-ink:' + theme.ink + '">' +
-          '<div class="bank-card-top"><span class="bank-logo-mark">' + brandLogoMarkup(card.issuer) + '</span><span class="bank-card-network">CRÉDITO</span></div>' +
-          '<div class="bank-card-chip-row"><span class="bank-card-chip" aria-hidden="true"><i></i></span><span class="bank-card-contactless" aria-hidden="true">)))</span></div>' +
-          '<div class="bank-card-bank">' + escapeHtml(card.issuer || 'Instituição') + '</div>' +
-          '<div class="bank-card-nickname">' + escapeHtml(nickname) + '</div>' +
-          '<div class="bank-card-bottom"><span>FECHAMENTO <b>dia ' + card.closing_day + '</b></span><span>VENCIMENTO <b>dia ' + card.due_day + '</b></span></div>' +
+        '<div class="bank-card-face wallet-card-face" data-issuer="' + escapeHtml(card.issuer || 'Outro') + '" style="--bank-color:' + theme.color + ';--bank-ink:' + theme.ink + '">' +
+          '<span class="wallet-card-glass" aria-hidden="true"></span>' +
+          '<div class="bank-card-top"><span class="bank-logo-mark">' + brandLogoMarkup(card.issuer) + '</span></div>' +
+          '<div class="wallet-card-bottom"><span class="wallet-card-label">' + escapeHtml(card.name && card.name !== card.issuer ? card.name : 'Crédito') + '</span><span class="wallet-card-orbit" aria-hidden="true"></span></div>' +
         '</div><div class="bank-card-details"><div><small>Limite total</small><strong>' + money(card.limit_cents || 0) + '</strong></div><div class="bank-card-actions">' +
           (archived ? '<span class="status-pill historical">Arquivado</span><button type="button" data-reactivate-card="' + card.id + '">Reativar</button>' : '<button type="button" data-edit-card="' + card.id + '">Editar</button><button type="button" data-archive-card="' + card.id + '">Arquivar</button>') +
         '</div></div></article>';
     }).join('');
-    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(Number(button.dataset.editCard))));
-    target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveResource('cards', Number(button.dataset.archiveCard), 'cartão')));
-    target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateResource('cards', Number(button.dataset.reactivateCard), 'cartão')));
+    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(button.dataset.editCard)));
+    target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveCard(button.dataset.archiveCard)));
+    target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateCard(button.dataset.reactivateCard)));
   }
   function renderCategories() {
     const target = $('#categoriesList');
@@ -659,12 +656,12 @@
     const issuer = form.elements.issuer.value || 'Nubank';
     const theme = bankTheme(issuer);
     const amount = parseMoneyInput(form.elements.limit.value);
-    const nickname = form.elements.name.value.trim() || (issuer === 'Outro' ? 'Cartão de crédito' : issuer + ' principal');
+    const nickname = form.elements.name.value.trim() || 'Crédito';
     $('#previewCardFace').style.setProperty('--preview-color', theme.color);
     $('#previewCardFace').style.setProperty('--preview-ink', theme.ink);
     $('#previewBankMark').innerHTML = brandLogoMarkup(issuer);
     $('#previewCardFace').dataset.issuer = issuer;
-    $('#previewBankName').textContent = issuer;
+    $('#previewBankName').textContent = '';
     $('#previewCardName').textContent = nickname;
     $('#previewCardLimit').textContent = Number.isFinite(amount) ? formatMoneyInput(amount) : '—';
     $('#previewLimitFact').textContent = Number.isFinite(amount) ? formatMoneyInput(amount) : '—';
