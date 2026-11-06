@@ -69,6 +69,10 @@ app = FastAPI(
     openapi_url=None,
 )
 app.add_middleware(
+    BackupRestoreSizeLimitMiddleware,
+    max_bytes=MAX_BACKUP_UPLOAD_BYTES,
+)
+app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
     session_cookie="xtrato_session",
@@ -79,6 +83,72 @@ app.add_middleware(
 
 
 MAX_BACKUP_UPLOAD_BYTES = 10 * 1024 * 1024
+
+
+class _BackupRestoreTooLarge(Exception):
+    pass
+
+
+class BackupRestoreSizeLimitMiddleware:
+    def __init__(self, app, max_bytes: int = MAX_BACKUP_UPLOAD_BYTES):
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if (
+            scope["type"] != "http"
+            or scope.get("path") != "/api/backup/restore"
+            or scope.get("method") != "POST"
+        ):
+            await self.app(scope, receive, send)
+            return
+
+        headers = dict(scope.get("headers", []))
+        raw_length = headers.get(b"content-length")
+        if raw_length is not None:
+            try:
+                declared_length = int(raw_length.decode("ascii"))
+            except (UnicodeDecodeError, ValueError):
+                response = JSONResponse(
+                    {"detail": "Cabeçalho de tamanho da requisição inválido."},
+                    status_code=400,
+                )
+                await response(scope, receive, send)
+                return
+            if declared_length < 0:
+                response = JSONResponse(
+                    {"detail": "Cabeçalho de tamanho da requisição inválido."},
+                    status_code=400,
+                )
+                await response(scope, receive, send)
+                return
+            if declared_length > self.max_bytes:
+                response = JSONResponse(
+                    {"detail": "O arquivo de backup excede o limite de 10 MB."},
+                    status_code=413,
+                )
+                await response(scope, receive, send)
+                return
+
+        received_bytes = 0
+
+        async def limited_receive():
+            nonlocal received_bytes
+            message = await receive()
+            if message["type"] == "http.request":
+                received_bytes += len(message.get("body", b""))
+                if received_bytes > self.max_bytes:
+                    raise _BackupRestoreTooLarge
+            return message
+
+        try:
+            await self.app(scope, limited_receive, send)
+        except _BackupRestoreTooLarge:
+            response = JSONResponse(
+                {"detail": "O arquivo de backup excede o limite de 10 MB."},
+                status_code=413,
+            )
+            await response(scope, receive, send)
 
 
 def private_api_error(detail: str, status_code: int) -> JSONResponse:
@@ -98,19 +168,6 @@ def private_api_error(detail: str, status_code: int) -> JSONResponse:
 
 @app.middleware("http")
 async def protect_mutations(request: Request, call_next):
-    if request.url.path == "/api/backup/restore" and request.method == "POST":
-        content_length = request.headers.get("content-length")
-        if content_length is None:
-            return private_api_error("Informe o tamanho do arquivo de backup na requisição.", 411)
-        try:
-            upload_size = int(content_length)
-        except ValueError:
-            return private_api_error("Cabeçalho de tamanho da requisição inválido.", 400)
-        if upload_size < 0:
-            return JSONResponse({"detail": "Cabeçalho de tamanho da requisição inválido."}, status_code=400)
-        if upload_size > MAX_BACKUP_UPLOAD_BYTES:
-            return private_api_error("O arquivo de backup excede o limite de 10 MB.", 413)
-
     if request.url.path.startswith("/api/") and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
         if request.headers.get("x-xtrato-request") != "1":
             return private_api_error("Requisição não autorizada.", 403)
