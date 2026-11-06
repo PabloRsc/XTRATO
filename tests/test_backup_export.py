@@ -454,3 +454,21 @@ def test_backup_restore_rejects_blank_card_category_and_purchase_names():
     }
     with pytest.raises(ValidationError):
         BackupRestoreIn.model_validate({**base, "categories": [category]})
+
+    valid_card = {**card, "id": 1, "name": "Nubank"}
+    valid_category = {**category, "id": 1, "name": "Compras"}
+    purchase = {
+        "id": 1, "description": "   ", "kind": "avista",
+        "direction": "expense", "purchase_date": "2026-11-06",
+        "card_id": 1, "category_id": 1, "total_cents": 1_000,
+        "installment_count": 1, "first_invoice_month": "2026-11-01",
+        "current_installment": 1, "end_invoice_month": None,
+        "active": True, "notes": "", "created_at": "2026-11-06T12:00:00+00:00",
+    }
+    with pytest.raises(ValidationError):
+        BackupRestoreIn.model_validate({
+            **base,
+            "cards": [valid_card],
+            "categories": [valid_category],
+            "purchases": [purchase],
+        })
