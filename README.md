@@ -6,9 +6,10 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 - Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
-- Cadastro e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento e vencimento.
-- Categorias pessoais.
+- Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento e vencimento.
+- Categorias pessoais com cadastro, edição e arquivamento.
 - Compras à vista, parceladas e despesas fixas mensais.
+- Edição segura de descrição e observações de compras/despesas fixas; valores, parcelas e meses de pagamento permanecem preservados.
 - Compra parcelada em andamento: informar total ou valor da parcela, parcela atual e mês da fatura atual.
 - Cada parcela fica armazenada como um lançamento separado, associado a `YYYY-MM` da fatura.
 - Parcelas anteriores de uma compra em andamento são preservadas como histórico e não são lançadas novamente no mês atual.
@@ -113,7 +114,7 @@ Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_UR
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
 - `GET/POST/PUT/DELETE /api/cards`
 - `GET/POST/PUT/DELETE /api/categories`
-- `POST /api/purchases`, `POST /api/purchases/{id}/cancel`
+- `POST /api/purchases`, `PATCH /api/purchases/{id}` (descrição/observações), `POST /api/purchases/{id}/cancel`
 - `GET /api/entries?month=YYYY-MM`
 - `GET /api/dashboard?month=YYYY-MM`
 - `GET /api/recurrences`

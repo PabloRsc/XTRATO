@@ -74,3 +74,15 @@ class PurchaseIn(BaseModel):
 class PurchaseUpdateIn(BaseModel):
     description: str | None = Field(default=None, min_length=1, max_length=100)
     notes: str | None = Field(default=None, max_length=300)
+
+    @model_validator(mode="after")
+    def require_editable_field(self):
+        if self.description is not None:
+            self.description = self.description.strip()
+            if not self.description:
+                raise ValueError("A descrição não pode ficar vazia.")
+        if self.notes is not None:
+            self.notes = self.notes.strip()
+        if self.description is None and self.notes is None:
+            raise ValueError("Informe uma descrição ou observação para atualizar.")
+        return self
