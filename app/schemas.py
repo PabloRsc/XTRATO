@@ -11,17 +11,6 @@ class LoginIn(BaseModel):
     password: str = Field(min_length=1, max_length=200)
 
 
-class PasswordChangeIn(BaseModel):
-    current_password: str = Field(min_length=1, max_length=200)
-    new_password: str = Field(min_length=12, max_length=200)
-
-    @model_validator(mode="after")
-    def require_new_password(self):
-        if self.current_password == self.new_password:
-            raise ValueError("A nova senha deve ser diferente da senha atual.")
-        return self
-
-
 class CardIn(BaseModel):
     name: str = Field(min_length=1, max_length=60)
     issuer: str = Field(default="", max_length=60)

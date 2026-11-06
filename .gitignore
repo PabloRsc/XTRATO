@@ -1,0 +1,25 @@
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+
+# Local databases and financial backups
+*.db
+*.sqlite
+*.sqlite3
+backup-*.sql
+backup-*.json
+xtrato-backup-*.json
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
