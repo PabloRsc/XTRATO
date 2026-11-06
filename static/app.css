@@ -687,3 +687,81 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
   .bank-card-entry{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)}
   .wallet-card-orbit{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
+
+
+/* Wallet cards v2 — true card proportions, layered layout and stronger glass */
+.bank-card-list{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,245px),1fr))!important;
+  align-items:start;gap:18px!important;
+}
+.bank-card-entry{
+  width:100%;max-width:360px;margin-inline:auto;
+  padding:8px!important;border-radius:20px!important;
+  background:rgba(255,255,255,.075)!important;
+  border:1px solid rgba(255,255,255,.17)!important;
+  box-shadow:0 18px 40px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.2)!important;
+  backdrop-filter:blur(22px) saturate(145%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+}
+.bank-card-face.wallet-card-face{
+  width:100%;aspect-ratio:1.586/1;min-height:0!important;
+  height:auto;padding:17px 18px!important;border-radius:14px!important;
+  overflow:hidden;isolation:isolate;position:relative;
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:
+    radial-gradient(ellipse at 18% 0%,rgba(255,255,255,.38),transparent 48%),
+    linear-gradient(145deg,color-mix(in srgb,var(--bank-color) 90%,#fff),var(--bank-color) 58%,color-mix(in srgb,var(--bank-color) 66%,#111827))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(0,0,0,.18),0 12px 28px color-mix(in srgb,var(--bank-color) 28%,transparent)!important;
+}
+.wallet-card-face:before{
+  content:"";position:absolute;inset:-25%;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(112deg,transparent 25%,rgba(255,255,255,.26) 38%,transparent 47%),
+    radial-gradient(ellipse at 82% 90%,rgba(255,255,255,.23),transparent 42%);
+  transform:rotate(-8deg);mix-blend-mode:screen;
+}
+.wallet-card-face:after{
+  content:"";position:absolute;z-index:0;pointer-events:none;
+  width:76%;aspect-ratio:1;right:-27%;bottom:-62%;
+  border:1px solid rgba(255,255,255,.5);border-radius:50%;
+  box-shadow:0 0 0 12px rgba(255,255,255,.10),0 0 0 25px rgba(255,255,255,.075),0 0 0 40px rgba(255,255,255,.045);
+}
+.wallet-card-glass{
+  position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(132deg,rgba(255,255,255,.30),rgba(255,255,255,.045) 36%,rgba(255,255,255,.12) 70%,rgba(0,0,0,.09));
+  border:1px solid rgba(255,255,255,.24);
+  backdrop-filter:blur(8px) saturate(135%);-webkit-backdrop-filter:blur(8px) saturate(135%);
+}
+.wallet-card-face .bank-card-top,.wallet-card-face .wallet-card-bottom{position:relative;z-index:2}
+.wallet-card-face .bank-card-top{min-height:30px}
+.wallet-card-face .bank-logo-mark{
+  display:flex;align-items:center;justify-content:flex-start;
+  max-width:72%;min-width:0;min-height:30px;padding:0!important;
+  background:transparent!important;border:0!important;
+  color:var(--bank-ink);filter:drop-shadow(0 2px 5px rgba(0,0,0,.18));
+}
+.wallet-card-face .bank-logo-mark svg{display:block;width:auto;height:29px;max-width:100%;fill:currentColor}
+.wallet-card-face .bank-logo-mark .brand-wordmark{font-size:clamp(17px,2vw,23px);font-weight:850;letter-spacing:-.8px;white-space:nowrap}
+.wallet-card-face .bank-logo-mark .mercado-pago-logo{width:135px;height:44px;max-width:100%;overflow:visible}
+.wallet-card-face .wallet-card-bottom{display:flex;align-items:flex-end;justify-content:space-between}
+.wallet-card-label{font-size:8px;letter-spacing:1.2px;opacity:.72}
+.wallet-card-orbit{
+  width:27px;height:27px;border:1px solid rgba(255,255,255,.72);
+  background:rgba(255,255,255,.22);box-shadow:inset 0 1px 6px rgba(255,255,255,.45),0 2px 8px rgba(0,0,0,.13);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.bank-card-details{padding:10px 4px 3px!important}
+.bank-card-details strong{font-size:14px!important}
+:root[data-theme="dark"] .bank-card-entry{background:rgba(255,255,255,.055)!important;border-color:rgba(255,255,255,.13)!important}
+:root[data-theme="light"] .bank-card-entry{background:rgba(255,255,255,.48)!important;border-color:rgba(255,255,255,.8)!important}
+.preview-card-face.wallet-card-face{aspect-ratio:1.586/1;min-height:0!important;height:auto;padding:18px!important}
+.preview-card-face.wallet-card-face .bank-logo-mark svg{height:31px}
+@media(max-width:760px){
+ .bank-card-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr))!important;gap:13px!important}
+ .bank-card-entry{max-width:340px}
+ .bank-card-face.wallet-card-face{padding:14px 15px!important}
+}
+@media(prefers-reduced-transparency:reduce){
+ .bank-card-entry,.wallet-card-glass,.wallet-card-orbit{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}
