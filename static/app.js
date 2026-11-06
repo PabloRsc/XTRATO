@@ -325,12 +325,23 @@
     if (kind === 'avista') { $('#calculationPreview').classList.add('hidden'); return; }
     $('#calculationPreview').classList.remove('hidden');
     let per = amount;
-    let detail = 'Valor mensal da cobrança';
+    let detail = 'Cobrança mensal prevista';
     let label = 'Valor mensal';
     if (kind === 'parcelado') {
-      per = ongoing && mode === 'installment' ? amount : Math.floor(amount / count);
-      detail = `${count} parcelas${ongoing ? ` · atual ${$('#purchaseForm').elements.current_installment.value || 1}/${count}` : ''}`;
-      label = ongoing && mode === 'installment' ? 'Valor informado por parcela' : 'Valor estimado por parcela';
+      if (ongoing && mode === 'installment') {
+        per = amount;
+        const current = $('#purchaseForm').elements.current_installment.value || 1;
+        detail = `Parcela atual ${current}/${count} · valor informado por parcela`;
+        label = 'Valor de cada parcela';
+      } else {
+        const base = Math.floor(amount / count);
+        const remainder = amount % count;
+        per = base;
+        detail = remainder
+          ? `${count - 1} parcelas de ${money(base)} e última de ${money(base + remainder)}`
+          : `${count} parcelas de ${money(base)}`;
+        label = 'Valor da primeira parcela';
+      }
     }
     $('#calculationLabel').textContent = label;
     $('#calculationAmount').textContent = money(per);
