@@ -784,3 +784,93 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
  .login-art .brand-mark-image{width:46px;height:46px;flex-basis:46px}
  .mobile-brand .brand-mark-image{width:42px;height:42px;flex-basis:42px}
 }
+
+
+/* XTRATO visual rebuild — phase 1: financial home and forecast */
+
+:root{
+ --bg:#f1f3ee;--surface:#fbfcf9;--surface-2:#e7ebe3;--ink:#13211a;--muted:#62736a;
+ --line:#d9dfd6;--green:#1d6b49;--green-dark:#0f3a29;--green-soft:#e4eee5;
+ --lime:#b9f04c;--red:#b4442f;--shadow:0 14px 40px rgba(19,33,26,.055);
+ font-family:"DM Sans",system-ui,sans-serif;
+}
+:root[data-theme="dark"]{
+ --bg:#0d1511;--surface:#141f19;--surface-2:#1c2a22;--ink:#e8efe9;--muted:#8da197;
+ --line:#25352c;--green:#4fc088;--green-dark:#0a2218;--green-soft:#173426;--lime:#b9f04c;--red:#ef8a73;
+}
+body{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif}
+h1,h2,h3,.xtrato-balance-value,.dark-total,.budget-numbers strong{font-family:"Bricolage Grotesque","DM Sans",sans-serif}
+.sidebar{background:var(--surface);border-color:var(--line)}
+.main-area{background:var(--bg)}
+.topbar{background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.panel-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.xtrato-home{max-width:1440px}
+.xtrato-welcome{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:4px 0 28px}
+.xtrato-welcome h1{font-size:clamp(30px,3vw,42px);letter-spacing:-1.4px;margin:8px 0 6px}
+.xtrato-welcome p,.xtrato-section-head p{margin:0;color:var(--muted);font-size:13px}
+.xtrato-hero-grid{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);gap:18px;margin-bottom:18px}
+.xtrato-balance{padding:25px 27px;background:linear-gradient(145deg,#0b2b1f,#0f4a33);color:#fff;border:0;position:relative;overflow:hidden}
+.xtrato-balance:after{content:"";position:absolute;width:300px;height:300px;right:-120px;bottom:-190px;border:1px solid #ffffff25;border-radius:50%;box-shadow:0 0 0 24px #ffffff0b,0 0 0 52px #ffffff08}
+.xtrato-overline{display:flex;align-items:center;gap:8px;color:#b9d6c4;font-size:10px;font-weight:700;letter-spacing:1.2px}
+.xtrato-overline svg{width:16px;height:16px}
+.xtrato-balance-value{font-size:clamp(38px,5vw,62px);font-weight:800;letter-spacing:-2px;line-height:1.15;margin:18px 0 10px;color:#fff}
+.xtrato-balance-value.negative{color:#ff9b89}
+.xtrato-budget-line{display:flex;justify-content:space-between;gap:12px;color:#c3d8cb;font-size:12px}
+.xtrato-progress{height:8px;border-radius:9px;background:#ffffff20;margin:11px 0 20px;overflow:hidden}
+.xtrato-progress span{display:block;height:100%;width:0;background:var(--lime);border-radius:inherit;transition:width .3s}
+.xtrato-balance-meta{display:flex;gap:22px;flex-wrap:wrap}
+.xtrato-balance-meta div{display:grid;gap:3px}
+.xtrato-balance-meta small{color:#a9c3b2;font-size:11px}
+.xtrato-balance-meta b{font-size:14px;color:#fff}
+.xtrato-budget-edit{position:relative;z-index:2;margin-top:19px;padding:0;border:0;background:none;color:var(--lime);font-size:12px;font-weight:700}
+.xtrato-wallet-panel{padding:22px 22px 17px;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);min-width:0}
+.xtrato-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:19px}
+.xtrato-section-head h2{font-size:20px;letter-spacing:-.5px;margin:5px 0}
+.xtrato-section-head .eyebrow{font-size:9px;letter-spacing:1.25px;font-weight:800;color:var(--green)}
+.xtrato-wallet-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.xtrato-wallet-card{min-width:0;min-height:112px;padding:13px 14px;border-radius:14px;color:var(--card-ink,#fff);background:linear-gradient(140deg,var(--card-a),var(--card-b));display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.xtrato-wallet-card:after{content:"";position:absolute;width:110px;height:110px;right:-50px;bottom:-72px;border:1px solid #ffffff55;border-radius:50%;box-shadow:0 0 0 12px #ffffff12,0 0 0 25px #ffffff0a}
+.xtrato-wallet-card span,.xtrato-wallet-card b{position:relative;z-index:1}
+.xtrato-wallet-card span{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xtrato-wallet-card b{font-size:17px;font-weight:700}
+.xtrato-wallet-foot{display:flex;justify-content:space-between;align-items:center;padding-top:14px;margin-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.xtrato-wallet-foot b{font-size:14px;color:var(--ink)}
+.xtrato-forecast-panel{padding:24px 25px;margin-bottom:18px}
+.xtrato-chart-key{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}
+.xtrato-chart-key i{width:8px;height:8px;border-radius:50%;background:var(--green);display:block}
+.xtrato-forecast-summary{display:flex;gap:32px;flex-wrap:wrap;margin:4px 0 14px}
+.xtrato-forecast-summary div{display:grid;gap:3px}
+.xtrato-forecast-summary small{font-size:11px;color:var(--muted)}
+.xtrato-forecast-summary b{font-size:17px}
+.xtrato-forecast-chart{height:210px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(5px,1.4vw,15px);align-items:stretch;padding-top:12px;overflow-x:auto}
+.forecast-column{min-width:34px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;color:var(--muted);font-size:10px}
+.forecast-bar-wrap{height:175px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}
+.forecast-value{font-size:9px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.forecast-bar{width:min(100%,38px);min-height:0;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,#b9f04c,#1d6b49);transition:height .3s}
+.forecast-column.is-current .forecast-bar{background:linear-gradient(180deg,#b9f04c,#0f3a29);box-shadow:0 5px 16px #1d6b4930}
+.forecast-column.is-current small{font-weight:800;color:var(--green)}
+.xtrato-insights-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-bottom:18px}
+.xtrato-category-panel,.xtrato-history-panel{padding:23px 24px;min-width:0}
+.xtrato-recent-panel{padding:23px 24px}
+.xtrato-home .trend-chart{min-height:170px}
+.xtrato-home .trend-bar{background:linear-gradient(180deg,#b9f04c,#1d6b49)}
+.xtrato-home .trend-column.current .trend-bar{background:var(--green-dark)}
+:root[data-theme="dark"] .xtrato-home .trend-column.current .trend-bar{background:var(--lime)}
+.xtrato-home .trend-column small{color:var(--muted)}
+.xtrato-home .category-bar-row{margin-bottom:15px}
+.xtrato-home .category-track{background:var(--surface-2)}
+.xtrato-home .category-track span{border-radius:8px}
+.xtrato-home .entry-row,.xtrato-home .entry-item{border-color:var(--line)}
+:root[data-theme="dark"] .xtrato-wallet-panel,:root[data-theme="dark"] .xtrato-forecast-panel,:root[data-theme="dark"] .xtrato-category-panel,:root[data-theme="dark"] .xtrato-history-panel,:root[data-theme="dark"] .xtrato-recent-panel{background:var(--surface)}
+@media(max-width:1050px){.xtrato-hero-grid{grid-template-columns:1fr}.xtrato-wallet-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){
+ .xtrato-welcome{align-items:flex-start;flex-direction:column;margin-bottom:18px}
+ .xtrato-welcome .btn-primary{width:100%;justify-content:center}
+ .xtrato-hero-grid,.xtrato-insights-grid{grid-template-columns:1fr;gap:13px}
+ .xtrato-balance,.xtrato-wallet-panel,.xtrato-forecast-panel,.xtrato-category-panel,.xtrato-history-panel,.xtrato-recent-panel{padding:19px}
+ .xtrato-wallet-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .xtrato-forecast-chart{grid-template-columns:repeat(12,46px);height:205px}
+ .forecast-bar-wrap{height:168px}
+ .xtrato-section-head{gap:9px}
+ .xtrato-section-head .link-button{font-size:11px}
+}
