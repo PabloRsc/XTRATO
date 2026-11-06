@@ -64,3 +64,22 @@ def test_card_accepts_both_payment_month_offsets():
 def test_card_rejects_invalid_payment_month_offset():
     with pytest.raises(ValidationError):
         CardIn(name="Nubank", due_month_offset=2)
+
+
+
+def test_production_configuration_rejects_example_secrets_and_weak_passwords():
+    from app.config import validate_production_settings
+
+    with pytest.raises(RuntimeError):
+        validate_production_settings("production", "local-development-key-change-before-production", True, "correct horse battery")
+    with pytest.raises(RuntimeError):
+        validate_production_settings("production", "a" * 48, True, "CHANGE_ME_USE_A_UNIQUE_PASSWORD")
+    with pytest.raises(RuntimeError):
+        validate_production_settings("production", "a" * 48, False, "a-strong-initial-password")
+
+
+def test_production_configuration_accepts_unique_secret_and_strong_password():
+    from app.config import validate_production_settings
+
+    validate_production_settings("production", "c" * 48, True, "a-strong-initial-password")
+    validate_production_settings("development", "short", False, "dev")
