@@ -164,3 +164,72 @@
 @media(max-width:1050px){.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:340px}}
 @media(max-width:760px){.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:320px}.card-preview-column{position:static}}
 @media(max-width:390px){.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.bank-choice{min-height:75px}.bank-choice-mark{width:38px;height:35px}.bank-choice b{font-size:9px}}
+
+/* High-contrast institution marks: no white-on-white logos. */
+.bank-choice[data-bank="Nubank"] .bank-choice-mark{--bank-tile:#820ad1;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Itaú"] .bank-choice-mark{--bank-tile:#ec7000;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Bradesco"] .bank-choice-mark{--bank-tile:#cc092f;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Inter"] .bank-choice-mark{--bank-tile:#ff7a00;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Santander"] .bank-choice-mark{--bank-tile:#ec0000;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Banco do Brasil"] .bank-choice-mark{--bank-tile:#ffdf00;--bank-tile-ink:#173b78}
+.bank-choice[data-bank="Caixa Econômica Federal"] .bank-choice-mark{--bank-tile:#0875b9;--bank-tile-ink:#fff}
+.bank-choice[data-bank="C6 Bank"] .bank-choice-mark{--bank-tile:#171717;--bank-tile-ink:#fff}
+.bank-choice[data-bank="BTG Pactual"] .bank-choice-mark{--bank-tile:#153d5b;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Banco PAN"] .bank-choice-mark{--bank-tile:#00aeef;--bank-tile-ink:#08334a}
+.bank-choice[data-bank="Mercado Pago"] .bank-choice-mark{--bank-tile:#009ee3;--bank-tile-ink:#fff}
+.bank-choice[data-bank="PicPay"] .bank-choice-mark{--bank-tile:#21c25e;--bank-tile-ink:#083b20}
+.bank-choice[data-bank="PagBank"] .bank-choice-mark{--bank-tile:#00a868;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Sicredi"] .bank-choice-mark{--bank-tile:#3fae29;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Sicoob"] .bank-choice-mark{--bank-tile:#003641;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Banrisul"] .bank-choice-mark{--bank-tile:#005ca9;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Banco Original"] .bank-choice-mark{--bank-tile:#00a859;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Neon"] .bank-choice-mark{--bank-tile:#0075ff;--bank-tile-ink:#fff}
+.bank-choice[data-bank="XP"] .bank-choice-mark{--bank-tile:#111827;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Digio"] .bank-choice-mark{--bank-tile:#6639b7;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Will Bank"] .bank-choice-mark{--bank-tile:#ffdf00;--bank-tile-ink:#171717}
+.bank-choice[data-bank="BV"] .bank-choice-mark{--bank-tile:#00a5b5;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Porto Bank"] .bank-choice-mark{--bank-tile:#003b70;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Sofisa Direto"] .bank-choice-mark{--bank-tile:#164b3b;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Unicred"] .bank-choice-mark{--bank-tile:#008b67;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Cresol"] .bank-choice-mark{--bank-tile:#006b3c;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Amazon"] .bank-choice-mark{--bank-tile:#232f3e;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Mercado Livre"] .bank-choice-mark{--bank-tile:#ffe600;--bank-tile-ink:#263238}
+.bank-choice[data-bank="Magalu"] .bank-choice-mark{--bank-tile:#0086ff;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Carrefour"] .bank-choice-mark{--bank-tile:#004e9b;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Renner"] .bank-choice-mark{--bank-tile:#c8102e;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Riachuelo"] .bank-choice-mark{--bank-tile:#171717;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Atacadão"] .bank-choice-mark{--bank-tile:#e6b800;--bank-tile-ink:#173b78}
+.bank-choice[data-bank="Credicard"] .bank-choice-mark{--bank-tile:#111827;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Bradescard"] .bank-choice-mark{--bank-tile:#c8102e;--bank-tile-ink:#fff}
+.bank-choice[data-bank="DM"] .bank-choice-mark{--bank-tile:#e31837;--bank-tile-ink:#fff}
+.bank-choice[data-bank="Outro"] .bank-choice-mark{--bank-tile:#edf1ef;--bank-tile-ink:#53635b}
+
+.bank-choice-mark{border:1px solid #00000010;box-shadow:0 2px 6px #15251b16,inset 0 1px #ffffff55}
+.bank-choice-mark svg{width:29px;height:29px;fill:currentColor}
+.bank-card-face,.preview-card-face{isolation:isolate;backface-visibility:hidden;transform:translateZ(0);-webkit-font-smoothing:antialiased}
+.bank-card-face{min-height:205px;border-radius:17px;padding:19px 20px 16px;box-shadow:0 14px 28px #15251b20,inset 0 1px #ffffff50;background-image:radial-gradient(ellipse at 100% 0%,#ffffff2b,transparent 43%),linear-gradient(135deg,var(--bank-color),color-mix(in srgb,var(--bank-color) 74%,#080d16))}
+.bank-card-face:before{content:"";position:absolute;inset:0;z-index:0;opacity:.28;background:repeating-linear-gradient(128deg,transparent 0 15px,#ffffff12 16px,#ffffff12 17px,transparent 18px 32px);pointer-events:none}
+.bank-card-face:after{width:210px;height:210px;right:-78px;top:-48px;border:1px solid #ffffff36;box-shadow:0 0 0 18px #ffffff0c,0 0 0 38px #ffffff09,0 0 0 60px #ffffff06;pointer-events:none}
+.bank-card-top,.bank-card-bottom,.bank-card-bank,.bank-card-nickname,.bank-card-chip-row{z-index:1}
+.bank-logo-mark{min-width:65px;min-height:34px;max-width:160px}
+.bank-logo-mark svg{width:48px;height:38px;filter:drop-shadow(0 1px 1px #0002)}
+.bank-logo-mark .brand-wordmark{font-size:21px;letter-spacing:-.8px;text-shadow:0 1px 1px #0002}
+.bank-card-network{border:1px solid #ffffff50;border-radius:99px;padding:5px 9px;letter-spacing:1.5px;background:#ffffff12}
+.bank-card-chip{width:39px;height:29px;border-radius:7px;background:linear-gradient(135deg,#e6d7a7,#b5a477 50%,#e9d9a9);border:1px solid #fff9;box-shadow:inset 0 0 0 1px #5e563b35}
+.bank-card-chip:before,.bank-card-chip:after,.bank-card-chip i{border-color:#766b4c99}
+.bank-card-bank{font-size:16px;font-weight:750;letter-spacing:.1px}
+.bank-card-nickname{font-size:11px;opacity:.9}
+.bank-card-bottom{font-size:8px;letter-spacing:.9px}
+.bank-card-bottom b{font-size:10px;letter-spacing:0}
+.preview-card-face{min-height:230px;border-radius:19px;padding:24px 23px 19px;box-shadow:0 16px 34px #15251b25,inset 0 1px #ffffff55;background-image:radial-gradient(ellipse at 100% 0%,#ffffff32,transparent 44%),linear-gradient(135deg,var(--preview-color),color-mix(in srgb,var(--preview-color) 72%,#080d16))}
+.preview-card-face:before{content:"";position:absolute;inset:0;z-index:0;opacity:.25;background:repeating-linear-gradient(128deg,transparent 0 16px,#ffffff12 17px,#ffffff12 18px,transparent 19px 34px);pointer-events:none}
+.preview-card-face:after{width:220px;height:220px;right:-78px;top:-55px;border:1px solid #ffffff36;box-shadow:0 0 0 20px #ffffff0c,0 0 0 42px #ffffff09,0 0 0 64px #ffffff06}
+.preview-card-brand,.preview-card-chip-row,.preview-card-face>strong,.preview-card-face>span{z-index:1}
+.preview-card-brand svg{width:43px;height:39px;filter:drop-shadow(0 1px 1px #0002)}
+.preview-card-brand .brand-wordmark{font-size:24px;text-shadow:0 1px 1px #0002}
+.preview-card-chip{width:40px;height:29px;border-radius:7px;background:linear-gradient(135deg,#e6d7a7,#b5a477 50%,#e9d9a9);border:1px solid #fff9;box-shadow:inset 0 0 0 1px #5e563b35}
+.preview-card-chip:after{inset:9px 0;border-color:#766b4c99}
+.preview-card-face>strong{font-size:17px;letter-spacing:-.2px}
+.preview-card-face>span{font-size:12px}
+@media(min-width:1400px){.bank-card-face{min-height:220px}.preview-card-face{min-height:250px}}
+@media(max-width:760px){.bank-card-face{min-height:190px}.preview-card-face{min-height:205px}}
