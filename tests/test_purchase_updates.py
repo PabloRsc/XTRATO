@@ -22,3 +22,13 @@ def test_purchase_update_rejects_empty_payload():
 def test_purchase_update_rejects_blank_description():
     with pytest.raises(ValidationError):
         PurchaseUpdateIn(description="   ")
+
+def test_purchase_update_trims_description_and_notes():
+    payload = PurchaseUpdateIn(description="  Farmácia  ", notes="  compra mensal  ")
+    assert payload.description == "Farmácia"
+    assert payload.notes == "compra mensal"
+
+
+def test_purchase_update_rejects_whitespace_only_notes_and_description():
+    with pytest.raises(ValidationError):
+        PurchaseUpdateIn(description="   ")
