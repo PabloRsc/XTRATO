@@ -11,7 +11,7 @@ from app.config import local_today
 from app.database import get_db
 from app.deps import authenticated_user
 from app.models import Budget, Card, Category, InvoiceEntry, Purchase
-from app.schemas import BudgetIn, PurchaseIn
+from app.schemas import BudgetIn, PurchaseIn, PurchaseUpdateIn
 from app.services.billing import (
     add_months, card_suggested_invoice_month, create_invoice_entries,
     ensure_recurring_entries, parse_month, query_month_entries,
@@ -182,6 +182,30 @@ def create_purchase(payload: PurchaseIn, request: Request, db: Session = Depends
         raise HTTPException(status_code=409, detail="Não foi possível registrar essa compra. Revise os dados.")
     db.refresh(purchase)
     return {"id": purchase.id, "message": "Compra registrada."}
+
+
+@router.patch("/purchases/{purchase_id}")
+def update_purchase(purchase_id: int, payload: PurchaseUpdateIn, request: Request, db: Session = Depends(get_db)):
+    user = authenticated_user(request, db)
+    purchase = db.scalar(select(Purchase).where(
+        Purchase.id == purchase_id,
+        Purchase.user_id == user.id,
+        Purchase.active.is_(True),
+    ))
+    if not purchase:
+        raise HTTPException(status_code=404, detail="Compra não encontrada ou já cancelada.")
+
+    values = payload.model_dump(exclude_unset=True)
+    if "description" in values:
+        description = (values["description"] or "").strip()
+        if not description:
+            raise HTTPException(status_code=422, detail="A descrição não pode ficar vazia.")
+        purchase.description = description
+    if "notes" in values:
+        purchase.notes = (values["notes"] or "").strip()
+
+    db.commit()
+    return {"ok": True, "message": "Descrição e observações atualizadas."}
 
 
 @router.post("/purchases/{purchase_id}/cancel")
