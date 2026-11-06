@@ -124,3 +124,32 @@ jobs:
           curl --fail --silent --show-error -b cookies.txt \
             http://127.0.0.1:8000/api/cards \
             | jq -e --argjson id "$card_id" 'any(.[]; .id == $id and .active == true)' >/dev/null
+
+          cp cookies.txt stale-cookies.txt
+          password_response="$(curl --fail --silent --show-error \
+            -b cookies.txt -c cookies.txt \
+            -H 'Content-Type: application/json' \
+            -H 'X-Xtrato-Request: 1' \
+            -d '{"current_password":"ci-test-initial-password","new_password":"ci-test-new-strong-password"}' \
+            http://127.0.0.1:8000/api/auth/password)"
+          echo "$password_response" | grep -q '"reauthenticate":true'
+
+          stale_session_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            -b stale-cookies.txt http://127.0.0.1:8000/api/auth/me)"
+          test "$stale_session_status" = "401"
+
+          old_password_status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            -c failed-login-cookies.txt \
+            -H 'Content-Type: application/json' \
+            -H 'X-Xtrato-Request: 1' \
+            -d '{"username":"ci-admin","password":"ci-test-initial-password"}' \
+            http://127.0.0.1:8000/api/auth/login)"
+          test "$old_password_status" = "401"
+
+          new_login_response="$(curl --fail --silent --show-error \
+            -b cookies.txt -c cookies.txt \
+            -H 'Content-Type: application/json' \
+            -H 'X-Xtrato-Request: 1' \
+            -d '{"username":"ci-admin","password":"ci-test-new-strong-password"}' \
+            http://127.0.0.1:8000/api/auth/login)"
+          echo "$new_login_response" | grep -q '"username":"ci-admin"'
