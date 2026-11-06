@@ -13,8 +13,8 @@ from app.deps import authenticated_user
 from app.models import Budget, Card, Category, InvoiceEntry, Purchase
 from app.schemas import BudgetIn, PurchaseIn, PurchaseUpdateIn
 from app.services.billing import (
-    add_months, card_suggested_invoice_month, cancel_purchase_entries, create_invoice_entries,
-    ensure_recurring_entries, parse_month, query_month_entries,
+    add_months, budget_usage_percentage, card_suggested_invoice_month, cancel_purchase_entries, create_invoice_entries,
+    ensure_recurring_entries, parse_month, query_month_entries, signed_entry_amount,
 )
 
 router = APIRouter(prefix="/api", tags=["financeiro"])
@@ -60,7 +60,7 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
     ensure_recurring_entries(db, user.id, add_months(selected, 12))
     db.commit()
     rows = query_month_entries(db, user.id, selected)
-    total = sum((entry.amount_cents if purchase.direction == "expense" else -entry.amount_cents) for entry, purchase, _card in rows)
+    total = sum(signed_entry_amount(entry.amount_cents, purchase.direction) for entry, purchase, _card in rows)
     expense_total = sum(entry.amount_cents for entry, purchase, _card in rows if purchase.direction == "expense")
     credits_total = sum(entry.amount_cents for entry, purchase, _card in rows if purchase.direction == "credit")
 
@@ -75,19 +75,19 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
     card_totals: dict[int, dict] = {}
     category_totals: dict[int, dict] = {}
     for entry, purchase, card in rows:
-        sign = 1 if purchase.direction == "expense" else -1
+        signed_amount = signed_entry_amount(entry.amount_cents, purchase.direction)
         card_row = card_totals.setdefault(card.id, {"id": card.id, "name": card.name, "color": card.color, "total_cents": 0})
-        card_row["total_cents"] += sign * entry.amount_cents
+        card_row["total_cents"] += signed_amount
         category = db.get(Category, purchase.category_id)
         if category:
             cat_row = category_totals.setdefault(category.id, {"id": category.id, "name": category.name, "color": category.color, "icon": category.icon, "total_cents": 0})
-            cat_row["total_cents"] += sign * entry.amount_cents
+            cat_row["total_cents"] += signed_amount
 
     trends = []
     for offset in range(5, -1, -1):
         trend_month = add_months(selected, -offset)
         trend_rows = query_month_entries(db, user.id, trend_month)
-        amount = sum((e.amount_cents if p.direction == "expense" else -e.amount_cents) for e, p, _c in trend_rows)
+        amount = sum(signed_entry_amount(e.amount_cents, p.direction) for e, p, _c in trend_rows)
         trends.append({"month": trend_month.strftime("%Y-%m"), "label": trend_month.strftime("%b").replace("Jan", "Jan").replace("Feb", "Fev").replace("Mar", "Mar").replace("Apr", "Abr").replace("May", "Mai").replace("Jun", "Jun").replace("Jul", "Jul").replace("Aug", "Ago").replace("Sep", "Set").replace("Oct", "Out").replace("Nov", "Nov").replace("Dec", "Dez"), "total_cents": amount})
 
     cards = db.scalars(select(Card).where(Card.user_id == user.id).order_by(Card.name)).all()
@@ -101,7 +101,7 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
         "limit_cents": limit_cents,
         "limit_effective_from": budget.month.strftime("%Y-%m") if budget else None,
         "available_cents": (limit_cents - total) if limit_cents is not None else None,
-        "percentage": (round((total / limit_cents) * 100, 1) if limit_cents > 0 else (100.0 if total > 0 else 0.0)) if limit_cents is not None else None,
+        "percentage": budget_usage_percentage(total, limit_cents) if limit_cents is not None else None,
         "cards": [{"id": c.id, "name": c.name, "color": c.color, "active": c.active, "total_cents": card_totals.get(c.id, {}).get("total_cents", 0)} for c in visible_cards],
         "card_totals": list(card_totals.values()),
         "categories": sorted(category_totals.values(), key=lambda x: x["total_cents"], reverse=True),
