@@ -83,6 +83,10 @@ A implantação é independente do provedor: o serviço web recebe `DATABASE_URL
 
 A conta autenticada pode baixar uma cópia portátil dos dados em `GET /api/backup`, também disponível pelo botão **Baixar backup dos dados** na interface. O arquivo JSON inclui cartões (inclusive arquivados), categorias, limites mensais, compras e parcelas, preservando IDs e vínculos. Senhas, hashes e sessões nunca são incluídos.
 
+A restauração fica disponível pelo botão **Restaurar backup**. Selecione um arquivo JSON XTRATO v1 e digite `RESTAURAR` para confirmar. Por segurança, a restauração só é permitida em uma conta sem cartões, compras ou limites cadastrados; categorias padrão ou personalizadas sem vínculos financeiros serão substituídas. A operação valida todos os vínculos e parcelas e é executada em uma única transação: se qualquer registro falhar, nada é importado.
+
+A restauração não altera o usuário, a senha nem as sessões da conta de destino. Depois de restaurar, confira os cartões, o limite e algumas faturas com os extratos originais.
+
 Guarde uma cópia fora do servidor, de preferência em um local privado com proteção de acesso. O backup JSON é uma cópia de segurança lógica; ele não substitui os backups nativos do PostgreSQL nem um procedimento de restauração testado.
 
 ## Banco de dados e backup
