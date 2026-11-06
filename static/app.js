@@ -213,8 +213,8 @@
       const cancel = allowCancel && row.purchase_active && row.entry_status !== 'historical' ? `<button class="mini-action" data-cancel="${row.purchase_id}" title="Cancelar esta compra">Cancelar</button>` : '';
       return `<div class="entry-row"><div class="merchant"><div class="merchant-symbol" style="color:${escapeHtml(row.category_color)};background:${escapeHtml(row.category_color)}18">${icon(row.category_icon || categoryIcon(row.category_name))}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${date} · ${escapeHtml(row.category_name)} ${status}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>${escapeHtml(kind)}</span></div><div class="entry-amount" style="${credit ? 'color:var(--green)' : ''}">${amount}<small>${credit ? 'Crédito na fatura' : row.kind === 'parcelado' ? 'Parcela da fatura' : row.kind === 'recorrente' ? 'Cobrança mensal' : 'Compra única'}</small></div><div class="entry-actions">${edit}${cancel}</div></div>`;
     }).join('');
-    $('[data-edit-purchase]', target).forEach(button => button.addEventListener('click', () => openPurchaseEdit(Number(button.dataset.editPurchase), button.dataset.description, button.dataset.notes)));
-    $('[data-cancel]', target).forEach(button => button.addEventListener('click', () => cancelPurchase(Number(button.dataset.cancel))));
+    target.querySelectorAll('[data-edit-purchase]').forEach(button => button.addEventListener('click', () => openPurchaseEdit(Number(button.dataset.editPurchase), button.dataset.description, button.dataset.notes)));
+    target.querySelectorAll('[data-cancel]').forEach(button => button.addEventListener('click', () => cancelPurchase(Number(button.dataset.cancel))));
   }
 
   async function loadStatement() {
@@ -252,15 +252,15 @@
     const target = $('#cardsList');
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão ao lado.</div>'; return; }
     target.innerHTML = state.cards.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</b><small>${escapeHtml(c.issuer || c.brand || 'Cartão')} · Fecha dia ${c.closing_day} · Vence dia ${c.due_day}</small></div><div class="managed-actions"><button type="button" data-edit-card="${c.id}">Editar</button><button type="button" data-archive-card="${c.id}">Arquivar</button></div></div>`).join('');
-    $('[data-edit-card]').forEach(b => b.addEventListener('click', () => startEditCard(Number(b.dataset.editCard))));
-    $('[data-archive-card]').forEach(b => b.addEventListener('click', () => archiveResource('cards', Number(b.dataset.archiveCard), 'cartão')));
+    target.querySelectorAll('[data-edit-card]').forEach(b => b.addEventListener('click', () => startEditCard(Number(b.dataset.editCard))));
+    target.querySelectorAll('[data-archive-card]').forEach(b => b.addEventListener('click', () => archiveResource('cards', Number(b.dataset.archiveCard), 'cartão')));
   }
   function renderCategories() {
     const target = $('#categoriesList');
     if (!state.categories.length) { target.innerHTML = '<div class="empty-inline">Nenhuma categoria cadastrada.</div>'; return; }
     target.innerHTML = state.categories.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon(c.icon || categoryIcon(c.name))}</div><div class="managed-copy"><b>${escapeHtml(c.name)}</b><small>Categoria de gastos</small></div><div class="managed-actions"><button type="button" data-edit-category="${c.id}">Editar</button><button type="button" data-archive-category="${c.id}">Arquivar</button></div></div>`).join('');
-    $('[data-edit-category]').forEach(b => b.addEventListener('click', () => startEditCategory(Number(b.dataset.editCategory))));
-    $('[data-archive-category]').forEach(b => b.addEventListener('click', () => archiveResource('categories', Number(b.dataset.archiveCategory), 'categoria')));
+    target.querySelectorAll('[data-edit-category]').forEach(b => b.addEventListener('click', () => startEditCategory(Number(b.dataset.editCategory))));
+    target.querySelectorAll('[data-archive-category]').forEach(b => b.addEventListener('click', () => archiveResource('categories', Number(b.dataset.archiveCategory), 'categoria')));
   }
   async function archiveResource(resource, id, label) {
     if (!window.confirm(`Arquivar este ${label}? Os lançamentos existentes serão preservados.`)) return;
@@ -279,8 +279,8 @@
     const target = $('#recurrencesList');
     if (!rows.length) { target.innerHTML = '<div class="empty-inline">Nenhuma despesa fixa cadastrada. Use “Nova compra” e escolha “Fixo mensal”.</div>'; return; }
     target.innerHTML = rows.map(row => `<div class="entry-row"><div class="merchant"><div class="merchant-symbol">${icon('repeat')}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${escapeHtml(row.category_name)} · Início ${formatMonth(row.first_invoice_month)}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>Fixo mensal</span></div><div class="entry-amount">${money(row.amount_cents)}<small>${row.active ? 'Ativa' : 'Arquivada'}</small></div><div class="entry-actions">${row.active ? `<button class="mini-action" data-edit-purchase="${row.id}" data-description="${escapeHtml(row.description)}" data-notes="${escapeHtml(row.notes || '')}">Editar</button><button class="mini-action" data-cancel="${row.id}">Encerrar</button>` : ''}</div></div>`).join('');
-    $('[data-edit-purchase]', target).forEach(b => b.addEventListener('click', () => openPurchaseEdit(Number(b.dataset.editPurchase), b.dataset.description, b.dataset.notes)));
-    $('[data-cancel]', target).forEach(b => b.addEventListener('click', () => cancelPurchase(Number(b.dataset.cancel))));
+    target.querySelectorAll('[data-edit-purchase]').forEach(b => b.addEventListener('click', () => openPurchaseEdit(Number(b.dataset.editPurchase), b.dataset.description, b.dataset.notes)));
+    target.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => cancelPurchase(Number(b.dataset.cancel))));
   }
 
   function suggestInvoiceMonth() {
