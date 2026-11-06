@@ -420,3 +420,37 @@ def test_backup_restore_rejects_incomplete_or_mismatched_installment_history():
     })
     with pytest.raises(ValidationError, match="soma das parcelas"):
         BackupRestoreIn.model_validate(payload)
+
+
+def test_backup_restore_rejects_blank_card_category_and_purchase_names():
+    import pytest
+    from pydantic import ValidationError
+
+    from app.schemas import BackupRestoreIn
+
+    base = {
+        "confirmation": "RESTAURAR",
+        "format": "xtrato-backup",
+        "version": 1,
+        "exported_at": "2026-11-06T12:00:00+00:00",
+        "account": {"username": "source"},
+        "cards": [],
+        "categories": [],
+        "budgets": [],
+        "purchases": [],
+        "invoice_entries": [],
+    }
+    card = {
+        "id": 1, "name": "   ", "issuer": "", "brand": "",
+        "last_four": None, "closing_day": 25, "due_day": 5,
+        "due_month_offset": 1, "color": "#247a57", "active": True,
+    }
+    with pytest.raises(ValidationError):
+        BackupRestoreIn.model_validate({**base, "cards": [card]})
+
+    category = {
+        "id": 1, "name": "   ", "color": "#78a88b",
+        "icon": "tag", "active": True,
+    }
+    with pytest.raises(ValidationError):
+        BackupRestoreIn.model_validate({**base, "categories": [category]})
