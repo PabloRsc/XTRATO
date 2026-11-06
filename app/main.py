@@ -81,6 +81,14 @@ app.add_middleware(
 @app.middleware("http")
 async def protect_mutations(request: Request, call_next):
     if request.url.path.startswith("/api/") and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+        if request.url.path == "/api/backup/restore":
+            content_length = request.headers.get("content-length")
+            if content_length:
+                try:
+                    if int(content_length) > 10 * 1024 * 1024:
+                        return JSONResponse({"detail": "O arquivo de backup excede o limite de 10 MB."}, status_code=413)
+                except ValueError:
+                    return JSONResponse({"detail": "Cabeçalho de tamanho da requisição inválido."}, status_code=400)
         if request.headers.get("x-xtrato-request") != "1":
             return JSONResponse({"detail": "Requisição não autorizada."}, status_code=403)
         origin = request.headers.get("origin")
