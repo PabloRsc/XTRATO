@@ -166,7 +166,7 @@
     $('#budgetWarning').textContent = warning;
     $('#cardCount').textContent = `${d.cards.length} ${d.cards.length === 1 ? 'cartão' : 'cartões'}`;
     $('#cardTotal').textContent = money(d.spent_cents);
-    $('#cardTotals').innerHTML = d.cards.length ? d.cards.map(c => `<div class="card-total-line"><span>${escapeHtml(c.name)}</span><b>${money(c.total_cents)}</b></div>`).join('') : '<div class="muted-dark">Cadastre seu primeiro cartão para começar.</div>';
+    $('#cardTotals').innerHTML = d.cards.length ? d.cards.map(c => `<div class="card-total-line"><span>${escapeHtml(c.name)}${c.active ? '' : ' · arquivado'}</span><b>${money(c.total_cents)}</b></div>`).join('') : '<div class="muted-dark">Cadastre seu primeiro cartão para começar.</div>';
     renderCategoryChart(d.categories || []);
     renderTrend(d.trend || []);
     renderEntries($('#recentEntries'), d.recent_entries || [], true);
