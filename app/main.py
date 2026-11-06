@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import (
     COOKIE_SECURE, INITIAL_ADMIN_PASSWORD, INITIAL_ADMIN_USERNAME,
@@ -208,7 +209,19 @@ app.include_router(finance.router)
 
 @app.get("/healthz", include_in_schema=False)
 def healthz():
+    """Liveness probe: the application process is responding."""
     return {"status": "ok"}
+
+
+@app.get("/readyz", include_in_schema=False)
+def readyz():
+    """Readiness probe: the application can reach its configured database."""
+    try:
+        with SessionLocal() as db:
+            db.execute(select(1))
+    except SQLAlchemyError:
+        return JSONResponse({"status": "not_ready"}, status_code=503)
+    return {"status": "ready"}
 
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
