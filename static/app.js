@@ -127,8 +127,8 @@
   }
 
   async function loadInitialData() {
-    state.cards = await api('/api/cards');
-    state.categories = await api('/api/categories');
+    state.cards = await api('/api/cards?include_archived=true');
+    state.categories = await api('/api/categories?include_archived=true');
     await refreshDashboard();
     renderCardOptions();
     renderCategoryOptions();
@@ -242,37 +242,55 @@
   }
 
   function renderCardOptions() {
-    const options = state.cards.map(c => `<option value="${c.id}">${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</option>`).join('');
-    $('#purchaseCard').innerHTML = `<option value="">${state.cards.length ? 'Selecione um cartão' : 'Cadastre um cartão'}</option>${options}`;
-    $('#statementCardFilter').innerHTML = `<option value="">Todos os cartões</option>${options}`;
+    const activeCards = state.cards.filter(card => card.active !== false);
+    const purchaseOptions = activeCards.map(card => `<option value="${card.id}">${escapeHtml(card.name)}${card.last_four ? ` ···· ${card.last_four}` : ''}</option>`).join('');
+    const filterOptions = state.cards.map(card => `<option value="${card.id}">${escapeHtml(card.name)}${card.active === false ? ' · arquivado' : ''}</option>`).join('');
+    $('#purchaseCard').innerHTML = `<option value="">${activeCards.length ? 'Selecione um cartão' : 'Cadastre um cartão ativo'}</option>${purchaseOptions}`;
+    $('#statementCardFilter').innerHTML = `<option value="">Todos os cartões</option>${filterOptions}`;
   }
   function renderCategoryOptions() {
-    $('#purchaseCategory').innerHTML = `<option value="">Selecione uma categoria</option>${state.categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}`;
+    const activeCategories = state.categories.filter(category => category.active !== false);
+    $('#purchaseCategory').innerHTML = `<option value="">Selecione uma categoria</option>${activeCategories.map(category => `<option value="${category.id}">${escapeHtml(category.name)}</option>`).join('')}`;
   }
   function renderCards() {
     const target = $('#cardsList');
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão ao lado.</div>'; return; }
-    target.innerHTML = state.cards.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</b><small>${escapeHtml(c.issuer || c.brand || 'Cartão')} · Fecha dia ${c.closing_day} · Vence dia ${c.due_day} · ${Number(c.due_month_offset) === 0 ? 'mesmo mês' : 'mês seguinte'}</small></div><div class="managed-actions"><button type="button" data-edit-card="${c.id}">Editar</button><button type="button" data-archive-card="${c.id}">Arquivar</button></div></div>`).join('');
-    target.querySelectorAll('[data-edit-card]').forEach(b => b.addEventListener('click', () => startEditCard(Number(b.dataset.editCard))));
-    target.querySelectorAll('[data-archive-card]').forEach(b => b.addEventListener('click', () => archiveResource('cards', Number(b.dataset.archiveCard), 'cartão')));
+    target.innerHTML = state.cards.map(card => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(card.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(card.name)}${card.last_four ? ` ···· ${card.last_four}` : ''} ${card.active === false ? '<span class="status-pill historical">Arquivado</span>' : ''}</b><small>${escapeHtml(card.issuer || card.brand || 'Cartão')} · Fecha dia ${card.closing_day} · Vence dia ${card.due_day} · ${Number(card.due_month_offset) === 0 ? 'mesmo mês' : 'mês seguinte'}</small></div><div class="managed-actions">${card.active === false ? `<button type="button" data-reactivate-card="${card.id}">Reativar</button>` : `<button type="button" data-edit-card="${card.id}">Editar</button><button type="button" data-archive-card="${card.id}">Arquivar</button>`}</div></div>`).join('');
+    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(Number(button.dataset.editCard))));
+    target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveResource('cards', Number(button.dataset.archiveCard), 'cartão')));
+    target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateResource('cards', Number(button.dataset.reactivateCard), 'cartão')));
   }
   function renderCategories() {
     const target = $('#categoriesList');
     if (!state.categories.length) { target.innerHTML = '<div class="empty-inline">Nenhuma categoria cadastrada.</div>'; return; }
-    target.innerHTML = state.categories.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon(c.icon || categoryIcon(c.name))}</div><div class="managed-copy"><b>${escapeHtml(c.name)}</b><small>Categoria de gastos</small></div><div class="managed-actions"><button type="button" data-edit-category="${c.id}">Editar</button><button type="button" data-archive-category="${c.id}">Arquivar</button></div></div>`).join('');
-    target.querySelectorAll('[data-edit-category]').forEach(b => b.addEventListener('click', () => startEditCategory(Number(b.dataset.editCategory))));
-    target.querySelectorAll('[data-archive-category]').forEach(b => b.addEventListener('click', () => archiveResource('categories', Number(b.dataset.archiveCategory), 'categoria')));
+    target.innerHTML = state.categories.map(category => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(category.color)}">${icon(category.icon || categoryIcon(category.name))}</div><div class="managed-copy"><b>${escapeHtml(category.name)} ${category.active === false ? '<span class="status-pill historical">Arquivada</span>' : ''}</b><small>Categoria de gastos</small></div><div class="managed-actions">${category.active === false ? `<button type="button" data-reactivate-category="${category.id}">Reativar</button>` : `<button type="button" data-edit-category="${category.id}">Editar</button><button type="button" data-archive-category="${category.id}">Arquivar</button>`}</div></div>`).join('');
+    target.querySelectorAll('[data-edit-category]').forEach(button => button.addEventListener('click', () => startEditCategory(Number(button.dataset.editCategory))));
+    target.querySelectorAll('[data-archive-category]').forEach(button => button.addEventListener('click', () => archiveResource('categories', Number(button.dataset.archiveCategory), 'categoria')));
+    target.querySelectorAll('[data-reactivate-category]').forEach(button => button.addEventListener('click', () => reactivateResource('categories', Number(button.dataset.reactivateCategory), 'categoria')));
   }
   async function archiveResource(resource, id, label) {
     if (!window.confirm(`Arquivar este ${label}? Os lançamentos existentes serão preservados.`)) return;
     try {
       await api(`/api/${resource}/${id}`, { method: 'DELETE' });
-      state[resource] = await api(`/api/${resource}`);
+      state[resource] = await api(`/api/${resource}?include_archived=true`);
       if (resource === 'cards') { renderCards(); renderCardOptions(); }
       else { renderCategories(); renderCategoryOptions(); }
       await refreshDashboard();
       toast(`${label[0].toUpperCase()}${label.slice(1)} arquivado.`);
     } catch (error) { toast(error.message); }
+  }
+
+  async function reactivateResource(resource, id, label) {
+    try {
+      await api(`/api/${resource}/${id}/reactivate`, { method: 'POST' });
+      state[resource] = await api(`/api/${resource}?include_archived=true`);
+      if (resource === 'cards') { renderCards(); renderCardOptions(); }
+      else { renderCategories(); renderCategoryOptions(); }
+      await refreshDashboard();
+      toast(`${label[0].toUpperCase()}${label.slice(1)} reativado.`);
+    } catch (error) {
+      toast(error.message);
+    }
   }
 
   async function loadRecurrences() {
@@ -502,7 +520,7 @@
       const editing = state.editingCardId;
       await api(editing ? `/api/cards/${editing}` : '/api/cards', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
       resetCardEditor();
-      state.cards = await api('/api/cards');
+      state.cards = await api('/api/cards?include_archived=true');
       renderCards(); renderCardOptions();
       await refreshDashboard();
       toast(editing ? 'Cartão atualizado.' : 'Cartão cadastrado.');
@@ -540,7 +558,7 @@
       const editing = state.editingCategoryId;
       await api(editing ? `/api/categories/${editing}` : '/api/categories', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
       resetCategoryEditor();
-      state.categories = await api('/api/categories');
+      state.categories = await api('/api/categories?include_archived=true');
       renderCategories(); renderCategoryOptions();
       await refreshDashboard();
       toast(editing ? 'Categoria atualizada.' : 'Categoria cadastrada.');
