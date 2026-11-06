@@ -281,3 +281,15 @@ def test_signed_invoice_amount_allows_credit_balance_and_rejects_invalid_values(
         signed_entry_amount(-1, "expense")
     with pytest.raises(ValueError):
         signed_entry_amount(100, "unknown")
+
+
+def test_budget_usage_percentage_never_goes_below_zero():
+    import pytest
+    from app.services.billing import budget_usage_percentage
+
+    assert budget_usage_percentage(75_000, 100_000) == 75.0
+    assert budget_usage_percentage(-5_000, 100_000) == 0.0
+    assert budget_usage_percentage(500, 0) == 100.0
+    assert budget_usage_percentage(-500, 0) == 0.0
+    with pytest.raises(ValueError):
+        budget_usage_percentage(100, -1)
