@@ -362,8 +362,8 @@
         '</div></div></article>';
     }).join('');
     target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(button.dataset.editCard)));
-    target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveCard(button.dataset.archiveCard)));
-    target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateCard(button.dataset.reactivateCard)));
+    target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveResource('cards', Number(button.dataset.archiveCard), 'cartão')));
+    target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateResource('cards', Number(button.dataset.reactivateCard), 'cartão')));
   }
   function renderCategories() {
     const target = $('#categoriesList');
