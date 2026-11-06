@@ -41,7 +41,7 @@ def make_scope(path, method="POST", headers=None):
     }
 
 
-def run_upload(body_chunks, headers=None, max_bytes=10):
+def run_upload(body_chunks, headers=None, max_bytes=10, path="/api/backup/restore"):
     messages = [
         {
             "type": "http.request",
@@ -75,7 +75,7 @@ def run_upload(body_chunks, headers=None, max_bytes=10):
         await Response("accepted")(scope, receive, send)
 
     middleware = BackupRestoreSizeLimitMiddleware(downstream, max_bytes=max_bytes)
-    asyncio.run(middleware(make_scope("/api/backup/restore", headers=headers), receive, send))
+    asyncio.run(middleware(make_scope(path, headers=headers), receive, send))
     response_start = next(message for message in sent if message["type"] == "http.response.start")
     return response_start["status"], app_called
 
@@ -89,7 +89,7 @@ def test_restore_accepts_bounded_stream_without_content_length():
 def test_restore_rejects_stream_over_limit_even_without_content_length():
     status, app_called = run_upload([b"123456", b"78901"], headers={})
     assert status == 413
-    assert app_called is True
+    assert app_called is False
 
 
 def test_restore_rejects_declared_body_larger_than_ten_megabytes_before_reading():
@@ -114,22 +114,10 @@ def test_non_restore_requests_are_not_subject_to_backup_upload_limit():
         [b"large body"],
         headers={},
         max_bytes=1,
+        path="/api/purchases",
     )
-    # The helper always targets the restore route; this test validates the
-    # independent request guard used by normal API mutations instead.
-    async def call_next(_request):
-        return Response("accepted")
-
-    response = asyncio.run(protect_mutations(
-        make_request("/api/purchases", method="POST", headers={
-            "Content-Length": "100000000",
-            "X-Xtrato-Request": "1",
-            "Host": "xtrato.test",
-            "Origin": "https://xtrato.test",
-        }),
-        call_next,
-    ))
-    assert response.status_code == 200
+    assert status == 200
+    assert app_called is True
 
 
 def test_mutating_api_request_rejects_missing_csrf_header_with_private_headers():
