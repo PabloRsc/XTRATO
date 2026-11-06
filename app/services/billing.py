@@ -27,10 +27,17 @@ def add_months(value: date, count: int) -> date:
     return date(year, month, 1)
 
 
-def month_from_purchase_date(purchase_date: date, closing_day: int) -> date:
-    """Suggest the invoice month using the card closing day; user can override it."""
+def month_from_purchase_date(purchase_date: date, closing_day: int, due_day: int) -> date:
+    """Suggest the month the invoice is paid, using both closing and due days.
+
+    Purchases after closing move to the next statement cycle. The payment month
+    is the closing month when the due day is after the closing day; otherwise
+    payment happens in the following calendar month.
+    """
     base = date(purchase_date.year, purchase_date.month, 1)
-    return add_months(base, 1) if purchase_date.day > closing_day else base
+    statement_offset = 1 if purchase_date.day > closing_day else 0
+    payment_offset = 1 if due_day <= closing_day else 0
+    return add_months(base, statement_offset + payment_offset)
 
 
 def split_amount(total_cents: int, parts: int) -> list[int]:
