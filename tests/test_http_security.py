@@ -80,6 +80,8 @@ def test_restore_rejects_body_larger_than_ten_megabytes():
     ))
 
     assert response.status_code == 413
+    assert response.headers["Cache-Control"] == "no-store"
+    assert response.headers["Pragma"] == "no-cache"
     assert called is False
 
 
@@ -110,6 +112,24 @@ def test_mutating_api_request_rejects_missing_csrf_header():
     ))
 
     assert response.status_code == 403
+    assert response.headers["Cache-Control"] == "no-store"
+
+
+def test_mutating_api_request_rejects_foreign_origin():
+    async def call_next(_request):
+        return Response("unexpected")
+
+    response = asyncio.run(protect_mutations(
+        make_request("/api/purchases", method="POST", headers={
+            "Host": "xtrato.test",
+            "Origin": "https://attacker.test",
+            "X-Xtrato-Request": "1",
+        }),
+        call_next,
+    ))
+
+    assert response.status_code == 403
+    assert response.headers["Cache-Control"] == "no-store"
 
 
 def test_api_responses_are_marked_private_and_non_cacheable():
