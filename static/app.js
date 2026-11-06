@@ -303,6 +303,13 @@
     return '<span class="brand-wordmark">' + escapeHtml(theme.mark) + '</span>';
   }
   function bankTheme(issuer) { return BANK_THEMES[issuer] || BANK_THEMES.Outro; }
+  function applyBankChoiceBrand(mark, issuer) {
+    const theme = bankTheme(issuer);
+    mark.innerHTML = brandLogoMarkup(issuer);
+    mark.style.setProperty('--bank-tile', theme.color);
+    mark.style.setProperty('--bank-tile-ink', theme.ink);
+    mark.setAttribute('aria-label', issuer);
+  }
   function renderCards() {
     const target = $('#cardsList');
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão.</div>'; return; }
@@ -568,7 +575,7 @@
       choice.className = 'bank-choice';
       choice.dataset.bank = issuer;
       choice.innerHTML = '<span class="bank-choice-mark"></span><b></b>';
-      choice.querySelector('.bank-choice-mark').innerHTML = brandLogoMarkup(issuer);
+      applyBankChoiceBrand(choice.querySelector('.bank-choice-mark'), issuer);
       choice.querySelector('b').textContent = issuer;
       picker.insertBefore(choice, picker.lastElementChild);
       choice.addEventListener('click', () => { setSelectedBank(issuer); updateCardPreview(); });
@@ -579,7 +586,7 @@
       item.classList.toggle('is-selected', selected);
       item.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
-    picker.querySelectorAll('.bank-choice-mark').forEach(mark => { const item = mark.closest('[data-bank]'); mark.innerHTML = brandLogoMarkup(item.dataset.bank); });
+    picker.querySelectorAll('.bank-choice-mark').forEach(mark => { const item = mark.closest('[data-bank]'); applyBankChoiceBrand(mark, item.dataset.bank); });
     updateCardPreview();
   }
   function filterBankCatalog() {
@@ -742,7 +749,7 @@
     $('#cardForm').addEventListener('submit', submitCard);
     $('#bankPicker').querySelectorAll('[data-bank]').forEach(button => button.addEventListener('click', () => setSelectedBank(button.dataset.bank)));
     $('#bankSearch').addEventListener('input', filterBankCatalog);
-    $('#bankPicker').querySelectorAll('.bank-choice-mark').forEach(mark => { const item = mark.closest('[data-bank]'); mark.innerHTML = brandLogoMarkup(item.dataset.bank); });
+    $('#bankPicker').querySelectorAll('.bank-choice-mark').forEach(mark => { const item = mark.closest('[data-bank]'); applyBankChoiceBrand(mark, item.dataset.bank); });
     filterBankCatalog();
     ['name', 'limit', 'closing_day', 'due_day'].forEach(key => $('#cardForm').elements[key].addEventListener('input', updateCardPreview));
     setSelectedBank('Nubank');
