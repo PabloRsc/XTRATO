@@ -136,7 +136,7 @@ class BackupCardIn(BaseModel):
     name: str = Field(min_length=1, max_length=60)
     issuer: str = Field(default="", max_length=60)
     brand: str = Field(default="", max_length=30)
-    last_four: str | None = Field(default=None, pattern=r"^\\d{4}$")
+    last_four: str | None = Field(default=None, pattern=r"^\d{4}$")
     closing_day: int = Field(ge=1, le=31)
     due_day: int = Field(ge=1, le=31)
     due_month_offset: int = Field(ge=0, le=1, default=1)
