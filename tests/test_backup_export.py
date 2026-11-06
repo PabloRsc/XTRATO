@@ -160,9 +160,53 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
     target_engine = make_db()
     with Session(target_engine) as target_db:
         target = User(username="target", password_hash="target-password-hash")
-        target_db.add(target)
+        other_user = User(username="another-owner", password_hash="other-hash")
+        target_db.add_all([target, other_user])
         target_db.flush()
-        # A newly initialized account may already contain default categories.
+        # Another account already owns IDs used by the source backup. The restore
+        # must remap IDs rather than colliding with these records.
+        other_card = Card(
+            user_id=other_user.id,
+            name="Other account card",
+            closing_day=20,
+            due_day=10,
+            color="#247a57",
+        )
+        other_category = Category(
+            user_id=other_user.id,
+            name="Other account category",
+            color="#78a88b",
+            icon="tag",
+        )
+        target_db.add_all([other_card, other_category])
+        target_db.flush()
+        target_db.add(Budget(user_id=other_user.id, month=date(2026, 11, 1), limit_cents=50_000))
+        other_purchase = Purchase(
+            user_id=other_user.id,
+            description="Other account purchase",
+            kind="avista",
+            direction="expense",
+            purchase_date=date(2026, 11, 1),
+            card_id=other_card.id,
+            category_id=other_category.id,
+            total_cents=1_000,
+            installment_count=1,
+            first_invoice_month=date(2026, 11, 1),
+            current_installment=1,
+            active=True,
+        )
+        target_db.add(other_purchase)
+        target_db.flush()
+        other_db_card_id = other_card.id
+        other_db_category_id = other_category.id
+        target_db.add(InvoiceEntry(
+            purchase_id=other_purchase.id,
+            invoice_month=date(2026, 11, 1),
+            installment_number=None,
+            amount_cents=1_000,
+            status="open",
+        ))
+        # The destination account may have default categories from sign-up too.
         target_db.add(Category(
             user_id=target.id,
             name="Outros",
@@ -199,15 +243,20 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
             "purchases": 1,
             "invoice_entries": 2,
         }
-        assert restored_card.id == source_card_id
+        assert restored_card.id != other_db_card_id
         assert restored_card.active is False
         assert restored_card.due_month_offset == 1
-        assert restored_category.id == source_category_id
+        assert restored_category.id != other_db_category_id
         assert restored_budget.limit_cents == 100_000
-        assert restored_purchase.id == source_purchase_id
+        assert restored_purchase.id != other_purchase.id
+        assert restored_purchase.card_id == restored_card.id
+        assert restored_purchase.category_id == restored_category.id
         assert [row.status for row in restored_entries] == ["historical", "cancelled"]
         assert [row.installment_number for row in restored_entries] == [1, 2]
         assert target_db.get(User, target.id).password_hash == "target-password-hash"
+        assert target_db.get(User, other_user.id).password_hash == "other-hash"
+        assert target_db.scalar(select(Purchase).where(Purchase.user_id == other_user.id)).description == "Other account purchase"
+        assert target_db.query(InvoiceEntry).filter(InvoiceEntry.purchase_id == other_purchase.id).count() == 1
         assert "source-hash-must-not-copy" not in str(restore_payload.model_dump())
 
     target_engine.dispose()
