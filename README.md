@@ -126,6 +126,13 @@ Na barra lateral, a opção **Alterar senha** solicita a senha atual e uma nova 
 
 Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_URL=sqlite:///./xtrato.db`, `APP_SECRET_KEY`, `INITIAL_ADMIN_USERNAME` e `INITIAL_ADMIN_PASSWORD`, então execute `alembic upgrade head` e `uvicorn app.main:app --reload`. Em um banco vazio, a primeira inicialização cria a conta e as categorias padrão. Para validar a lógica, execute `python -m pytest -q`.
 
+## Verificações de disponibilidade
+
+- `GET /healthz` confirma que o processo da aplicação está respondendo (liveness).
+- `GET /readyz` confirma que a aplicação consegue consultar o banco de dados configurado (readiness). Retorna HTTP 503 quando o banco não está acessível.
+
+Em plataformas de hospedagem, use `/readyz` como verificação de disponibilidade do serviço para evitar considerar a aplicação pronta quando o PostgreSQL estiver indisponível.
+
 ## Endpoints principais
 
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/password`
@@ -139,4 +146,4 @@ Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_UR
 - `GET /api/backup`, `POST /api/backup/restore` (restauração em conta vazia)
 - `GET /api/cards?include_archived=true`, `POST /api/cards/{id}/reactivate`
 - `GET /api/categories?include_archived=true`, `POST /api/categories/{id}/reactivate`
-- `GET /healthz`
+- `GET /healthz`, `GET /readyz`
