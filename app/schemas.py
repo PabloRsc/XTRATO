@@ -25,7 +25,7 @@ class PasswordChangeIn(BaseModel):
 class CardIn(BaseModel):
     # Optional nickname; issuer identifies the bank.
     name: str = Field(default="", max_length=60)
-    issuer: str = Field(min_length=1, max_length=60)
+    issuer: str = Field(default="Outro", min_length=1, max_length=60)
     limit_cents: int = Field(default=0, ge=0, le=100_000_000_000)
     # Legacy fields remain accepted for older clients/backups.
     brand: str = Field(default="", max_length=30)
