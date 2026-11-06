@@ -46,6 +46,7 @@ jobs:
       - name: Smoke-test app with PostgreSQL using Docker Compose
         env:
           APP_ENV: development
+          APP_SECRET_KEY: ci-test-secret-key-for-github-actions-only
           COOKIE_SECURE: "false"
           APP_TIMEZONE: America/Sao_Paulo
           POSTGRES_DB: xtrato_ci
