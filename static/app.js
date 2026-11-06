@@ -255,25 +255,53 @@
   const BANK_THEMES = {
     'Nubank': { mark: 'nu', color: '#820AD1', ink: '#fff' },
     'Itaú': { mark: 'itaú', color: '#EC7000', ink: '#fff' },
-    'Bradesco': { mark: 'b', color: '#CC092F', ink: '#fff' },
-    'Banco do Brasil': { mark: 'bb', color: '#F7D117', ink: '#173B78' },
-    'Caixa Econômica Federal': { mark: 'caixa', color: '#0066A1', ink: '#fff' },
-    'Santander': { mark: 's', color: '#EC0000', ink: '#fff' },
+    'Bradesco': { mark: 'bradesco', color: '#CC092F', ink: '#fff' },
+    'Banco do Brasil': { mark: 'BB', color: '#F7D117', ink: '#173B78' },
+    'Caixa Econômica Federal': { mark: 'CAIXA', color: '#0066A1', ink: '#fff' },
+    'Santander': { mark: 'Santander', color: '#EC0000', ink: '#fff' },
     'Inter': { mark: 'inter', color: '#FF7A00', ink: '#fff' },
-    'C6 Bank': { mark: 'c6', color: '#242424', ink: '#fff' },
-    'BTG Pactual': { mark: 'btg', color: '#153D5B', ink: '#fff' },
-    'Banco PAN': { mark: 'pan', color: '#00AEEF', ink: '#08334A' },
-    'Mercado Pago': { mark: 'mp', color: '#009EE3', ink: '#fff' },
-    'PicPay': { mark: 'pic', color: '#21C25E', ink: '#083B20' },
-    'PagBank': { mark: 'pag', color: '#00A868', ink: '#fff' },
+    'C6 Bank': { mark: 'C6', color: '#171717', ink: '#fff' },
+    'BTG Pactual': { mark: 'BTG', color: '#153D5B', ink: '#fff' },
+    'Banco PAN': { mark: 'PAN', color: '#00AEEF', ink: '#08334A' },
+    'Mercado Pago': { mark: 'MP', color: '#009EE3', ink: '#fff' },
+    'PicPay': { mark: 'PicPay', color: '#21C25E', ink: '#083B20' },
+    'PagBank': { mark: 'PagBank', color: '#00A868', ink: '#fff' },
     'Sicredi': { mark: 'sicredi', color: '#3FAE29', ink: '#fff' },
     'Sicoob': { mark: 'sicoob', color: '#003641', ink: '#fff' },
-    'Banrisul': { mark: 'banri', color: '#005CA9', ink: '#fff' },
-    'Banco Original': { mark: 'o', color: '#00A859', ink: '#fff' },
+    'Banrisul': { mark: 'banrisul', color: '#005CA9', ink: '#fff' },
+    'Banco Original': { mark: 'original', color: '#00A859', ink: '#fff' },
     'Neon': { mark: 'neon', color: '#0075FF', ink: '#fff' },
-    'XP': { mark: 'xp', color: '#111827', ink: '#fff' },
-    'Outro': { mark: 'cartão', color: '#247a57', ink: '#fff' },
+    'XP': { mark: 'XP', color: '#111827', ink: '#fff' },
+    'Digio': { mark: 'digio', color: '#6639B7', ink: '#fff' },
+    'Will Bank': { mark: 'will', color: '#FFDF00', ink: '#171717' },
+    'BV': { mark: 'bv', color: '#00A5B5', ink: '#fff' },
+    'Porto Bank': { mark: 'porto', color: '#003B70', ink: '#fff' },
+    'Sofisa Direto': { mark: 'sofisa', color: '#164B3B', ink: '#fff' },
+    'Unicred': { mark: 'unicred', color: '#008B67', ink: '#fff' },
+    'Cresol': { mark: 'cresol', color: '#006B3C', ink: '#fff' },
+    'Amazon': { mark: 'amazon', color: '#232F3E', ink: '#fff' },
+    'Mercado Livre': { mark: 'ML', color: '#FFE600', ink: '#263238' },
+    'Magalu': { mark: 'magalu', color: '#0086FF', ink: '#fff' },
+    'Carrefour': { mark: 'Carrefour', color: '#004E9B', ink: '#fff' },
+    'Renner': { mark: 'Renner', color: '#C8102E', ink: '#fff' },
+    'Riachuelo': { mark: 'riachuelo', color: '#171717', ink: '#fff' },
+    'Atacadão': { mark: 'Atacadão', color: '#E6B800', ink: '#173B78' },
+    'Credicard': { mark: 'credicard', color: '#111827', ink: '#fff' },
+    'Bradescard': { mark: 'bradescard', color: '#C8102E', ink: '#fff' },
+    'DM': { mark: 'DM', color: '#E31837', ink: '#fff' },
+    'Outro': { mark: '•••', color: '#247a57', ink: '#fff' },
   };
+  const BRAND_PATHS = {
+    'Nubank': 'M7.2795 5.4336c-1.1815 0-2.1846.4628-2.9432 1.252h-.002c-.0541-.0022-.1074-.002-.162-.002-1.5436 0-2.9925.8835-3.699 2.2559-.3088.5996-.4234 1.2442-.459 1.9003-.0321.589 0 1.1863 0 1.7696v5.6523H3.184s.0022-2.784 0-5.1777c-.0014-1.6112-.0118-3.0471 0-3.3418.056-1.3937.4372-2.3053 1.1484-3.0508 2.3585.0018 3.8852 1.6091 3.9705 4.168.0196.5874.0254 3.7304.0254 3.7304v3.672h3.1678v-4.965c0-1.5007.0127-2.8006-.0918-3.6952-.292-2.5-1.821-4.168-4.1248-4.168zm8.3903.3008l-3.166.0039v4.9648c0 1.5009-.0127 2.8007.0919 3.6953.2921 2.5001 1.821 4.168 4.1248 4.168 1.1815 0 2.1846-.4628 2.9432-1.252.0003-.0003.0016.0004.002 0 .0542.0023.1093.002.164.002 1.5435 0 2.9905-.8835 3.6971-2.2558.3088-.5997.4233-1.2442.459-1.9004.032-.5889 0-1.1862 0-1.7695V5.7383H20.816s-.0022 2.784 0 5.1777c.0015 1.6113.0119 3.047 0 3.3418-.056 1.3935-.4372 2.3053-1.1483 3.0508-2.3586-.0018-3.8853-1.6091-3.9706-4.168-.0196-.5874-.0273-2.0437-.0273-3.7324Z',
+    'Neon': 'M24 0V24l-9.365-8.045V24H0V0ZM2.942 21.087h8.751V9.563l9.365 8.204V2.919L2.942 2.914Z',
+    'PicPay': 'M16.463 1.587v7.537H24V1.587zm1.256 1.256h5.025v5.025h-5.025zm1.256 1.256v2.513h2.513V4.099zM3.77 5.355V8.53h3.376c2.142 0 3.358 1.04 3.358 2.939 0 1.947-1.216 3.011-3.358 3.011H3.769V8.53H0v13.884h3.769v-4.76h3.57c4.333 0 6.815-2.352 6.815-6.32 0-3.771-2.482-5.978-6.814-5.978Z'
+  };
+  function brandLogoMarkup(issuer) {
+    const theme = bankTheme(issuer);
+    if (BRAND_PATHS[issuer]) return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + BRAND_PATHS[issuer] + '"/></svg>';
+    if (issuer === 'Amazon') return '<svg class="amazon-wordmark" viewBox="0 0 120 42" role="img" aria-label="Amazon"><text x="3" y="25">amazon</text><path d="M18 31 Q59 47 101 29" /></svg>';
+    return '<span class="brand-wordmark">' + escapeHtml(theme.mark) + '</span>';
+  }
   function bankTheme(issuer) { return BANK_THEMES[issuer] || BANK_THEMES.Outro; }
   function renderCards() {
     const target = $('#cardsList');
