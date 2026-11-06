@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.config import local_today
 from app.database import get_db
 from app.deps import authenticated_user
 from app.models import Card, Category
 from app.schemas import CardIn, CategoryIn
+from app.services.backup import build_user_backup
 
 router = APIRouter(prefix="/api", tags=["cadastros"])
 
@@ -110,3 +113,15 @@ def archive_category(category_id: int, request: Request, db: Session = Depends(g
     category.active = False
     db.commit()
     return {"ok": True}
+
+
+
+@router.get("/backup")
+def download_backup(request: Request, db: Session = Depends(get_db)):
+    user = user_or_401(request, db)
+    payload = build_user_backup(db, user)
+    filename = f"xtrato-backup-{local_today().isoformat()}.json"
+    return JSONResponse(
+        content=payload,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
