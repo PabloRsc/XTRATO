@@ -152,10 +152,6 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
         ])
         source_db.commit()
         exported = build_user_backup(source_db, source)
-        source_card_id = source_card.id
-        source_category_id = source_category.id
-        source_purchase_id = purchase.id
-
     source_engine.dispose()
     target_engine = make_db()
     with Session(target_engine) as target_db:
