@@ -4,7 +4,7 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 ## O que esta base já implementa
 
-- Login privado, sem cadastro público, com troca de senha dentro da conta e revogação de todas as sessões anteriores.
+- Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
 - Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento, vencimento e escolha do mês de pagamento (mesmo mês ou mês seguinte).
 - Cartões e categorias arquivados permanecem visíveis na área de cadastros e podem ser reativados; não aparecem nos seletores de novas compras enquanto arquivados.
@@ -84,7 +84,7 @@ A implantação é independente do provedor: o serviço web recebe `DATABASE_URL
 
 A conta autenticada pode baixar uma cópia portátil dos dados em `GET /api/backup`, também disponível pelo botão **Baixar backup dos dados** na interface. O arquivo JSON inclui cartões (inclusive arquivados), categorias, limites mensais, compras e parcelas, preservando os vínculos entre registros. Na restauração, os IDs são remapeados para evitar colisões com dados de outras contas no servidor de destino. Senhas, hashes e sessões nunca são incluídos.
 
-A restauração fica disponível pelo botão **Restaurar backup**. Selecione um arquivo JSON XTRATO v1 e digite `RESTAURAR` para confirmar. Por segurança, a restauração só é permitida em uma conta sem cartões, compras ou limites cadastrados; categorias padrão ou personalizadas sem vínculos financeiros serão substituídas. A operação valida todos os vínculos e parcelas e é executada em uma única transação: se qualquer registro falhar, nada é importado.
+A restauração fica disponível pelo botão **Restaurar backup**. Selecione um arquivo JSON XTRATO v1 e digite `RESTAURAR` para confirmar. Por segurança, a restauração só é permitida em uma conta sem cartões, compras ou limites cadastrados; categorias padrão ou personalizadas sem vínculos financeiros serão substituídas. A operação valida vínculos, datas com fuso horário e valores exatos de todas as parcelas, e é executada em uma única transação: se qualquer registro falhar, nada é importado.
 
 A restauração não altera o usuário, a senha nem as sessões da conta de destino. Depois de restaurar, confira os cartões, o limite e algumas faturas com os extratos originais.
 
@@ -127,7 +127,7 @@ Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_UR
 
 ## Endpoints principais
 
-- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/password`
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
 - `GET/POST/PUT/DELETE /api/cards`
 - `GET/POST/PUT/DELETE /api/categories`
 - `POST /api/purchases`, `PATCH /api/purchases/{id}` (descrição/observações), `POST /api/purchases/{id}/cancel`
