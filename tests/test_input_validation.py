@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas import CardIn, CategoryIn, PurchaseIn
+from app.schemas import CardIn, CategoryIn, PasswordChangeIn, PurchaseIn
 
 
 def test_card_name_is_trimmed_and_optional_fields_can_be_empty():
@@ -164,3 +164,15 @@ def test_disabling_ongoing_purchase_cannot_leave_installment_value_mode():
     }
     with pytest.raises(ValidationError):
         PurchaseIn(**payload)
+
+
+def test_password_change_requires_a_different_password_with_minimum_length():
+    with pytest.raises(ValidationError):
+        PasswordChangeIn(current_password="current-password-123", new_password="short")
+    with pytest.raises(ValidationError):
+        PasswordChangeIn(current_password="same-password-123", new_password="same-password-123")
+    payload = PasswordChangeIn(
+        current_password="current-password-123",
+        new_password="a-brand-new-strong-password",
+    )
+    assert payload.new_password == "a-brand-new-strong-password"
