@@ -32,7 +32,6 @@ class Card(Base):
         UniqueConstraint("user_id", "name", name="uq_card_user_name"),
         CheckConstraint("closing_day >= 1 AND closing_day <= 31", name="ck_card_closing_day"),
         CheckConstraint("due_day >= 1 AND due_day <= 31", name="ck_card_due_day"),
-        CheckConstraint("due_month_offset IN (0, 1)", name="ck_card_due_month_offset"),
     )
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
