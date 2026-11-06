@@ -27,7 +27,7 @@ def test_backup_contains_financial_history_and_excludes_password_hash():
         db.flush()
 
         card = Card(
-            user_id=user.id, name="Nubank", issuer="Nubank", brand="Mastercard",
+            user_id=user.id, name="Nubank", issuer="Nubank", limit_cents=500000, brand="Mastercard",
             last_four="1234", closing_day=25, due_day=5, color="#247a57", active=False,
         )
         category = Category(
@@ -58,6 +58,7 @@ def test_backup_contains_financial_history_and_excludes_password_hash():
         assert payload["account"] == {"username": "owner"}
         assert payload["cards"][0]["active"] is False
         assert payload["cards"][0]["due_month_offset"] == 1
+        assert payload["cards"][0]["limit_cents"] == 500000
         assert payload["purchases"][0]["description"] == "Notebook"
         assert payload["invoice_entries"][0]["installment_number"] == 3
         assert payload["budgets"][0]["limit_cents"] == 100_000
@@ -99,6 +100,7 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
             user_id=source.id,
             name="Nubank",
             issuer="Nubank",
+            limit_cents=750000,
             brand="Mastercard",
             last_four="4321",
             closing_day=25,
@@ -242,6 +244,7 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
         assert restored_card.id != other_db_card_id
         assert restored_card.active is False
         assert restored_card.due_month_offset == 1
+        assert restored_card.limit_cents == 750000
         assert restored_category.id != other_db_category_id
         assert restored_budget.limit_cents == 100_000
         assert restored_purchase.id != other_purchase.id
