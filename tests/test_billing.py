@@ -234,3 +234,20 @@ def test_cancelled_recurring_purchase_does_not_generate_more_entries():
         assert len(rows) == 1
         assert rows[0].status == "historical"
     engine.dispose()
+
+
+
+def test_parse_month_requires_four_digit_year_and_zero_padded_month():
+    from app.services.billing import parse_month
+
+    assert parse_month("2026-01") == date(2026, 1, 1)
+    assert parse_month("2026-12") == date(2026, 12, 1)
+
+
+def test_parse_month_rejects_noncanonical_or_invalid_month_values():
+    import pytest
+    from app.services.billing import parse_month
+
+    for value in ["2026-1", "26-01", "2026-00", "2026-13", "2026/01", "2026-01-01", "abcd-01"]:
+        with pytest.raises(ValueError):
+            parse_month(value)
