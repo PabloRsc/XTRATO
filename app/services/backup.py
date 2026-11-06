@@ -116,11 +116,11 @@ def build_user_backup(db: Session, user: User) -> dict:
 def restore_user_backup(db: Session, user: User, payload) -> dict:
     """Restore a validated backup into an account with no financial records.
 
-    The caller must validate the payload with BackupRestoreIn first. Existing
-    default/custom categories are replaced, but any cards, budgets or purchases
-    make the target account non-empty and block restoration.
+    New database IDs are allocated during restore and source IDs are mapped to
+    them. This preserves all relationships without colliding with IDs owned by
+    other accounts in the destination database.
     """
-    from sqlalchemy import func, text
+    from sqlalchemy import func
 
     from app.models import Budget, Card, Category, InvoiceEntry, Purchase
 
@@ -134,12 +134,15 @@ def restore_user_backup(db: Session, user: User, payload) -> dict:
             "A restauração só está disponível em uma conta sem cartões, compras ou limites cadastrados."
         )
 
-    # Default categories created during account initialization are replaceable.
+    # Default/custom categories in this empty account can be replaced safely.
     db.query(Category).filter(Category.user_id == user.id).delete(synchronize_session=False)
 
+    card_ids: dict[int, int] = {}
+    category_ids: dict[int, int] = {}
+    purchase_ids: dict[int, int] = {}
+
     for item in payload.cards:
-        db.add(Card(
-            id=item.id,
+        card = Card(
             user_id=user.id,
             name=item.name,
             issuer=item.issuer,
@@ -150,33 +153,39 @@ def restore_user_backup(db: Session, user: User, payload) -> dict:
             due_month_offset=item.due_month_offset,
             color=item.color,
             active=item.active,
-        ))
+        )
+        db.add(card)
+        db.flush()
+        card_ids[item.id] = card.id
+
     for item in payload.categories:
-        db.add(Category(
-            id=item.id,
+        category = Category(
             user_id=user.id,
             name=item.name,
             color=item.color,
             icon=item.icon,
             active=item.active,
-        ))
+        )
+        db.add(category)
+        db.flush()
+        category_ids[item.id] = category.id
+
     for item in payload.budgets:
         db.add(Budget(
-            id=item.id,
             user_id=user.id,
             month=item.month,
             limit_cents=item.limit_cents,
         ))
+
     for item in payload.purchases:
-        db.add(Purchase(
-            id=item.id,
+        purchase = Purchase(
             user_id=user.id,
             description=item.description,
             kind=item.kind,
             direction=item.direction,
             purchase_date=item.purchase_date,
-            card_id=item.card_id,
-            category_id=item.category_id,
+            card_id=card_ids[item.card_id],
+            category_id=category_ids[item.category_id],
             total_cents=item.total_cents,
             installment_count=item.installment_count,
             first_invoice_month=item.first_invoice_month,
@@ -185,27 +194,20 @@ def restore_user_backup(db: Session, user: User, payload) -> dict:
             active=item.active,
             notes=item.notes,
             created_at=item.created_at,
-        ))
-    db.flush()
+        )
+        db.add(purchase)
+        db.flush()
+        purchase_ids[item.id] = purchase.id
+
     for item in payload.invoice_entries:
         db.add(InvoiceEntry(
-            id=item.id,
-            purchase_id=item.purchase_id,
+            purchase_id=purchase_ids[item.purchase_id],
             invoice_month=item.invoice_month,
             installment_number=item.installment_number,
             amount_cents=item.amount_cents,
             status=item.status,
         ))
     db.flush()
-
-    # Explicit IDs must advance PostgreSQL sequences; SQLite adjusts its
-    # AUTOINCREMENT sequence when explicit integer primary keys are inserted.
-    if db.bind is not None and db.bind.dialect.name == "postgresql":
-        for table in ("cards", "categories", "budgets", "purchases", "invoice_entries"):
-            db.execute(text(
-                f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
-                f"GREATEST(COALESCE((SELECT MAX(id) FROM {table}), 1), 1), true)"
-            ))
 
     return {
         "cards": len(payload.cards),
