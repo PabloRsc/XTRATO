@@ -305,6 +305,19 @@
     updateOngoingFields();
     updateCalculation();
   }
+  function updateDirectionOptions() {
+    const credit = $('#purchaseForm').elements.direction.value === 'credit';
+    const recurringButton = $('.type-switch button[data-kind="recorrente"]');
+    recurringButton.disabled = credit;
+    recurringButton.title = credit ? 'Estornos e créditos são lançamentos eventuais.' : '';
+    $('#ongoingCheck').disabled = credit;
+    if (credit) {
+      $('#ongoingCheck').checked = false;
+      if ($('#purchaseForm').elements.kind.value === 'recorrente') setKind('avista');
+    }
+    updateOngoingFields();
+  }
+
   function updateOngoingFields() {
     const active = $('#ongoingCheck').checked;
     $('#ongoingFields').classList.toggle('hidden', !active);
@@ -557,7 +570,7 @@
     $('#purchaseForm').elements.amount.addEventListener('input', updateCalculation);
     $('#purchaseForm').elements.installment_count.addEventListener('input', updateCalculation);
     $('#purchaseForm').elements.current_installment.addEventListener('input', updateCalculation);
-    $('#purchaseForm').elements.direction.addEventListener('change', updateOngoingFields);
+    $('#purchaseForm').elements.direction.addEventListener('change', updateDirectionOptions);
     $('#firstInvoiceMonth').addEventListener('change', () => { state.invoiceMonthTouched = true; });
     $('#purchaseDate').addEventListener('change', () => { state.invoiceMonthTouched = false; suggestInvoiceMonth(); });
     $('#purchaseCard').addEventListener('change', suggestInvoiceMonth);
@@ -599,6 +612,7 @@
     $('#purchaseDate').value = todayISO();
     $('#firstInvoiceMonth').value = state.month;
     wireEvents();
+    updateDirectionOptions();
     try {
       const user = await api('/api/auth/me');
       showApp(user);
