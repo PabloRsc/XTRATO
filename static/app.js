@@ -5,13 +5,24 @@
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const money = cents => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((Number(cents) || 0) / 100);
   const moneyInputToCents = value => Math.round(Number(String(value).replace(',', '.')) * 100);
+  const saoPauloDate = () => {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date());
+    return Object.fromEntries(parts
+      .filter(part => ['year', 'month', 'day'].includes(part.type))
+      .map(part => [part.type, part.value]));
+  };
   const monthNow = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const { year, month } = saoPauloDate();
+    return `${year}-${month}`;
   };
   const todayISO = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const { year, month, day } = saoPauloDate();
+    return `${year}-${month}-${day}`;
   };
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   const formatDate = value => {
@@ -272,7 +283,9 @@
     if (!dateValue || !card || state.invoiceMonthTouched) return;
     const d = new Date(`${dateValue}T12:00:00`);
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    $('#firstInvoiceMonth').value = d.getDate() > card.closing_day ? addMonth(month, 1) : month;
+    const statementOffset = d.getDate() > card.closing_day ? 1 : 0;
+    const paymentOffset = card.due_day <= card.closing_day ? 1 : 0;
+    $('#firstInvoiceMonth').value = addMonth(month, statementOffset + paymentOffset);
   }
   function setKind(kind) {
     const form = $('#purchaseForm');
