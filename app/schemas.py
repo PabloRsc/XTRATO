@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class LoginIn(BaseModel):
@@ -127,4 +127,130 @@ class PurchaseUpdateIn(BaseModel):
             self.notes = self.notes.strip()
         if self.description is None and self.notes is None:
             raise ValueError("Informe uma descrição ou observação para atualizar.")
+        return self
+
+
+class BackupCardIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: int = Field(gt=0)
+    name: str = Field(min_length=1, max_length=60)
+    issuer: str = Field(default="", max_length=60)
+    brand: str = Field(default="", max_length=30)
+    last_four: str | None = Field(default=None, pattern=r"^\\d{4}$")
+    closing_day: int = Field(ge=1, le=31)
+    due_day: int = Field(ge=1, le=31)
+    due_month_offset: int = Field(ge=0, le=1, default=1)
+    color: str = Field(pattern=r"^#[0-9A-Fa-f]{6}$")
+    active: bool
+
+
+class BackupCategoryIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: int = Field(gt=0)
+    name: str = Field(min_length=1, max_length=50)
+    color: str = Field(pattern=r"^#[0-9A-Fa-f]{6}$")
+    icon: str = Field(max_length=30)
+    active: bool
+
+
+class BackupBudgetIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: int = Field(gt=0)
+    month: date
+    limit_cents: int = Field(ge=0, le=100_000_000)
+
+    @model_validator(mode="after")
+    def month_must_be_first_day(self):
+        if self.month.day != 1:
+            raise ValueError("O mês do limite deve usar o primeiro dia.")
+        return self
+
+
+class BackupPurchaseIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: int = Field(gt=0)
+    description: str = Field(min_length=1, max_length=100)
+    kind: Literal["avista", "parcelado", "recorrente"]
+    direction: Literal["expense", "credit"]
+    purchase_date: date
+    card_id: int = Field(gt=0)
+    category_id: int = Field(gt=0)
+    total_cents: int = Field(gt=0, le=4_800_000_000)
+    installment_count: int = Field(ge=1, le=48)
+    first_invoice_month: date
+    current_installment: int = Field(ge=1, le=48)
+    end_invoice_month: date | None = None
+    active: bool
+    notes: str = Field(default="", max_length=300)
+    created_at: datetime | None = None
+
+    @model_validator(mode="after")
+    def validate_dates_and_kind(self):
+        if self.first_invoice_month.day != 1:
+            raise ValueError("O mês inicial da compra deve usar o primeiro dia.")
+        if self.end_invoice_month and self.end_invoice_month.day != 1:
+            raise ValueError("O mês final da recorrência deve usar o primeiro dia.")
+        if self.kind == "parcelado" and self.installment_count < 2:
+            raise ValueError("Parcelamentos precisam ter ao menos duas parcelas.")
+        if self.kind != "recorrente" and self.end_invoice_month is not None:
+            raise ValueError("Apenas despesas fixas podem ter mês final.")
+        if self.kind == "recorrente" and self.direction != "expense":
+            raise ValueError("Créditos não podem ser recorrentes.")
+        if self.current_installment > self.installment_count:
+            raise ValueError("A parcela atual excede o total de parcelas.")
+        return self
+
+
+class BackupInvoiceEntryIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: int = Field(gt=0)
+    purchase_id: int = Field(gt=0)
+    invoice_month: date
+    installment_number: int | None = Field(default=None, ge=1, le=48)
+    amount_cents: int = Field(gt=0, le=4_800_000_000)
+    status: Literal["open", "historical", "cancelled"]
+
+    @model_validator(mode="after")
+    def month_must_be_first_day(self):
+        if self.invoice_month.day != 1:
+            raise ValueError("O mês da parcela deve usar o primeiro dia.")
+        return self
+
+
+class BackupRestoreIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    format: Literal["xtrato-backup"]
+    version: Literal[1]
+    exported_at: datetime
+    account: dict
+    cards: list[BackupCardIn] = Field(max_length=50)
+    categories: list[BackupCategoryIn] = Field(max_length=200)
+    budgets: list[BackupBudgetIn] = Field(max_length=600)
+    purchases: list[BackupPurchaseIn] = Field(max_length=10_000)
+    invoice_entries: list[BackupInvoiceEntryIn] = Field(max_length=50_000)
+
+    @model_validator(mode="after")
+    def validate_backup_relationships(self):
+        ids = {
+            "cards": [row.id for row in self.cards],
+            "categories": [row.id for row in self.categories],
+            "budgets": [row.id for row in self.budgets],
+            "purchases": [row.id for row in self.purchases],
+            "invoice_entries": [row.id for row in self.invoice_entries],
+        }
+        for name, values in ids.items():
+            if len(values) != len(set(values)):
+                raise ValueError(f"O backup contém IDs duplicados em {name}.")
+
+        card_ids = set(ids["cards"])
+        category_ids = set(ids["categories"])
+        purchase_ids = set(ids["purchases"])
+        for purchase in self.purchases:
+            if purchase.card_id not in card_ids or purchase.category_id not in category_ids:
+                raise ValueError("Uma compra aponta para cartão ou categoria inexistente.")
+        entry_purchase_ids = []
+        for entry in self.invoice_entries:
+            if entry.purchase_id not in purchase_ids:
+                raise ValueError("Uma parcela aponta para uma compra inexistente.")
+            entry_purchase_ids.append(entry.purchase_id)
         return self
