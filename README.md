@@ -50,7 +50,7 @@ docker compose logs -f app
 A aplicação já inclui um perfil opcional com Caddy para terminar TLS automaticamente. Para publicar:
 
 1. Aponte um domínio/subdomínio para o IP do servidor (registros DNS A/AAAA).
-2. No `.env`, defina `DOMAIN=seu-dominio.com`, `APP_ENV=production`, `COOKIE_SECURE=true` e `APP_TIMEZONE=America/Sao_Paulo`. A aplicação se recusará a iniciar em produção se o cookie seguro não estiver habilitado.
+2. No `.env`, defina `DOMAIN=seu-dominio.com`, `APP_ENV=production`, `COOKIE_SECURE=true` e `APP_TIMEZONE=America/Sao_Paulo`. A aplicação se recusará a iniciar em produção sem HTTPS/cookie seguro, sem um segredo de sessão único com pelo menos 32 caracteres ou com uma senha inicial fraca.
 3. Gere um segredo longo para `APP_SECRET_KEY` (`openssl rand -hex 32`) e senhas fortes e únicas para o PostgreSQL e para o usuário. Para `POSTGRES_PASSWORD`, mantenha o formato hexadecimal gerado com `openssl rand -hex 24`.
 4. Libere as portas TCP 80 e 443 (e UDP 443, opcional para HTTP/3) no firewall do servidor.
 5. Execute:
