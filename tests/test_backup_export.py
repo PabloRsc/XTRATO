@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -89,12 +89,11 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
     from app.schemas import BackupRestoreIn
     from app.services.backup import restore_user_backup
 
-    engine = make_db()
-    with Session(engine) as db:
+    source_engine = make_db()
+    with Session(source_engine) as source_db:
         source = User(username="source", password_hash="source-hash-must-not-copy")
-        target = User(username="target", password_hash="target-password-hash")
-        db.add_all([source, target])
-        db.flush()
+        source_db.add(source)
+        source_db.flush()
 
         source_card = Card(
             user_id=source.id,
@@ -115,9 +114,9 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
             icon="shopping-bag",
             active=True,
         )
-        db.add_all([source_card, source_category])
-        db.flush()
-        db.add(Budget(user_id=source.id, month=date(2026, 11, 1), limit_cents=100_000))
+        source_db.add_all([source_card, source_category])
+        source_db.flush()
+        source_db.add(Budget(user_id=source.id, month=date(2026, 11, 1), limit_cents=100_000))
         purchase = Purchase(
             user_id=source.id,
             description="Notebook",
@@ -133,9 +132,9 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
             active=False,
             notes="Parcela em andamento",
         )
-        db.add(purchase)
-        db.flush()
-        db.add_all([
+        source_db.add(purchase)
+        source_db.flush()
+        source_db.add_all([
             InvoiceEntry(
                 purchase_id=purchase.id,
                 invoice_month=date(2026, 10, 1),
@@ -151,32 +150,40 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
                 status="cancelled",
             ),
         ])
-        # The target account has only the default category seeded at sign-up.
-        db.add(Category(
+        source_db.commit()
+        exported = build_user_backup(source_db, source)
+
+    source_engine.dispose()
+    target_engine = make_db()
+    with Session(target_engine) as target_db:
+        target = User(username="target", password_hash="target-password-hash")
+        target_db.add(target)
+        target_db.flush()
+        # A newly initialized account may already contain default categories.
+        target_db.add(Category(
             user_id=target.id,
             name="Outros",
             color="#929a94",
             icon="tag",
             active=True,
         ))
-        db.commit()
+        target_db.commit()
 
-        exported = build_user_backup(db, source)
         restore_payload = BackupRestoreIn.model_validate({
             **exported,
             "confirmation": "RESTAURAR",
         })
-        result = restore_user_backup(db, target, restore_payload)
-        db.commit()
+        result = restore_user_backup(target_db, target, restore_payload)
+        target_db.commit()
 
-        restored_card = db.scalar(select(Card).where(Card.user_id == target.id))
-        restored_category = db.scalar(select(Category).where(
+        restored_card = target_db.scalar(select(Card).where(Card.user_id == target.id))
+        restored_category = target_db.scalar(select(Category).where(
             Category.user_id == target.id,
             Category.name == "Compras",
         ))
-        restored_budget = db.scalar(select(Budget).where(Budget.user_id == target.id))
-        restored_purchase = db.scalar(select(Purchase).where(Purchase.user_id == target.id))
-        restored_entries = db.scalars(
+        restored_budget = target_db.scalar(select(Budget).where(Budget.user_id == target.id))
+        restored_purchase = target_db.scalar(select(Purchase).where(Purchase.user_id == target.id))
+        restored_entries = target_db.scalars(
             select(InvoiceEntry)
             .where(InvoiceEntry.purchase_id == restored_purchase.id)
             .order_by(InvoiceEntry.invoice_month)
@@ -197,10 +204,10 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
         assert restored_purchase.id == purchase.id
         assert [row.status for row in restored_entries] == ["historical", "cancelled"]
         assert [row.installment_number for row in restored_entries] == [1, 2]
-        assert db.get(User, target.id).password_hash == "target-password-hash"
+        assert target_db.get(User, target.id).password_hash == "target-password-hash"
         assert "source-hash-must-not-copy" not in str(restore_payload.model_dump())
 
-    engine.dispose()
+    target_engine.dispose()
 
 
 def test_backup_restore_refuses_an_account_that_already_has_a_card():
