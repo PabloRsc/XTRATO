@@ -66,6 +66,7 @@
     home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/>',
     book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M4 4.5v17.5M8 6h8"/>',
     download: '<path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
+    upload: '<path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
   };
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
@@ -126,8 +127,8 @@
   }
 
   async function loadInitialData() {
-    state.cards = await api('/api/cards');
-    state.categories = await api('/api/categories');
+    state.cards = await api('/api/cards?include_archived=true');
+    state.categories = await api('/api/categories?include_archived=true');
     await refreshDashboard();
     renderCardOptions();
     renderCategoryOptions();
@@ -241,37 +242,55 @@
   }
 
   function renderCardOptions() {
-    const options = state.cards.map(c => `<option value="${c.id}">${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</option>`).join('');
-    $('#purchaseCard').innerHTML = `<option value="">${state.cards.length ? 'Selecione um cartão' : 'Cadastre um cartão'}</option>${options}`;
-    $('#statementCardFilter').innerHTML = `<option value="">Todos os cartões</option>${options}`;
+    const activeCards = state.cards.filter(card => card.active !== false);
+    const purchaseOptions = activeCards.map(card => `<option value="${card.id}">${escapeHtml(card.name)}${card.last_four ? ` ···· ${card.last_four}` : ''}</option>`).join('');
+    const filterOptions = state.cards.map(card => `<option value="${card.id}">${escapeHtml(card.name)}${card.active === false ? ' · arquivado' : ''}</option>`).join('');
+    $('#purchaseCard').innerHTML = `<option value="">${activeCards.length ? 'Selecione um cartão' : 'Cadastre um cartão ativo'}</option>${purchaseOptions}`;
+    $('#statementCardFilter').innerHTML = `<option value="">Todos os cartões</option>${filterOptions}`;
   }
   function renderCategoryOptions() {
-    $('#purchaseCategory').innerHTML = `<option value="">Selecione uma categoria</option>${state.categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}`;
+    const activeCategories = state.categories.filter(category => category.active !== false);
+    $('#purchaseCategory').innerHTML = `<option value="">Selecione uma categoria</option>${activeCategories.map(category => `<option value="${category.id}">${escapeHtml(category.name)}</option>`).join('')}`;
   }
   function renderCards() {
     const target = $('#cardsList');
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão ao lado.</div>'; return; }
-    target.innerHTML = state.cards.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</b><small>${escapeHtml(c.issuer || c.brand || 'Cartão')} · Fecha dia ${c.closing_day} · Vence dia ${c.due_day} · ${Number(c.due_month_offset) === 0 ? 'mesmo mês' : 'mês seguinte'}</small></div><div class="managed-actions"><button type="button" data-edit-card="${c.id}">Editar</button><button type="button" data-archive-card="${c.id}">Arquivar</button></div></div>`).join('');
-    target.querySelectorAll('[data-edit-card]').forEach(b => b.addEventListener('click', () => startEditCard(Number(b.dataset.editCard))));
-    target.querySelectorAll('[data-archive-card]').forEach(b => b.addEventListener('click', () => archiveResource('cards', Number(b.dataset.archiveCard), 'cartão')));
+    target.innerHTML = state.cards.map(card => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(card.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(card.name)}${card.last_four ? ` ···· ${card.last_four}` : ''} ${card.active === false ? '<span class="status-pill historical">Arquivado</span>' : ''}</b><small>${escapeHtml(card.issuer || card.brand || 'Cartão')} · Fecha dia ${card.closing_day} · Vence dia ${card.due_day} · ${Number(card.due_month_offset) === 0 ? 'mesmo mês' : 'mês seguinte'}</small></div><div class="managed-actions">${card.active === false ? `<button type="button" data-reactivate-card="${card.id}">Reativar</button>` : `<button type="button" data-edit-card="${card.id}">Editar</button><button type="button" data-archive-card="${card.id}">Arquivar</button>`}</div></div>`).join('');
+    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(Number(button.dataset.editCard))));
+    target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveResource('cards', Number(button.dataset.archiveCard), 'cartão')));
+    target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateResource('cards', Number(button.dataset.reactivateCard), 'cartão')));
   }
   function renderCategories() {
     const target = $('#categoriesList');
     if (!state.categories.length) { target.innerHTML = '<div class="empty-inline">Nenhuma categoria cadastrada.</div>'; return; }
-    target.innerHTML = state.categories.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon(c.icon || categoryIcon(c.name))}</div><div class="managed-copy"><b>${escapeHtml(c.name)}</b><small>Categoria de gastos</small></div><div class="managed-actions"><button type="button" data-edit-category="${c.id}">Editar</button><button type="button" data-archive-category="${c.id}">Arquivar</button></div></div>`).join('');
-    target.querySelectorAll('[data-edit-category]').forEach(b => b.addEventListener('click', () => startEditCategory(Number(b.dataset.editCategory))));
-    target.querySelectorAll('[data-archive-category]').forEach(b => b.addEventListener('click', () => archiveResource('categories', Number(b.dataset.archiveCategory), 'categoria')));
+    target.innerHTML = state.categories.map(category => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(category.color)}">${icon(category.icon || categoryIcon(category.name))}</div><div class="managed-copy"><b>${escapeHtml(category.name)} ${category.active === false ? '<span class="status-pill historical">Arquivada</span>' : ''}</b><small>Categoria de gastos</small></div><div class="managed-actions">${category.active === false ? `<button type="button" data-reactivate-category="${category.id}">Reativar</button>` : `<button type="button" data-edit-category="${category.id}">Editar</button><button type="button" data-archive-category="${category.id}">Arquivar</button>`}</div></div>`).join('');
+    target.querySelectorAll('[data-edit-category]').forEach(button => button.addEventListener('click', () => startEditCategory(Number(button.dataset.editCategory))));
+    target.querySelectorAll('[data-archive-category]').forEach(button => button.addEventListener('click', () => archiveResource('categories', Number(button.dataset.archiveCategory), 'categoria')));
+    target.querySelectorAll('[data-reactivate-category]').forEach(button => button.addEventListener('click', () => reactivateResource('categories', Number(button.dataset.reactivateCategory), 'categoria')));
   }
   async function archiveResource(resource, id, label) {
     if (!window.confirm(`Arquivar este ${label}? Os lançamentos existentes serão preservados.`)) return;
     try {
       await api(`/api/${resource}/${id}`, { method: 'DELETE' });
-      state[resource] = await api(`/api/${resource}`);
+      state[resource] = await api(`/api/${resource}?include_archived=true`);
       if (resource === 'cards') { renderCards(); renderCardOptions(); }
       else { renderCategories(); renderCategoryOptions(); }
       await refreshDashboard();
       toast(`${label[0].toUpperCase()}${label.slice(1)} arquivado.`);
     } catch (error) { toast(error.message); }
+  }
+
+  async function reactivateResource(resource, id, label) {
+    try {
+      await api(`/api/${resource}/${id}/reactivate`, { method: 'POST' });
+      state[resource] = await api(`/api/${resource}?include_archived=true`);
+      if (resource === 'cards') { renderCards(); renderCardOptions(); }
+      else { renderCategories(); renderCategoryOptions(); }
+      await refreshDashboard();
+      toast(`${label[0].toUpperCase()}${label.slice(1)} reativado.`);
+    } catch (error) {
+      toast(error.message);
+    }
   }
 
   async function loadRecurrences() {
@@ -383,9 +402,19 @@
   function openPurchase(kind = 'avista') {
     resetPurchaseForm();
     if (kind === 'recorrente') setKind('recorrente');
-    if (!state.cards.length || !state.categories.length) {
-      toast('Antes de lançar, cadastre ao menos um cartão e uma categoria.');
-      if (!state.cards.length) setPage('cards'); else setPage('categories');
+    const hasActiveCards = state.cards.some(card => card.active !== false);
+    const hasActiveCategories = state.categories.some(category => category.active !== false);
+    if (!hasActiveCards || !hasActiveCategories) {
+      if (!hasActiveCards && !hasActiveCategories) {
+        toast('Cadastre ou reative um cartão e uma categoria antes de lançar.');
+        setPage('cards');
+      } else if (!hasActiveCards) {
+        toast('Cadastre ou reative um cartão antes de lançar.');
+        setPage('cards');
+      } else {
+        toast('Cadastre ou reative uma categoria antes de lançar.');
+        setPage('categories');
+      }
       return;
     }
     renderCardOptions();
@@ -501,7 +530,7 @@
       const editing = state.editingCardId;
       await api(editing ? `/api/cards/${editing}` : '/api/cards', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
       resetCardEditor();
-      state.cards = await api('/api/cards');
+      state.cards = await api('/api/cards?include_archived=true');
       renderCards(); renderCardOptions();
       await refreshDashboard();
       toast(editing ? 'Cartão atualizado.' : 'Cartão cadastrado.');
@@ -539,7 +568,7 @@
       const editing = state.editingCategoryId;
       await api(editing ? `/api/categories/${editing}` : '/api/categories', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
       resetCategoryEditor();
-      state.categories = await api('/api/categories');
+      state.categories = await api('/api/categories?include_archived=true');
       renderCategories(); renderCategoryOptions();
       await refreshDashboard();
       toast(editing ? 'Categoria atualizada.' : 'Categoria cadastrada.');
@@ -588,7 +617,50 @@
     $('#logoutButton').addEventListener('click', logout);
     $('#mobileLogout').addEventListener('click', logout);
     $('#backupButton').addEventListener('click', () => window.location.assign('/api/backup'));
+    $('#restoreButton').addEventListener('click', () => $('#backupRestoreFile').click());
+    $('#backupRestoreFile').addEventListener('change', restoreBackupFromFile);
     $('#loginForm').addEventListener('submit', login);
+  }
+
+  async function restoreBackupFromFile(event) {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast('O arquivo excede o limite de 10 MB.');
+      return;
+    }
+
+    let backup;
+    try {
+      backup = JSON.parse(await file.text());
+    } catch {
+      toast('Não foi possível ler o arquivo. Selecione um backup JSON válido.');
+      return;
+    }
+    if (!backup || backup.format !== 'xtrato-backup' || backup.version !== 1) {
+      toast('Formato de backup não reconhecido ou versão incompatível.');
+      return;
+    }
+
+    const confirmation = window.prompt(
+      'A restauração só funciona em uma conta sem cartões, compras ou limites. Digite RESTAURAR para continuar.'
+    );
+    if (confirmation !== 'RESTAURAR') {
+      toast('Restauração cancelada.');
+      return;
+    }
+
+    try {
+      const result = await api('/api/backup/restore', {
+        method: 'POST',
+        body: JSON.stringify({ ...backup, confirmation: 'RESTAURAR' }),
+      });
+      await loadInitialData();
+      toast(`Backup restaurado: ${result.restored.purchases} compras e ${result.restored.cards} cartões.`);
+    } catch (error) {
+      toast(error.message);
+    }
   }
 
   async function login(event) {
