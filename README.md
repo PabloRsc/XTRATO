@@ -8,8 +8,8 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
 - Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento e vencimento.
 - Categorias pessoais com cadastro, edição e arquivamento.
-- Compras à vista, parceladas e despesas fixas mensais.
 - Edição segura de descrição e observações de compras/despesas fixas; valores, parcelas e meses de pagamento permanecem preservados.
+- Compras à vista, parceladas e despesas fixas mensais.
 - Compra parcelada em andamento: informar total ou valor da parcela, parcela atual e mês da fatura atual.
 - Cada parcela fica armazenada como um lançamento separado, associado a `YYYY-MM` da fatura.
 - Parcelas anteriores de uma compra em andamento são preservadas como histórico e não são lançadas novamente no mês atual.
@@ -76,6 +76,12 @@ A imagem Docker aceita a variável `PORT` definida pela plataforma de hospedagem
 Não use SQLite nem armazenamento local efêmero para produção. Em camadas gratuitas, confirme antes os limites de suspensão, memória, horas de execução, armazenamento, backups, limites de conexão e eventual expiração do banco. Uma aplicação que “hospeda grátis” mas apaga o banco ou o disco não é adequada para guardar seu histórico financeiro.
 
 A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo`, `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` e a variável `PORT` fornecida pelo ambiente. Use HTTPS na plataforma e não coloque segredos no GitHub.
+
+## Backup pessoal
+
+A conta autenticada pode baixar uma cópia portátil dos dados em `GET /api/backup`, também disponível pelo botão **Baixar backup dos dados** na interface. O arquivo JSON inclui cartões (inclusive arquivados), categorias, limites mensais, compras e parcelas, preservando IDs e vínculos. Senhas, hashes e sessões nunca são incluídos.
+
+Guarde uma cópia fora do servidor, de preferência em um local privado com proteção de acesso. O backup JSON é uma cópia de segurança lógica; ele não substitui os backups nativos do PostgreSQL nem um procedimento de restauração testado.
 
 ## Banco de dados e backup
 
