@@ -472,3 +472,50 @@ def test_backup_restore_rejects_blank_card_category_and_purchase_names():
             "categories": [valid_category],
             "purchases": [purchase],
         })
+
+
+def test_backup_restore_rejects_naive_timestamps_and_recurrence_end_before_start():
+    import pytest
+    from pydantic import ValidationError
+
+    from app.schemas import BackupRestoreIn
+
+    base = {
+        "confirmation": "RESTAURAR",
+        "format": "xtrato-backup",
+        "version": 1,
+        "exported_at": "2026-11-06T12:00:00+00:00",
+        "account": {"username": "source"},
+        "cards": [{
+            "id": 1, "name": "Nubank", "issuer": "", "brand": "",
+            "last_four": None, "closing_day": 25, "due_day": 5,
+            "due_month_offset": 1, "color": "#247a57", "active": True,
+        }],
+        "categories": [{
+            "id": 1, "name": "Compras", "color": "#78a88b",
+            "icon": "shopping-bag", "active": True,
+        }],
+        "budgets": [],
+        "purchases": [{
+            "id": 1, "description": "Streaming", "kind": "recorrente",
+            "direction": "expense", "purchase_date": "2026-11-01",
+            "card_id": 1, "category_id": 1, "total_cents": 3990,
+            "installment_count": 1, "first_invoice_month": "2026-11-01",
+            "current_installment": 1, "end_invoice_month": "2026-10-01",
+            "active": True, "notes": "", "created_at": "2026-11-01T12:00:00+00:00",
+        }],
+        "invoice_entries": [],
+    }
+    with pytest.raises(ValidationError, match="mês final"):
+        BackupRestoreIn.model_validate(base)
+
+    invalid_timestamp = {**base, "purchases": [{
+        **base["purchases"][0],
+        "end_invoice_month": None,
+        "created_at": "2026-11-01T12:00:00",
+    }]}
+    with pytest.raises(ValidationError, match="fuso horário"):
+        BackupRestoreIn.model_validate(invalid_timestamp)
+
+    with pytest.raises(ValidationError, match="fuso horário"):
+        BackupRestoreIn.model_validate({**base, "exported_at": "2026-11-06T12:00:00"})
