@@ -32,6 +32,7 @@ class Card(Base):
         UniqueConstraint("user_id", "name", name="uq_card_user_name"),
         CheckConstraint("closing_day >= 1 AND closing_day <= 31", name="ck_card_closing_day"),
         CheckConstraint("due_day >= 1 AND due_day <= 31", name="ck_card_due_day"),
+        CheckConstraint("due_month_offset IN (0, 1)", name="ck_card_due_month_offset"),
     )
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -41,6 +42,7 @@ class Card(Base):
     last_four: Mapped[str | None] = mapped_column(String(4), nullable=True)
     closing_day: Mapped[int] = mapped_column(Integer, default=25, nullable=False)
     due_day: Mapped[int] = mapped_column(Integer, default=5, nullable=False)
+    due_month_offset: Mapped[int] = mapped_column(Integer, default=1, server_default="1", nullable=False)
     color: Mapped[str] = mapped_column(String(20), default="#247a57", nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)

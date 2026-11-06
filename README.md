@@ -6,7 +6,7 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 - Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
-- Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento e vencimento.
+- Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento, vencimento e escolha do mês de pagamento (mesmo mês ou mês seguinte).
 - Categorias pessoais com cadastro, edição e arquivamento.
 - Edição segura de descrição e observações de compras/despesas fixas; valores, parcelas e meses de pagamento permanecem preservados.
 - Compras à vista, parceladas e despesas fixas mensais.
@@ -50,7 +50,7 @@ docker compose logs -f app
 A aplicação já inclui um perfil opcional com Caddy para terminar TLS automaticamente. Para publicar:
 
 1. Aponte um domínio/subdomínio para o IP do servidor (registros DNS A/AAAA).
-2. No `.env`, defina `DOMAIN=seu-dominio.com`, `APP_ENV=production`, `COOKIE_SECURE=true` e `APP_TIMEZONE=America/Sao_Paulo`. A aplicação se recusará a iniciar em produção se o cookie seguro não estiver habilitado.
+2. No `.env`, defina `DOMAIN=seu-dominio.com`, `APP_ENV=production`, `COOKIE_SECURE=true` e `APP_TIMEZONE=America/Sao_Paulo`. A aplicação se recusará a iniciar em produção sem HTTPS/cookie seguro, sem um segredo de sessão único com pelo menos 32 caracteres ou com uma senha inicial fraca.
 3. Gere um segredo longo para `APP_SECRET_KEY` (`openssl rand -hex 32`) e senhas fortes e únicas para o PostgreSQL e para o usuário. Para `POSTGRES_PASSWORD`, mantenha o formato hexadecimal gerado com `openssl rand -hex 24`.
 4. Libere as portas TCP 80 e 443 (e UDP 443, opcional para HTTP/3) no firewall do servidor.
 5. Execute:
@@ -101,12 +101,11 @@ Guarde os backups fora do servidor e teste a restauração periodicamente. O vol
 
 ## Regras importantes do produto
 
-- O orçamento é calculado pelo mês em que a fatura será paga, não pelo mês em que a compra foi realizada.
-- O limite configurado é global e continua valendo nos meses seguintes; uma nova configuração cria uma alteração a partir daquele mês.
-- O limite mensal acompanha o mês em que a fatura será paga, e não apenas o mês em que a compra foi feita.
-- O fechamento e o vencimento do cartão são usados juntos para sugerir o mês de pagamento: compras após o fechamento entram no ciclo seguinte; o dia de vencimento define se o ciclo é pago no mesmo mês do fechamento ou no mês seguinte.
+- O limite mensal global é calculado pelo mês em que a fatura será paga, não pelo mês em que a compra foi realizada.
+- O limite configurado continua valendo nos meses seguintes; uma nova configuração cria uma alteração a partir daquele mês.
+- Cada cartão define explicitamente se a fatura é paga no mesmo mês do fechamento ou no mês seguinte. Compras após o fechamento entram no ciclo seguinte; o usuário pode ajustar o mês de pagamento de cada compra.
 - A sugestão pode ser alterada manualmente para refletir a fatura real da instituição, inclusive quando a administradora usa regras específicas.
-- Uma compra parcelada gera uma linha por parcela. O valor total é dividido em centavos e a soma das parcelas sempre fecha com o total informado.
+- Uma compra parcelada gera uma linha por parcela. O valor total é dividido em centavos e a soma das parcelas sempre fecha com o total informado; eventuais centavos restantes ficam na última parcela e são exibidos no formulário.
 - Para compra antiga em andamento, o mês informado é o da parcela atual. O sistema deduz o mês inicial conforme o número da parcela e marca as anteriores como históricas.
 - Despesas fixas geram lançamentos mensais de forma idempotente, sem duplicar a mesma recorrência no mesmo mês.
 - O limite mede o comprometimento líquido na fatura. Um pagamento da fatura não deve ser lançado como compra.
