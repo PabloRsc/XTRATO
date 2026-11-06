@@ -20,3 +20,5 @@
 .backup-link{width:100%;display:flex;align-items:center;justify-content:flex-start;gap:9px;padding:10px 11px;margin:0 0 12px;background:#f5f8f5;border:1px solid #e7eee7;border-radius:9px;color:#52665a;font-size:10px;font-weight:700;text-align:left}.backup-link:hover{background:#edf4ee;color:var(--green-dark);border-color:#d6e5d9}.backup-link svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 .backup-link+.backup-link{margin-top:-6px}
+
+.profile-password{display:block;border:0;background:transparent;padding:2px 0 0;color:var(--green-dark);font-size:9px;font-weight:700;text-align:left}.profile-password:hover{text-decoration:underline}
