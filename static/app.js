@@ -295,7 +295,7 @@
     $('#installmentFields').classList.toggle('hidden', kind !== 'parcelado');
     $('#recurrenceEndField').classList.toggle('hidden', kind !== 'recorrente');
     $('#invoiceMonthField').classList.toggle('hidden', kind === 'parcelado' && $('#ongoingCheck').checked);
-    $('#invoiceMonthLabel').querySelector('span').textContent = kind === 'recorrente' ? 'Começar na fatura de' : 'Primeira cobrança na fatura de';
+    $('#invoiceMonthLabel').querySelector('span').textContent = kind === 'recorrente' ? 'Mês de pagamento inicial' : 'Mês de pagamento da primeira parcela';
     updateOngoingFields();
     updateCalculation();
   }
