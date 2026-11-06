@@ -53,3 +53,14 @@ def test_purchase_rejects_whitespace_only_description():
             category_id=1,
             amount_cents=1250,
         )
+
+
+
+def test_card_accepts_both_payment_month_offsets():
+    assert CardIn(name="Nubank", due_month_offset=0).due_month_offset == 0
+    assert CardIn(name="Inter", due_month_offset=1).due_month_offset == 1
+
+
+def test_card_rejects_invalid_payment_month_offset():
+    with pytest.raises(ValidationError):
+        CardIn(name="Nubank", due_month_offset=2)
