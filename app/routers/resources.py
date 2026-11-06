@@ -71,7 +71,13 @@ def update_card(card_id: int, payload: CardIn, request: Request, db: Session = D
         raise HTTPException(status_code=404, detail="Cartão não encontrado.")
     data = payload.model_dump()
     if not data["name"]:
-        data["name"] = data["issuer"]
+        base_name = data["issuer"]
+        candidate = base_name
+        suffix = 2
+        while db.scalar(select(Card.id).where(Card.user_id == user.id, Card.name == candidate, Card.id != card.id)):
+            candidate = f"{base_name} ({suffix})"
+            suffix += 1
+        data["name"] = candidate
     for key, value in data.items():
         setattr(card, key, value)
     try:
