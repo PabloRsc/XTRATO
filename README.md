@@ -6,7 +6,7 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 - Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
-- Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento e vencimento.
+- Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento, vencimento e escolha do mês de pagamento (mesmo mês ou mês seguinte).
 - Categorias pessoais com cadastro, edição e arquivamento.
 - Edição segura de descrição e observações de compras/despesas fixas; valores, parcelas e meses de pagamento permanecem preservados.
 - Compras à vista, parceladas e despesas fixas mensais.
