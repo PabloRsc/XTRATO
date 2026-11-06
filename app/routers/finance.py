@@ -83,6 +83,53 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
             cat_row = category_totals.setdefault(category.id, {"id": category.id, "name": category.name, "color": category.color, "icon": category.icon, "total_cents": 0})
             cat_row["total_cents"] += signed_amount
 
+
+    forecast = []
+    for offset in range(0, 12):
+        forecast_month = add_months(selected, offset)
+        forecast_rows = query_month_entries(db, user.id, forecast_month)
+        forecast_total = sum(
+            signed_entry_amount(entry.amount_cents, purchase.direction)
+            for entry, purchase, _card in forecast_rows
+        )
+        forecast_label = forecast_month.strftime("%b").replace(
+            "Jan", "Jan"
+        ).replace("Feb", "Fev").replace("Mar", "Mar").replace(
+            "Apr", "Abr"
+        ).replace("May", "Mai").replace("Jun", "Jun").replace(
+            "Jul", "Jul"
+        ).replace("Aug", "Ago").replace("Sep", "Set").replace(
+            "Oct", "Out"
+        ).replace("Nov", "Nov").replace("Dec", "Dez")
+        forecast.append({
+            "month": forecast_month.strftime("%Y-%m"),
+            "label": forecast_label,
+            "total_cents": forecast_total,
+        })
+
+    forecast = []
+    for offset in range(0, 12):
+        forecast_month = add_months(selected, offset)
+        forecast_rows = query_month_entries(db, user.id, forecast_month)
+        forecast_total = sum(
+            signed_entry_amount(entry.amount_cents, purchase.direction)
+            for entry, purchase, _card in forecast_rows
+        )
+        forecast_label = forecast_month.strftime("%b").replace(
+            "Jan", "Jan"
+        ).replace("Feb", "Fev").replace("Mar", "Mar").replace(
+            "Apr", "Abr"
+        ).replace("May", "Mai").replace("Jun", "Jun").replace(
+            "Jul", "Jul"
+        ).replace("Aug", "Ago").replace("Sep", "Set").replace(
+            "Oct", "Out"
+        ).replace("Nov", "Nov").replace("Dec", "Dez")
+        forecast.append({
+            "month": forecast_month.strftime("%Y-%m"),
+            "label": forecast_label,
+            "total_cents": forecast_total,
+        })
+
     trends = []
     for offset in range(5, -1, -1):
         trend_month = add_months(selected, -offset)
@@ -106,6 +153,8 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
         "card_totals": list(card_totals.values()),
         "categories": sorted(category_totals.values(), key=lambda x: x["total_cents"], reverse=True),
         "trend": trends,
+        "forecast": forecast,
+        "forecast": forecast,
         "recent_entries": entries[:8],
     }
 
