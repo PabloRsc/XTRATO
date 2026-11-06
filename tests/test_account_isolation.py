@@ -9,7 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.database import Base
 from app.models import Budget, Card, Category, InvoiceEntry, Purchase, User
 from app.routers import finance, resources
-from app.schemas import CardIn, CategoryIn, PurchaseIn, PurchaseUpdateIn
+from app.schemas import BudgetIn, CardIn, CategoryIn, PurchaseIn, PurchaseUpdateIn
 from app.services.backup import build_user_backup
 
 
@@ -131,8 +131,9 @@ def test_authenticated_account_cannot_read_another_accounts_statement_dashboard_
         assert dashboard["cards"] == [{"id": stranger_card.id, "name": stranger_card.name,
                                        "color": stranger_card.color, "active": True, "total_cents": 0}]
         assert recurrences == []
-        assert backup["cards"] == [backup["cards"][0]] if backup["cards"] else []
+        assert [card["id"] for card in backup["cards"]] == [stranger_card.id]
         assert all(card["name"] != owner_card.name for card in backup["cards"])
+        assert [category["id"] for category in backup["categories"]] == [stranger_category.id]
         assert all(category["name"] != owner_category.name for category in backup["categories"])
         assert backup["purchases"] == []
         assert backup["invoice_entries"] == []
@@ -223,8 +224,7 @@ def test_account_budget_changes_do_not_affect_another_account():
         request = make_request(stranger.id)
 
         result = finance.save_budget(
-            finance.BudgetIn(month="2026-11", limit_cents=25_000)
-            if hasattr(finance, "BudgetIn") else None,
+            BudgetIn(month="2026-11", limit_cents=25_000),
             request,
             db,
         )
