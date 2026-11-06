@@ -351,3 +351,45 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
 @media(max-width:1000px){.dashboard-overview-grid{grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr)}.dashboard-insights-grid{grid-template-columns:1fr}.dashboard-category-panel,.dashboard-trend-panel{min-height:220px}}
 @media(max-width:760px){.dashboard-overview-grid{grid-template-columns:1fr}.dashboard-cards-card{min-height:220px}.dashboard-insights-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.dashboard-page{gap:13px}.dashboard-welcome{align-items:flex-start;gap:10px}.dashboard-welcome h1{font-size:26px}.dashboard-welcome p{font-size:10px;max-width:255px}.dashboard-add-button{min-height:37px;padding:0 10px;font-size:9px}.dashboard-budget-card{padding:18px;min-height:225px}.dashboard-budget-card .budget-numbers{margin:20px 0 17px}.dashboard-budget-card .budget-foot{gap:13px 18px}.dashboard-budget-card .budget-foot div{min-width:calc(50% - 10px)}.dashboard-cards-card{padding:19px;min-height:215px}.dashboard-category-panel,.dashboard-trend-panel,.dashboard-recent-panel{padding:17px;border-radius:16px}.dashboard-category-panel .section-heading,.dashboard-trend-panel .section-heading,.dashboard-recent-panel .section-heading{gap:8px}.dashboard-category-panel .section-heading .link-button,.dashboard-recent-panel .section-heading .link-button{font-size:9px;white-space:nowrap}}
+
+
+/* Statement redesign — searchable ledger with clear period hierarchy */
+.statement-page{display:grid;gap:18px}
+.statement-welcome{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:2px 1px 5px}
+.statement-welcome h1{font-size:clamp(27px,3vw,35px);line-height:1.08;letter-spacing:-1.35px;margin:0;color:var(--ink);font-weight:800}
+.statement-welcome p{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.6;max-width:600px}
+.statement-welcome .eyebrow{display:block;margin-bottom:9px}
+.statement-add-button{min-height:43px;padding:0 17px;white-space:nowrap}
+.statement-workspace{padding:23px 24px;border-radius:20px;box-shadow:var(--shadow)}
+.statement-workspace-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:22px}
+.statement-workspace-heading>div{display:flex;align-items:center;gap:12px}
+.statement-section-icon{width:40px;height:40px;border-radius:13px;background:var(--surface-3);color:var(--green-dark);display:grid;place-items:center}
+.statement-section-icon svg{width:19px;height:19px}
+.statement-workspace-heading h2{font-size:15px;letter-spacing:-.3px;margin:0;color:var(--ink)}
+.statement-workspace-heading p{font-size:10px;margin:4px 0 0;color:var(--muted)}
+.statement-live-indicator{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:9px;background:var(--surface-2);border:1px solid var(--line);border-radius:30px;padding:7px 10px}
+.statement-live-indicator i{width:6px;height:6px;border-radius:50%;background:#26ad72;box-shadow:0 0 0 3px #26ad7220}
+.statement-toolbar{display:flex;align-items:end;gap:12px;margin-bottom:17px}
+.statement-search-box{max-width:none;min-height:43px;padding:0 13px;background:var(--surface-2);border-color:var(--line);border-radius:12px;flex:1}
+.statement-search-box:focus-within{border-color:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 12%,transparent)}
+.statement-search-box input{font-size:11px;color:var(--ink)}
+.statement-filter-label{display:grid;gap:6px;min-width:190px;color:var(--muted);font-size:9px;font-weight:700}
+.statement-filter-label select{height:43px;min-width:0;width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);padding:0 12px;border-radius:12px;font-size:10px}
+.statement-summary-card{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:16px 18px;border:1px solid var(--line);background:var(--surface-2);border-radius:14px}
+.statement-summary-card>div{display:grid;gap:5px}
+.statement-summary-card #statementCount{font-size:12px;font-weight:700;color:var(--ink)}
+.statement-summary-label{font-size:9px;color:var(--muted)}
+.statement-summary-total{text-align:right}
+.statement-summary-total strong{font-size:21px;letter-spacing:-.6px;color:var(--ink)}
+.statement-results-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:23px 1px 8px}
+.statement-results-heading h3{font-size:12px;margin:0;color:var(--ink)}
+.statement-results-heading>span{font-size:9px;color:var(--muted)}
+.statement-results .entry-row{padding:15px 5px;border-top-color:var(--line)}
+.statement-results .merchant-copy b{font-size:11px;color:var(--ink)}
+.statement-results .merchant-copy small{font-size:9px}
+.statement-results .entry-amount{font-size:11px}
+.statement-results .entry-card,.statement-results .entry-type{font-size:10px}
+:root[data-theme="dark"] .statement-section-icon{background:#20372b;color:#8ed6ae}
+:root[data-theme="dark"] .statement-live-indicator i{box-shadow:0 0 0 3px #26ad7230}
+@media(max-width:760px){.statement-workspace{padding:19px}.statement-toolbar{align-items:stretch}.statement-filter-label{min-width:160px}}
+@media(max-width:620px){.statement-page{gap:13px}.statement-welcome{align-items:flex-start;gap:9px}.statement-welcome h1{font-size:26px}.statement-welcome p{font-size:10px;max-width:255px}.statement-add-button{min-height:37px;padding:0 10px;font-size:9px}.statement-workspace{padding:16px;border-radius:16px}.statement-workspace-heading{margin-bottom:16px}.statement-section-icon{width:35px;height:35px}.statement-workspace-heading h2{font-size:13px}.statement-workspace-heading p{font-size:9px;max-width:220px}.statement-live-indicator{font-size:8px;padding:6px 8px}.statement-toolbar{flex-direction:column;gap:9px}.statement-search-box{min-height:41px;width:100%;max-width:none}.statement-filter-label{width:100%;min-width:0}.statement-filter-label select{height:41px}.statement-summary-card{padding:13px;gap:8px}.statement-summary-label{font-size:8px}.statement-summary-card #statementCount{font-size:10px}.statement-summary-total strong{font-size:17px}.statement-results-heading{margin-top:19px}.statement-results-heading h3{font-size:11px}.statement-results-heading>span{font-size:8px}}

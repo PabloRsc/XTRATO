@@ -84,9 +84,21 @@
   <section class="panel-card recent-panel dashboard-recent-panel"><div class="section-heading"><div><span class="dashboard-section-kicker">ATIVIDADE RECENTE</span><h2>Últimos lançamentos</h2><p>Compras agrupadas pela fatura em que serão cobradas</p></div><button class="link-button" data-go="statement">Ver extrato completo <span>→</span></button></div><div id="recentEntries" class="entry-list"><div class="empty-inline">Nenhuma compra cadastrada para este mês.</div></div></section>
 </section>
 
-<section class="page-view hidden" id="page-statement">
-        <div class="page-heading"><div><span class="eyebrow">MOVIMENTAÇÕES</span><h1>Extrato unificado</h1><p>Todas as compras de todos os cartões, organizadas por mês de fatura.</p></div><button class="btn-primary" id="newPurchaseStatement"><span data-icon="plus"></span> Nova compra</button></div>
-        <section class="panel-card statement-panel"><div class="statement-toolbar"><div class="search-box"><span data-icon="search"></span><input id="statementSearch" type="search" placeholder="Buscar compra ou estabelecimento"></div><select id="statementCardFilter"><option value="">Todos os cartões</option></select></div><div class="statement-summary"><span id="statementCount">0 lançamentos</span><strong id="statementTotal">R$ 0,00</strong></div><div id="statementEntries" class="entry-list"><div class="empty-inline">Nenhum lançamento encontrado neste mês.</div></div></section>
+<section class="page-view hidden statement-page" id="page-statement">
+        <div class="statement-welcome">
+          <div><span class="eyebrow">MOVIMENTAÇÕES</span><h1>Seu extrato</h1><p>Encontre compras, acompanhe os valores e entenda para onde seu dinheiro está indo.</p></div>
+          <button class="btn-primary statement-add-button" id="newPurchaseStatement"><span data-icon="plus"></span> Nova compra</button>
+        </div>
+        <section class="panel-card statement-panel statement-workspace">
+          <div class="statement-workspace-heading"><div><span class="statement-section-icon" data-icon="list"></span><div><h2>Todos os lançamentos</h2><p>Movimentações organizadas pelo mês de pagamento da fatura.</p></div></div><span class="statement-live-indicator"><i></i> Atualizado</span></div>
+          <div class="statement-toolbar">
+            <label class="search-box statement-search-box" for="statementSearch"><span data-icon="search"></span><input id="statementSearch" type="search" placeholder="Buscar compra ou estabelecimento" autocomplete="off" aria-label="Buscar compra ou estabelecimento"></label>
+            <label class="statement-filter-label" for="statementCardFilter"><span>Cartão</span><select id="statementCardFilter"><option value="">Todos os cartões</option></select></label>
+          </div>
+          <div class="statement-summary statement-summary-card"><div><span class="statement-summary-label">Lançamentos encontrados</span><span id="statementCount">0 lançamentos</span></div><div class="statement-summary-total"><span class="statement-summary-label">Total líquido no período</span><strong id="statementTotal">R$ 0,00</strong></div></div>
+          <div class="statement-results-heading"><h3>Movimentações do período</h3><span>Compras e créditos</span></div>
+          <div id="statementEntries" class="entry-list statement-results"><div class="empty-inline">Nenhum lançamento encontrado neste mês.</div></div>
+        </section>
       </section>
 
       <section class="page-view hidden" id="page-cards">
