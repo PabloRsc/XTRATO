@@ -131,3 +131,106 @@ def test_recurring_entries_are_created_only_through_end_month_and_are_idempotent
         ]
         assert all(row.amount_cents == 3_990 for row in rows)
     engine.dispose()
+
+
+
+def test_cancel_purchase_preserves_past_history_and_cancels_current_and_future_entries():
+    from app.services.billing import cancel_purchase_entries
+
+    engine = make_db()
+    with Session(engine) as db:
+        user = User(username="owner", password_hash="test")
+        db.add(user)
+        db.flush()
+        card = Card(user_id=user.id, name="Nubank", closing_day=25, due_day=5, color="#247a57")
+        category = Category(user_id=user.id, name="Compras", color="#78a88b", icon="shopping-bag")
+        db.add_all([card, category])
+        db.flush()
+        purchase = Purchase(
+            user_id=user.id,
+            description="Notebook",
+            kind="parcelado",
+            direction="expense",
+            purchase_date=date(2026, 9, 5),
+            card_id=card.id,
+            category_id=category.id,
+            total_cents=100_000,
+            installment_count=4,
+            first_invoice_month=date(2026, 9, 1),
+            current_installment=1,
+            active=True,
+        )
+        db.add(purchase)
+        db.flush()
+        for number, month in enumerate(
+            [date(2026, 9, 1), date(2026, 10, 1), date(2026, 11, 1), date(2026, 12, 1)],
+            start=1,
+        ):
+            db.add(InvoiceEntry(
+                purchase_id=purchase.id,
+                invoice_month=month,
+                installment_number=number,
+                amount_cents=25_000,
+                status="open",
+            ))
+        db.flush()
+
+        cancelled_count = cancel_purchase_entries(purchase, date(2026, 11, 1))
+        db.flush()
+        rows = db.scalars(
+            select(InvoiceEntry).where(InvoiceEntry.purchase_id == purchase.id).order_by(InvoiceEntry.invoice_month)
+        ).all()
+
+        assert cancelled_count == 2
+        assert purchase.active is False
+        assert [row.status for row in rows] == ["open", "open", "cancelled", "cancelled"]
+    engine.dispose()
+
+
+def test_cancelled_recurring_purchase_does_not_generate_more_entries():
+    from app.services.billing import cancel_purchase_entries, ensure_recurring_entries
+
+    engine = make_db()
+    with Session(engine) as db:
+        user = User(username="owner", password_hash="test")
+        db.add(user)
+        db.flush()
+        card = Card(user_id=user.id, name="Inter", closing_day=20, due_day=10, color="#247a57")
+        category = Category(user_id=user.id, name="Assinaturas", color="#78a88b", icon="repeat")
+        db.add_all([card, category])
+        db.flush()
+        purchase = Purchase(
+            user_id=user.id,
+            description="Streaming",
+            kind="recorrente",
+            direction="expense",
+            purchase_date=date(2026, 10, 1),
+            card_id=card.id,
+            category_id=category.id,
+            total_cents=3_990,
+            installment_count=1,
+            first_invoice_month=date(2026, 10, 1),
+            current_installment=1,
+            active=True,
+        )
+        db.add(purchase)
+        db.flush()
+        db.add(InvoiceEntry(
+            purchase_id=purchase.id,
+            invoice_month=date(2026, 10, 1),
+            installment_number=None,
+            amount_cents=3_990,
+            status="historical",
+        ))
+        db.flush()
+
+        cancel_purchase_entries(purchase, date(2026, 11, 1))
+        ensure_recurring_entries(db, user.id, date(2027, 2, 1))
+        db.commit()
+        rows = db.scalars(
+            select(InvoiceEntry).where(InvoiceEntry.purchase_id == purchase.id).order_by(InvoiceEntry.invoice_month)
+        ).all()
+
+        assert len(rows) == 1
+        assert rows[0].status == "historical"
+    engine.dispose()
