@@ -5,15 +5,20 @@ from app.schemas import CardIn, CategoryIn, PasswordChangeIn, PurchaseIn
 
 
 def test_card_name_is_trimmed_and_optional_fields_can_be_empty():
-    card = CardIn(name="  Nubank principal  ", issuer="  Nubank ", brand=" ")
+    card = CardIn(name="  Ultravioleta  ", issuer="  Nubank ", brand=" ", limit_cents=500000, closing_day=25, due_day=5)
     assert card.name == "Nubank principal"
     assert card.issuer == "Nubank"
     assert card.brand == ""
+    assert card.limit_cents == 500000
+    assert card.due_month_offset == 1
 
 
-def test_card_rejects_whitespace_only_name():
+def test_card_name_is_optional_but_bank_is_required():
+    card = CardIn(issuer="Itaú", limit_cents=250000, closing_day=3, due_day=10)
+    assert card.name == ""
+    assert card.due_month_offset == 0
     with pytest.raises(ValidationError):
-        CardIn(name="   ")
+        CardIn(name="Cartão", issuer="   ")
 
 
 def test_category_name_and_icon_are_normalized():
@@ -56,14 +61,14 @@ def test_purchase_rejects_whitespace_only_description():
 
 
 
-def test_card_accepts_both_payment_month_offsets():
-    assert CardIn(name="Nubank", due_month_offset=0).due_month_offset == 0
-    assert CardIn(name="Inter", due_month_offset=1).due_month_offset == 1
+def test_card_accepts_explicit_payment_month_offsets():
+    assert CardIn(name="Nubank", issuer="Nubank", due_month_offset=0).due_month_offset == 0
+    assert CardIn(name="Inter", issuer="Inter", due_month_offset=1).due_month_offset == 1
 
 
 def test_card_rejects_invalid_payment_month_offset():
     with pytest.raises(ValidationError):
-        CardIn(name="Nubank", due_month_offset=2)
+        CardIn(name="Nubank", issuer="Nubank", due_month_offset=2)
 
 
 
