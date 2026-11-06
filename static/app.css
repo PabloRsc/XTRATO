@@ -22,3 +22,28 @@
 .backup-link+.backup-link{margin-top:-6px}
 
 .profile-password{display:block;border:0;background:transparent;padding:2px 0 0;color:var(--green-dark);font-size:9px;font-weight:700;text-align:left}.profile-password:hover{text-decoration:underline}
+
+/* Bank-branded credit cards */
+.field-hint{grid-column:1/-1;margin:-3px 0 2px;color:var(--muted);font-size:10px;line-height:1.5}
+.span-2{grid-column:1/-1}
+.bank-card-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:14px}
+.bank-card-entry{min-width:0;border:1px solid var(--line);border-radius:15px;padding:10px;background:#fff;box-shadow:0 5px 18px rgba(36,59,43,.045)}
+.bank-card-face{min-height:166px;border-radius:11px;padding:15px 16px 13px;background:linear-gradient(135deg,var(--bank-color),color-mix(in srgb,var(--bank-color) 76%,#111));color:var(--bank-ink);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.bank-card-face:after{content:"";position:absolute;width:150px;height:150px;border:1px solid #ffffff2b;border-radius:50%;right:-58px;top:35px;box-shadow:0 0 0 17px #ffffff0d,0 0 0 34px #ffffff08}
+.bank-card-top,.bank-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:1}
+.bank-logo-mark{font-size:15px;font-weight:900;letter-spacing:-.6px;text-transform:lowercase;background:#ffffff24;border:1px solid #ffffff3a;border-radius:7px;padding:5px 8px;max-width:90px;overflow:hidden;text-overflow:ellipsis}
+.bank-card-network{font-size:8px;font-weight:800;letter-spacing:1.2px;opacity:.8}
+.bank-card-bank{font-size:16px;font-weight:800;margin-top:17px;position:relative;z-index:1}
+.bank-card-nickname{font-size:10px;opacity:.82;margin-top:2px;position:relative;z-index:1}
+.bank-card-bottom{margin-top:auto;padding-top:17px}
+.bank-card-bottom span{display:grid;gap:3px;font-size:7px;letter-spacing:.8px;opacity:.8}
+.bank-card-bottom b{font-size:10px;letter-spacing:0;opacity:1}
+.bank-card-details{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;padding:12px 3px 2px}
+.bank-card-details>div:first-child{display:grid;gap:3px}
+.bank-card-details small{font-size:9px;color:var(--muted)}
+.bank-card-details strong{font-size:15px;letter-spacing:-.3px}
+.bank-card-actions{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.bank-card-actions button{border:1px solid var(--line);background:#fff;color:var(--green-dark);border-radius:7px;padding:6px 8px;font-size:9px;font-weight:700}
+.bank-card-actions button:hover{background:var(--green-soft)}
+.bank-card-entry.is-archived .bank-card-face{filter:grayscale(.75);opacity:.72}
+@media(max-width:760px){.bank-card-list{grid-template-columns:1fr}.bank-card-face{min-height:155px}.bank-card-details strong{font-size:14px}}
