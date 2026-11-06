@@ -1,6 +1,6 @@
 # XTRATO — controle pessoal de cartões
 
-Aplicação web pessoal para centralizar compras de vários cartões, acompanhar parcelas por mês de fatura e controlar um orçamento mensal global.
+Aplicação web pessoal para centralizar compras de vários cartões, organizar parcelas pelo mês em que a fatura será paga e controlar um orçamento mensal global.
 
 ## O que esta base já implementa
 
@@ -94,7 +94,7 @@ Guarde os backups fora do servidor e teste a restauração periodicamente. O vol
 
 ## Regras importantes do produto
 
-- O orçamento é calculado pelo mês da fatura, não pelo mês da compra.
+- O orçamento é calculado pelo mês em que a fatura será paga, não pelo mês em que a compra foi realizada.
 - O limite configurado é global e continua valendo nos meses seguintes; uma nova configuração cria uma alteração a partir daquele mês.
 - O limite mensal acompanha o mês em que a fatura será paga, e não apenas o mês em que a compra foi feita.
 - O fechamento e o vencimento do cartão são usados juntos para sugerir o mês de pagamento: compras após o fechamento entram no ciclo seguinte; o dia de vencimento define se o ciclo é pago no mesmo mês do fechamento ou no mês seguinte.
