@@ -108,7 +108,7 @@ Guarde os backups fora do servidor e teste a restauração periodicamente. O vol
 
 ## Segurança da conta
 
-Na barra lateral, a opção **Alterar senha** solicita a senha atual e uma nova senha de pelo menos 12 caracteres. Após a troca, o sistema incrementa a versão de sessão do usuário, encerra o acesso atual e rejeita cookies assinados anteriormente em qualquer navegador. É necessário entrar novamente com a nova senha.
+Na barra lateral, a opção **Alterar senha** solicita a senha atual e uma nova senha de pelo menos 12 caracteres. As tentativas incorretas são limitadas por conta. Após a troca, o sistema incrementa a versão de sessão do usuário, encerra o acesso atual e rejeita cookies assinados anteriormente em qualquer navegador. É necessário entrar novamente com a nova senha.
 
 ## Regras importantes do produto
 
