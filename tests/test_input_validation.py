@@ -148,3 +148,19 @@ def test_end_invoice_month_is_only_allowed_for_recurring_purchases():
     }
     with pytest.raises(ValidationError):
         PurchaseIn(**payload)
+
+
+def test_disabling_ongoing_purchase_cannot_leave_installment_value_mode():
+    payload = {
+        "description": "Compra",
+        "kind": "parcelado",
+        "purchase_date": "2026-11-06",
+        "card_id": 1,
+        "category_id": 1,
+        "amount_cents": 2500,
+        "installment_count": 2,
+        "value_mode": "installment",
+        "ongoing": False,
+    }
+    with pytest.raises(ValidationError):
+        PurchaseIn(**payload)
