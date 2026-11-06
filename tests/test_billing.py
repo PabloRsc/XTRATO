@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base
 from app.models import Card, Category, InvoiceEntry, Purchase, User
-from app.services.billing import add_months, create_invoice_entries, month_from_purchase_date, split_amount
+from app.services.billing import add_months, create_invoice_entries, month_from_purchase_date, query_month_entries, split_amount
 
 
 def make_db():
