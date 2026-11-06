@@ -130,4 +130,7 @@ Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_UR
 - `GET /api/dashboard?month=YYYY-MM`
 - `GET /api/recurrences`
 - `PUT /api/budgets`
+- `GET /api/backup`, `POST /api/backup/restore` (restauração em conta vazia)
+- `GET /api/cards?include_archived=true`, `POST /api/cards/{id}/reactivate`
+- `GET /api/categories?include_archived=true`, `POST /api/categories/{id}/reactivate`
 - `GET /healthz`
