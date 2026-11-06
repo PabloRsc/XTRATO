@@ -44,6 +44,17 @@ def month_from_purchase_date(purchase_date: date, closing_day: int, due_month_of
     return add_months(base, statement_offset + due_month_offset)
 
 
+def signed_entry_amount(amount_cents: int, direction: str) -> int:
+    """Return a purchase as positive spending or a credit as a reduction."""
+    if amount_cents < 0:
+        raise ValueError("O valor do lançamento não pode ser negativo.")
+    if direction == "expense":
+        return amount_cents
+    if direction == "credit":
+        return -amount_cents
+    raise ValueError("Tipo de movimentação inválido.")
+
+
 def split_amount(total_cents: int, parts: int) -> list[int]:
     """Split integer cents exactly; any remainder is placed in the final installment."""
     base, remainder = divmod(total_cents, parts)
