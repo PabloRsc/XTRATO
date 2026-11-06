@@ -495,3 +495,44 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
 :root[data-theme="dark"] .managed-actions button{background:var(--surface);border-color:var(--line);color:var(--muted)}
 @media(max-width:850px){.categories-management-grid{grid-template-columns:1fr}}
 @media(max-width:620px){.categories-page-heading{align-items:flex-start;flex-direction:column}.categories-page-note{font-size:8px}.categories-overview-strip{gap:7px}.categories-overview-strip>div{padding:12px 10px;border-radius:12px}.categories-overview-strip>div span{font-size:8px;line-height:1.3}.categories-overview-strip>div strong{font-size:16px}.categories-overview-strip>div:last-child strong{font-size:12px}.management-form,.management-list{padding:16px;border-radius:16px}.managed-item{gap:9px;padding:10px}.managed-color{width:36px;height:36px;flex-basis:36px}.managed-actions{gap:4px}.managed-actions button{padding:6px 7px;font-size:8px}}
+
+/* Recurring expenses redesign */
+.recurrences-page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.recurrences-page-heading>div{max-width:680px}
+.recurrences-page-heading h1{font-size:clamp(28px,3vw,36px);font-weight:820;letter-spacing:-1.3px}
+.recurrences-page-heading p{line-height:1.65;max-width:620px}
+.recurrences-page-heading>.btn-primary{min-height:43px;border-radius:12px;padding:0 16px;font-size:11px;font-weight:750;white-space:nowrap}
+.recurrences-overview-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.recurrences-overview-strip>div{display:grid;gap:7px;padding:15px 18px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,var(--surface),var(--surface-2));box-shadow:0 5px 18px #183d2910}
+.recurrences-overview-strip>div span{font-size:9px;color:var(--muted);font-weight:650}
+.recurrences-overview-strip>div strong{font-size:20px;letter-spacing:-.65px;color:var(--ink)}
+.recurrences-overview-strip>div:nth-child(2) strong{color:var(--green-dark)}
+.recurrences-panel{padding:23px;border:1px solid var(--line);border-radius:19px;background:var(--surface);box-shadow:var(--shadow)}
+.recurrences-list-heading{align-items:flex-end;margin-bottom:18px}
+.recurrences-list-heading .dashboard-section-kicker{display:block;margin-bottom:6px}
+.recurrences-list-heading h2{font-size:17px;letter-spacing:-.4px}
+.recurrences-list-heading p{max-width:600px;line-height:1.6}
+.recurrences-list-caption{font-size:9px;color:var(--muted);white-space:nowrap}
+.recurrences-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.recurrence-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);transition:transform .16s,border-color .16s}
+.recurrence-entry:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--green) 42%,var(--line))}
+.recurrence-entry .merchant{min-width:0}
+.recurrence-entry .merchant-symbol{width:39px;height:39px;flex-basis:39px;border-radius:12px}
+.recurrence-entry .merchant-copy b{font-size:11px;color:var(--ink)}
+.recurrence-entry .merchant-copy small{font-size:9px;line-height:1.5}
+.recurrence-entry .entry-card{grid-column:1;grid-row:2;margin-left:51px;font-size:9px;color:var(--muted)}
+.recurrence-entry .entry-type{grid-column:1;grid-row:3;margin-left:51px}
+.recurrence-entry .entry-type span{background:var(--green-soft);color:var(--green-dark);font-size:8px;font-weight:700}
+.recurrence-entry .entry-amount{grid-column:2;grid-row:1;text-align:right;font-size:14px;color:var(--ink);white-space:nowrap}
+.recurrence-entry .entry-amount small{font-size:8px;margin-top:5px}
+.recurrence-entry .entry-actions{grid-column:2;grid-row:2 / span 2;align-self:end;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.recurrence-entry .mini-action{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface);font-size:8px;font-weight:700}
+.recurrence-entry .mini-action:hover{border-color:var(--green);background:var(--green-soft);color:var(--green-dark)}
+.recurrence-entry.is-archived{opacity:.68}
+:root[data-theme="dark"] .recurrences-overview-strip>div{background:linear-gradient(145deg,#17251e,#121b17);box-shadow:0 7px 20px #0002}
+:root[data-theme="dark"] .recurrences-overview-strip>div:nth-child(2) strong{color:#7ce5b1}
+:root[data-theme="dark"] .recurrences-panel{background:var(--surface);border-color:var(--line)}
+:root[data-theme="dark"] .recurrence-entry{background:var(--surface-2);border-color:var(--line)}
+:root[data-theme="dark"] .recurrence-entry .mini-action{background:var(--surface);border-color:var(--line);color:var(--muted)}
+@media(max-width:760px){.recurrences-list{grid-template-columns:1fr}}
+@media(max-width:620px){.recurrences-page-heading{align-items:flex-start;flex-direction:column}.recurrences-page-heading>.btn-primary{width:100%;justify-content:center}.recurrences-overview-strip{gap:7px}.recurrences-overview-strip>div{padding:12px 10px;border-radius:12px}.recurrences-overview-strip>div span{font-size:8px;line-height:1.3}.recurrences-overview-strip>div strong{font-size:16px}.recurrences-overview-strip>div:nth-child(2) strong{font-size:13px}.recurrences-panel{padding:16px;border-radius:16px}.recurrences-list-heading{align-items:flex-start}.recurrences-list-caption{display:none}.recurrence-entry{padding:11px;gap:8px}.recurrence-entry .entry-amount{font-size:12px}}
