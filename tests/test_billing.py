@@ -30,9 +30,14 @@ def test_month_arithmetic_crosses_year_boundary():
     assert add_months(date(2027, 1, 1), -2) == date(2026, 11, 1)
 
 
-def test_card_closing_day_suggests_invoice_month():
-    assert month_from_purchase_date(date(2026, 11, 20), 25) == date(2026, 11, 1)
-    assert month_from_purchase_date(date(2026, 11, 28), 25) == date(2026, 12, 1)
+def test_card_closing_and_due_days_suggest_payment_month():
+    # Closing on day 25 and paying on day 5: November statement is paid in December.
+    assert month_from_purchase_date(date(2026, 11, 20), 25, 5) == date(2026, 12, 1)
+    # A purchase after closing enters the next statement and is paid in January.
+    assert month_from_purchase_date(date(2026, 11, 28), 25, 5) == date(2027, 1, 1)
+    # If the due day is later than closing, payment is in the closing month.
+    assert month_from_purchase_date(date(2026, 11, 3), 5, 20) == date(2026, 11, 1)
+    assert month_from_purchase_date(date(2026, 11, 8), 5, 20) == date(2026, 12, 1)
 
 
 def test_ongoing_installment_keeps_previous_entries_as_history():
