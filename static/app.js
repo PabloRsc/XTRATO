@@ -519,14 +519,67 @@
     } catch (error) { $('#budgetError').textContent = error.message; }
   }
 
+  function parseMoneyInput(value) {
+    const raw = String(value ?? '').trim().replace(/R\\$/gi, '').replace(/\\s/g, '');
+    if (!raw) return 0;
+    const normalized = raw.includes(',') ? raw.replace(/\\./g, '').replace(',', '.') : raw;
+    const amount = Number(normalized);
+    return Number.isFinite(amount) && amount >= 0 ? amount : NaN;
+  }
+  function formatMoneyInput(value) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
+  }
+  function setSelectedBank(issuer) {
+    const input = $('#cardIssuer');
+    const picker = $('#bankPicker');
+    let choice = [...picker.querySelectorAll('[data-bank]')].find(item => item.dataset.bank === issuer);
+    if (!choice && issuer) {
+      choice = document.createElement('button');
+      choice.type = 'button';
+      choice.className = 'bank-choice';
+      choice.dataset.bank = issuer;
+      choice.innerHTML = '<span class="bank-choice-mark"></span><b></b>';
+      choice.querySelector('.bank-choice-mark').textContent = bankTheme(issuer).mark;
+      choice.querySelector('b').textContent = issuer;
+      picker.insertBefore(choice, picker.lastElementChild);
+      choice.addEventListener('click', () => { setSelectedBank(issuer); updateCardPreview(); });
+    }
+    input.value = issuer || '';
+    picker.querySelectorAll('[data-bank]').forEach(item => {
+      const selected = item.dataset.bank === issuer;
+      item.classList.toggle('is-selected', selected);
+      item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    updateCardPreview();
+  }
+  function updateCardPreview() {
+    const form = $('#cardForm');
+    if (!form) return;
+    const issuer = form.elements.issuer.value || 'Nubank';
+    const theme = bankTheme(issuer);
+    const amount = parseMoneyInput(form.elements.limit.value);
+    const nickname = form.elements.name.value.trim() || (issuer === 'Outro' ? 'Cartão de crédito' : issuer + ' principal');
+    $('#previewCardFace').style.setProperty('--preview-color', theme.color);
+    $('#previewCardFace').style.setProperty('--preview-ink', theme.ink);
+    $('#previewBankMark').textContent = theme.mark;
+    $('#previewBankName').textContent = issuer;
+    $('#previewCardName').textContent = nickname;
+    $('#previewCardLimit').textContent = Number.isFinite(amount) ? formatMoneyInput(amount) : '—';
+    $('#previewLimitFact').textContent = Number.isFinite(amount) ? formatMoneyInput(amount) : '—';
+    $('#previewClosingDay').textContent = form.elements.closing_day.value || '—';
+    $('#previewDueDay').textContent = form.elements.due_day.value || '—';
+  }
   function startEditCard(id) {
     const card = state.cards.find(item => item.id === id);
     if (!card) return;
     state.editingCardId = id;
     const form = $('#cardForm');
-    for (const key of ['name', 'issuer', 'closing_day', 'due_day']) form.elements[key].value = card[key] ?? '';
-    form.elements.limit.value = ((card.limit_cents || 0) / 100).toFixed(2);
-    $('#cardFormTitle').textContent = 'Editar cartão';
+    form.elements.name.value = card.name === card.issuer ? '' : (card.name || '');
+    form.elements.limit.value = ((card.limit_cents || 0) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    form.elements.closing_day.value = card.closing_day ?? 3;
+    form.elements.due_day.value = card.due_day ?? 10;
+    setSelectedBank(card.issuer || 'Outro');
+    $('#cardFormTitle').textContent = 'Editar instituição';
     $('#cardFormSubmit').textContent = 'Salvar alterações';
     $('#cancelCardEdit').classList.remove('hidden');
     $('#cardFormMessage').textContent = 'Alterar fechamento ou vencimento afeta apenas sugestões de novas compras.';
@@ -537,22 +590,25 @@
     state.editingCardId = null;
     const form = $('#cardForm');
     form.reset();
-    form.elements.issuer.value = '';
-    form.elements.closing_day.value = 25;
-    form.elements.due_day.value = 5;
-    form.elements.limit.value = '';
-    $('#cardFormTitle').textContent = 'Adicionar cartão';
-    $('#cardFormSubmit').textContent = 'Salvar cartão';
+    form.elements.closing_day.value = 3;
+    form.elements.due_day.value = 10;
+    setSelectedBank('Nubank');
+    $('#cardFormTitle').textContent = 'Instituição';
+    $('#cardFormSubmit').textContent = '✓　Salvar cartão';
     $('#cancelCardEdit').classList.add('hidden');
     $('#cardFormMessage').textContent = '';
+    updateCardPreview();
   }
   async function submitCard(event) {
     event.preventDefault();
     const form = event.currentTarget;
     const fd = new FormData(form);
-    const issuer = fd.get('issuer').trim();
+    const issuer = String(fd.get('issuer') || '').trim();
+    const limit = parseMoneyInput(fd.get('limit'));
+    if (!issuer) { $('#cardFormMessage').textContent = 'Escolha o banco do cartão.'; return; }
+    if (!Number.isFinite(limit)) { $('#cardFormMessage').textContent = 'Informe um limite válido.'; return; }
     const theme = bankTheme(issuer);
-    const payload = { name: fd.get('name').trim(), issuer, limit_cents: Math.round(Number(fd.get('limit')) * 100), brand: '', last_four: null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), color: theme.color };
+    const payload = { name: String(fd.get('name') || '').trim(), issuer, limit_cents: Math.round(limit * 100), brand: '', last_four: null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), color: theme.color };
     try {
       const editing = state.editingCardId;
       await api(editing ? `/api/cards/${editing}` : '/api/cards', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
@@ -635,6 +691,9 @@
     $('#purchaseForm').addEventListener('submit', submitPurchase);
     $('#budgetForm').addEventListener('submit', submitBudget);
     $('#cardForm').addEventListener('submit', submitCard);
+    $('#bankPicker').querySelectorAll('[data-bank]').forEach(button => button.addEventListener('click', () => setSelectedBank(button.dataset.bank)));
+    ['name', 'limit', 'closing_day', 'due_day'].forEach(key => $('#cardForm').elements[key].addEventListener('input', updateCardPreview));
+    setSelectedBank('Nubank');
     $('#categoryForm').addEventListener('submit', submitCategory);
     $('#cancelCardEdit').addEventListener('click', resetCardEditor);
     $('#cancelCategoryEdit').addEventListener('click', resetCategoryEditor);
