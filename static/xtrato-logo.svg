@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" role="img" aria-labelledby="title desc">
+<title id="title">XTRATO</title><desc id="desc">Marca XTRATO com símbolo de crescimento financeiro e seta ascendente.</desc>
+<defs>
+ <linearGradient id="green" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#079b72"/><stop offset=".52" stop-color="#18d985"/><stop offset="1" stop-color="#65f57c"/></linearGradient>
+ <linearGradient id="green2" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#087b62"/><stop offset="1" stop-color="#39e78b"/></linearGradient>
+</defs>
+<g transform="translate(10 10)">
+ <path d="M20 55h72l155 220h-75L20 55Z" fill="url(#green2)"/>
+ <path d="M247 55h-72L20 275h75L247 55Z" fill="url(#green)"/>
+ <path d="M42 248 101 163l38 44 51-70 39 46 76-105 34 25-103 144-41-48-53 73-39-44-38 55Z" fill="url(#green)"/>
+ <path d="m193 138 110-112-7 72-27-22-88 94Z" fill="url(#green)"/>
+ <path d="M118 92h22v57h-22zM156 47h22v80h-22z" fill="url(#green)"/>
+ <path d="m66 95 28 13-17 5 13 20-14 9-13-21-8 14Z" fill="#071b17"/>
+ <path d="m184 208 24 14-15 4 13 19-14 9-13-20-8 13Z" fill="#071b17"/>
+</g>
+<g font-family="Arial,Helvetica,sans-serif" font-weight="800" letter-spacing="2">
+ <text x="350" y="207" font-size="148" fill="url(#green)">X</text>
+ <text x="462" y="207" font-size="148" fill="#17241e">TRATO</text>
+</g>
+</svg>
