@@ -48,15 +48,9 @@ async def lifespan(app: FastAPI):
             for name, color, icon in DEFAULT_CATEGORIES:
                 db.add(Category(user_id=user.id, name=name, color=color, icon=icon))
             db.commit()
-        else:
-            # Seed only missing defaults for the existing owner; custom categories remain untouched.
-            users = db.scalars(select(User)).all()
-            for user in users:
-                existing = set(db.scalars(select(Category.name).where(Category.user_id == user.id)).all())
-                for name, color, icon in DEFAULT_CATEGORIES:
-                    if name not in existing:
-                        db.add(Category(user_id=user.id, name=name, color=color, icon=icon))
-            db.commit()
+        # Do not seed categories for existing accounts on restart. In particular,
+        # a backup restore must remain exact; re-adding defaults here would mutate
+        # the restored category collection after the next deployment/restart.
     yield
 
 

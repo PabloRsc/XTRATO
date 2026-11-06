@@ -4,6 +4,8 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 ## O que esta base já implementa
 
+A auditoria técnica e os critérios de aceite para produção estão documentados em [`docs/AUDITORIA_TECNICA_2026-11-06.md`](docs/AUDITORIA_TECNICA_2026-11-06.md).
+
 - Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
 - Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento, vencimento e escolha do mês de pagamento (mesmo mês ou mês seguinte).
@@ -56,14 +58,15 @@ A aplicação já inclui um perfil opcional com Caddy para terminar TLS automati
 1. Aponte um domínio/subdomínio para o IP do servidor (registros DNS A/AAAA).
 2. No `.env`, defina `DOMAIN=seu-dominio.com`, `APP_ENV=production`, `COOKIE_SECURE=true` e `APP_TIMEZONE=America/Sao_Paulo`. A aplicação se recusará a iniciar em produção sem HTTPS/cookie seguro, sem um segredo de sessão único com pelo menos 32 caracteres ou com uma senha inicial fraca.
 3. Gere um segredo longo para `APP_SECRET_KEY` (`openssl rand -hex 32`) e senhas fortes e únicas para o PostgreSQL e para o usuário. Para `POSTGRES_PASSWORD`, mantenha o formato hexadecimal gerado com `openssl rand -hex 24`.
-4. Libere as portas TCP 80 e 443 (e UDP 443, opcional para HTTP/3) no firewall do servidor.
-5. Execute:
+4. Configure `FORWARDED_ALLOW_IPS` com o IP/CIDR confiável do proxy reverso. No Docker Compose local com a rede bridge padrão, o exemplo usa `172.16.0.0/12,127.0.0.1,::1`; em plataformas gerenciadas, substitua pelo intervalo publicado pelo provedor. Nunca use `*` em produção: isso permitiria que clientes falsificassem cabeçalhos encaminhados e contornassem limites por IP.
+5. Libere as portas TCP 80 e 443 (e UDP 443, opcional para HTTP/3) no firewall do servidor.
+6. Execute:
 
 ```bash
 docker compose --profile proxy up -d --build
 ```
 
-6. Acesse `https://seu-dominio.com`.
+7. Acesse `https://seu-dominio.com`.
 
 Não publique o app sem HTTPS. Em produção, mantenha o acesso à porta interna da aplicação restrito e use o Caddy ou outro proxy HTTPS.
 
@@ -79,7 +82,7 @@ A imagem Docker aceita a variável `PORT` definida pela plataforma de hospedagem
 
 Não use SQLite nem armazenamento local efêmero para produção. Em camadas gratuitas, confirme antes os limites de suspensão, memória, horas de execução, armazenamento, backups, limites de conexão e eventual expiração do banco. Uma aplicação que “hospeda grátis” mas apaga o banco ou o disco não é adequada para guardar seu histórico financeiro.
 
-A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo` e a variável `PORT` fornecida pelo ambiente. Na primeira inicialização de um banco vazio, defina também `INITIAL_ADMIN_USERNAME` e `INITIAL_ADMIN_PASSWORD`; depois de criar a conta e confirmar o acesso, essas duas variáveis podem ser removidas. Use HTTPS na plataforma e não coloque segredos no GitHub.
+A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo`, `FORWARDED_ALLOW_IPS` configurado apenas para os proxies confiáveis e a variável `PORT` fornecida pelo ambiente. Na primeira inicialização de um banco vazio, defina também `INITIAL_ADMIN_USERNAME` e `INITIAL_ADMIN_PASSWORD`; depois de criar a conta e confirmar o acesso, essas duas variáveis podem ser removidas. Use HTTPS na plataforma e não coloque segredos no GitHub.
 
 ## Backup pessoal
 
