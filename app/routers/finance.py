@@ -257,6 +257,7 @@ def list_recurrences(request: Request, db: Session = Depends(get_db)):
         "amount_cents": p.total_cents,
         "card_name": c.name,
         "category_name": cat.name,
+        "notes": p.notes,
         "first_invoice_month": p.first_invoice_month.strftime("%Y-%m"),
         "end_invoice_month": p.end_invoice_month.strftime("%Y-%m") if p.end_invoice_month else None,
         "active": p.active,
