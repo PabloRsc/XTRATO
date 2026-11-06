@@ -787,7 +787,7 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
 
 
 /* XTRATO visual rebuild — phase 1: financial home and forecast */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700&display=swap');
+
 :root{
  --bg:#f1f3ee;--surface:#fbfcf9;--surface-2:#e7ebe3;--ink:#13211a;--muted:#62736a;
  --line:#d9dfd6;--green:#1d6b49;--green-dark:#0f3a29;--green-soft:#e4eee5;
