@@ -1,26 +1,25 @@
-# Environment files and secrets
+# Secrets and local environment files
 .env
 .env.*
 !.env.example
 
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-.venv/
-venv/
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Local databases and backups
+# Local databases and financial backups
 *.db
 *.sqlite
 *.sqlite3
 backup-*.sql
+backup-*.json
+xtrato-backup-*.json
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
 
 # Editors and operating systems
-.vscode/
-.idea/
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/

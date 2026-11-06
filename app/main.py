@@ -59,6 +59,84 @@ async def lifespan(app: FastAPI):
     yield
 
 
+MAX_BACKUP_UPLOAD_BYTES = 10 * 1024 * 1024
+
+
+class BackupRestoreSizeLimitMiddleware:
+    def __init__(self, app, max_bytes: int = MAX_BACKUP_UPLOAD_BYTES):
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if (
+            scope["type"] != "http"
+            or scope.get("path") != "/api/backup/restore"
+            or scope.get("method") != "POST"
+        ):
+            await self.app(scope, receive, send)
+            return
+
+        headers = dict(scope.get("headers", []))
+        raw_length = headers.get(b"content-length")
+        if raw_length is not None:
+            try:
+                declared_length = int(raw_length.decode("ascii"))
+            except (UnicodeDecodeError, ValueError):
+                response = JSONResponse(
+                    {"detail": "Cabeçalho de tamanho da requisição inválido."},
+                    status_code=400,
+                )
+                await response(scope, receive, send)
+                return
+            if declared_length < 0:
+                response = JSONResponse(
+                    {"detail": "Cabeçalho de tamanho da requisição inválido."},
+                    status_code=400,
+                )
+                await response(scope, receive, send)
+                return
+            if declared_length > self.max_bytes:
+                response = JSONResponse(
+                    {"detail": "O arquivo de backup excede o limite de 10 MB."},
+                    status_code=413,
+                )
+                await response(scope, receive, send)
+                return
+
+        # Buffer only up to the configured cap, then replay the bounded body
+        # to FastAPI. This also enforces the limit when Content-Length is absent.
+        buffered_messages = []
+        received_bytes = 0
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                buffered_messages.append(message)
+                break
+            if message["type"] != "http.request":
+                buffered_messages.append(message)
+                break
+
+            received_bytes += len(message.get("body", b""))
+            if received_bytes > self.max_bytes:
+                response = JSONResponse(
+                    {"detail": "O arquivo de backup excede o limite de 10 MB."},
+                    status_code=413,
+                )
+                await response(scope, receive, send)
+                return
+
+            buffered_messages.append(message)
+            if not message.get("more_body", False):
+                break
+
+        async def replay_receive():
+            if buffered_messages:
+                return buffered_messages.pop(0)
+            return await receive()
+
+        await self.app(scope, replay_receive, send)
+
+
 app = FastAPI(
     title="XTRATO",
     description="Controle pessoal de gastos em cartões de crédito.",
@@ -67,6 +145,10 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
     openapi_url=None,
+)
+app.add_middleware(
+    BackupRestoreSizeLimitMiddleware,
+    max_bytes=MAX_BACKUP_UPLOAD_BYTES,
 )
 app.add_middleware(
     SessionMiddleware,
@@ -78,26 +160,37 @@ app.add_middleware(
 )
 
 
+def private_api_error(detail: str, status_code: int) -> JSONResponse:
+    response = JSONResponse({"detail": detail}, status_code=status_code)
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Vary"] = "Cookie"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    if COOKIE_SECURE:
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+
 @app.middleware("http")
 async def protect_mutations(request: Request, call_next):
     if request.url.path.startswith("/api/") and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
-        if request.url.path == "/api/backup/restore":
-            content_length = request.headers.get("content-length")
-            if content_length:
-                try:
-                    if int(content_length) > 10 * 1024 * 1024:
-                        return JSONResponse({"detail": "O arquivo de backup excede o limite de 10 MB."}, status_code=413)
-                except ValueError:
-                    return JSONResponse({"detail": "Cabeçalho de tamanho da requisição inválido."}, status_code=400)
         if request.headers.get("x-xtrato-request") != "1":
-            return JSONResponse({"detail": "Requisição não autorizada."}, status_code=403)
+            return private_api_error("Requisição não autorizada.", 403)
         origin = request.headers.get("origin")
         host = request.headers.get("host", "").lower()
         if origin:
             from urllib.parse import urlparse
             if (urlparse(origin).netloc or "").lower() != host:
-                return JSONResponse({"detail": "Origem não autorizada."}, status_code=403)
+                return private_api_error("Origem não autorizada.", 403)
     response = await call_next(request)
+    if request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Vary"] = "Cookie"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"

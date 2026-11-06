@@ -106,10 +106,6 @@ docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"' < back
 
 Guarde os backups fora do servidor e teste a restauração periodicamente. O volume sozinho não substitui backup.
 
-## Segurança da conta
-
-Na barra lateral, a opção **Alterar senha** solicita a senha atual e uma nova senha de pelo menos 12 caracteres. As tentativas incorretas são limitadas por conta. Após a troca, o sistema incrementa a versão de sessão do usuário, encerra o acesso atual e rejeita cookies assinados anteriormente em qualquer navegador. É necessário entrar novamente com a nova senha.
-
 ## Regras importantes do produto
 
 - O limite mensal global é calculado pelo mês em que a fatura será paga, não pelo mês em que a compra foi realizada.
