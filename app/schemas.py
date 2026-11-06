@@ -143,6 +143,19 @@ class BackupCardIn(BaseModel):
     color: str = Field(pattern=r"^#[0-9A-Fa-f]{6}$")
     active: bool
 
+    @field_validator("name")
+    @classmethod
+    def normalize_backup_card_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("O nome do cartão no backup não pode ficar vazio.")
+        return value
+
+    @field_validator("issuer", "brand")
+    @classmethod
+    def normalize_backup_card_optional_text(cls, value: str) -> str:
+        return value.strip()
+
 
 class BackupCategoryIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -151,6 +164,14 @@ class BackupCategoryIn(BaseModel):
     color: str = Field(pattern=r"^#[0-9A-Fa-f]{6}$")
     icon: str = Field(max_length=30)
     active: bool
+
+    @field_validator("name", "icon")
+    @classmethod
+    def normalize_backup_category_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Nome e ícone da categoria no backup não podem ficar vazios.")
+        return value
 
 
 class BackupBudgetIn(BaseModel):
@@ -187,6 +208,19 @@ class BackupPurchaseIn(BaseModel):
     @field_validator("description", "notes")
     @classmethod
     def normalize_backup_purchase_text(cls, value: str) -> str:
+        return value.strip()
+
+    @field_validator("description")
+    @classmethod
+    def require_backup_purchase_description(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("A descrição da compra no backup não pode ficar vazia.")
+        return value
+
+    @field_validator("notes")
+    @classmethod
+    def normalize_backup_purchase_notes(cls, value: str) -> str:
         return value.strip()
 
     @model_validator(mode="after")
