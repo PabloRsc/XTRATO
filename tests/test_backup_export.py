@@ -57,6 +57,7 @@ def test_backup_contains_financial_history_and_excludes_password_hash():
         assert payload["version"] == 1
         assert payload["account"] == {"username": "owner"}
         assert payload["cards"][0]["active"] is False
+        assert payload["cards"][0]["due_month_offset"] == 1
         assert payload["purchases"][0]["description"] == "Notebook"
         assert payload["invoice_entries"][0]["installment_number"] == 3
         assert payload["budgets"][0]["limit_cents"] == 100_000
