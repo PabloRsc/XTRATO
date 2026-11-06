@@ -128,10 +128,19 @@ def restore_user_backup(db: Session, user: User, payload) -> dict:
 
     from app.models import Budget, Card, Category, InvoiceEntry, Purchase
 
+    # Serialize restore attempts for this account. PostgreSQL holds this row lock
+    # until the surrounding request transaction commits or rolls back, so a
+    # concurrent restore must re-check the account after the first one finishes.
+    locked_user = db.scalar(
+        select(User).where(User.id == user.id).with_for_update()
+    )
+    if locked_user is None:
+        raise ValueError("A conta de destino não está mais disponível.")
+
     has_financial_data = any([
-        db.scalar(select(func.count()).select_from(Card).where(Card.user_id == user.id)),
-        db.scalar(select(func.count()).select_from(Budget).where(Budget.user_id == user.id)),
-        db.scalar(select(func.count()).select_from(Purchase).where(Purchase.user_id == user.id)),
+        db.scalar(select(func.count()).select_from(Card).where(Card.user_id == locked_user.id)),
+        db.scalar(select(func.count()).select_from(Budget).where(Budget.user_id == locked_user.id)),
+        db.scalar(select(func.count()).select_from(Purchase).where(Purchase.user_id == locked_user.id)),
     ])
     if has_financial_data:
         raise ValueError(
