@@ -153,3 +153,26 @@ jobs:
             -d '{"username":"ci-admin","password":"ci-test-new-strong-password"}' \
             http://127.0.0.1:8000/api/auth/login)"
           echo "$new_login_response" | grep -q '"username":"ci-admin"'
+
+          # Bootstrap credentials are needed only while the database is empty.
+          docker compose stop app
+          unset INITIAL_ADMIN_USERNAME INITIAL_ADMIN_PASSWORD
+          docker compose up -d app
+
+          ready_after_restart=0
+          for attempt in $(seq 1 45); do
+            if curl --fail --silent http://127.0.0.1:8000/healthz >/dev/null; then
+              ready_after_restart=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready_after_restart" -ne 1 ]; then
+            docker compose logs --no-color app db
+            exit 1
+          fi
+
+          session_after_restart="$(curl --fail --silent --show-error \
+            -b cookies.txt \
+            http://127.0.0.1:8000/api/auth/me)"
+          echo "$session_after_restart" | grep -q '"username":"ci-admin"'
