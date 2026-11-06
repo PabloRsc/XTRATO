@@ -393,3 +393,66 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
 :root[data-theme="dark"] .statement-live-indicator i{box-shadow:0 0 0 3px #26ad7230}
 @media(max-width:760px){.statement-workspace{padding:19px}.statement-toolbar{align-items:stretch}.statement-filter-label{min-width:160px}}
 @media(max-width:620px){.statement-page{gap:13px}.statement-welcome{align-items:flex-start;gap:9px}.statement-welcome h1{font-size:26px}.statement-welcome p{font-size:10px;max-width:255px}.statement-add-button{min-height:37px;padding:0 10px;font-size:9px}.statement-workspace{padding:16px;border-radius:16px}.statement-workspace-heading{margin-bottom:16px}.statement-section-icon{width:35px;height:35px}.statement-workspace-heading h2{font-size:13px}.statement-workspace-heading p{font-size:9px;max-width:220px}.statement-live-indicator{font-size:8px;padding:6px 8px}.statement-toolbar{flex-direction:column;gap:9px}.statement-search-box{min-height:41px;width:100%;max-width:none}.statement-filter-label{width:100%;min-width:0}.statement-filter-label select{height:41px}.statement-summary-card{padding:13px;gap:8px}.statement-summary-label{font-size:8px}.statement-summary-card #statementCount{font-size:10px}.statement-summary-total strong{font-size:17px}.statement-results-heading{margin-top:19px}.statement-results-heading h3{font-size:11px}.statement-results-heading>span{font-size:8px}}
+
+/* Cards portfolio redesign — summary, registration and wallet hierarchy */
+.cards-page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.cards-page-heading>div{max-width:660px}
+.cards-page-heading h1{font-size:clamp(28px,3vw,36px);letter-spacing:-1.3px;font-weight:820}
+.cards-page-heading p{max-width:600px;line-height:1.65}
+.cards-page-note{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:30px;background:var(--surface);color:var(--muted);font-size:9px;white-space:nowrap}
+.cards-page-note svg{width:15px;height:15px;color:var(--green)}
+.cards-overview-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cards-overview-strip>div{display:grid;gap:7px;padding:15px 18px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,var(--surface),var(--surface-2));box-shadow:0 5px 18px #183d2910}
+.cards-overview-strip>div span{font-size:9px;color:var(--muted);font-weight:650}
+.cards-overview-strip>div strong{font-size:20px;letter-spacing:-.65px;color:var(--ink)}
+.cards-overview-strip>div:nth-child(2) strong{color:var(--green-dark)}
+.card-registration-layout{grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);gap:17px}
+.card-registration-form,.card-preview-panel,.card-registered-panel{border-radius:19px;box-shadow:var(--shadow)}
+.card-registration-form{padding:23px}
+.card-registration-form .section-heading h2{font-size:16px}
+.card-registration-form .section-heading p{line-height:1.55}
+.card-registration-fields{gap:14px}
+.bank-picker{max-height:340px;overflow:auto;padding:4px 3px 7px;scrollbar-width:thin;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.bank-choice{min-height:91px;border-radius:14px;background:var(--surface-2);border-color:var(--line);gap:8px}
+.bank-choice:hover{background:var(--surface-3);border-color:var(--green)}
+.bank-choice-mark{width:43px;height:43px;border-radius:13px}
+.bank-choice b{font-size:10px}
+.card-preview-column{position:static;align-self:start}
+.card-preview-panel{padding:22px;border-radius:19px}
+.card-live-preview{gap:12px}
+.preview-card-face{min-height:210px;padding:23px;border-radius:18px;box-shadow:0 16px 32px #14291e28,inset 0 1px #ffffff55}
+.preview-card-face>strong{font-size:19px;letter-spacing:-.4px}
+.preview-card-facts>div{min-height:49px;background:var(--surface-2);border-color:var(--line);padding:0 14px}
+.preview-card-facts>div span{color:var(--muted)}
+.card-registered-panel{padding:23px;grid-column:1/-1}
+.cards-list-heading{align-items:flex-end}
+.cards-list-heading .dashboard-section-kicker{margin-bottom:6px}
+.cards-list-heading h2{font-size:17px;letter-spacing:-.4px}
+.cards-list-heading p{max-width:560px;line-height:1.55}
+.cards-list-caption{font-size:9px;color:var(--muted);padding-bottom:2px}
+.bank-card-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr));gap:17px}
+.bank-card-entry{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:10px;box-shadow:0 8px 24px #183d2910;transition:transform .18s,box-shadow .18s}
+.bank-card-entry:hover{transform:translateY(-2px);box-shadow:0 14px 30px #183d2918}
+.bank-card-face{min-height:195px;border-radius:14px;padding:17px 18px;box-shadow:inset 0 1px #ffffff55,0 8px 17px #11182718}
+.bank-card-bank{font-size:16px;letter-spacing:-.3px}
+.bank-card-nickname{font-size:11px}
+.bank-card-bottom{padding-top:13px}
+.bank-card-bottom span{font-size:8px;letter-spacing:.8px}
+.bank-card-details{padding:13px 5px 3px}
+.bank-card-details>div:first-child{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.bank-card-details small{font-size:9px;color:var(--muted)}
+.bank-card-details strong{font-size:16px;color:var(--ink);letter-spacing:-.4px}
+.bank-card-actions button{border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:var(--surface-2);color:var(--muted);font-size:9px;font-weight:700}
+.bank-card-actions button:hover{background:var(--green-soft);color:var(--green-dark);border-color:var(--green)}
+.bank-card-entry.is-archived{opacity:.76}
+:root[data-theme="dark"] .cards-overview-strip>div{background:linear-gradient(145deg,#17251e,#121b17);box-shadow:0 7px 20px #0002}
+:root[data-theme="dark"] .cards-overview-strip>div strong{color:var(--ink)}
+:root[data-theme="dark"] .cards-overview-strip>div:nth-child(2) strong{color:#7ce5b1}
+:root[data-theme="dark"] .bank-choice{background:var(--surface-2);border-color:var(--line)}
+:root[data-theme="dark"] .bank-choice:hover{background:var(--surface-3)}
+:root[data-theme="dark"] .bank-choice.is-selected{background:var(--green-soft);border-color:var(--green)}
+:root[data-theme="dark"] .preview-card-facts>div{background:var(--surface-2);border-color:var(--line)}
+:root[data-theme="dark"] .bank-card-entry{background:var(--surface);border-color:var(--line);box-shadow:0 8px 24px #0003}
+@media(max-width:1050px){.card-registration-layout{grid-template-columns:minmax(0,1fr) minmax(270px,.85fr)}.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.cards-page-heading{align-items:flex-start;flex-direction:column}.cards-page-note{font-size:8px}.card-registration-layout{grid-template-columns:1fr}.card-preview-column{grid-row:2}.card-registered-panel{grid-column:1}.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:300px}}
+@media(max-width:620px){.cards-overview-strip{gap:7px}.cards-overview-strip>div{padding:12px 10px;border-radius:12px}.cards-overview-strip>div span{font-size:8px;line-height:1.3}.cards-overview-strip>div strong{font-size:16px}.card-registration-form,.card-preview-panel,.card-registered-panel{padding:16px;border-radius:16px}.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.bank-choice{min-height:80px}.bank-choice-mark{width:38px;height:38px}.bank-choice b{font-size:9px}.preview-card-face{min-height:195px;padding:19px}.bank-card-list{grid-template-columns:1fr}.cards-list-heading{align-items:flex-start}.cards-list-caption{display:none}}

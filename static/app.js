@@ -342,6 +342,12 @@
   }
   function renderCards() {
     const target = $('#cardsList');
+    const activeCards = state.cards.filter(card => card.active !== false);
+    const archivedCards = state.cards.filter(card => card.active === false);
+    const totalLimit = activeCards.reduce((sum, card) => sum + (Number(card.limit_cents) || 0), 0);
+    $('#cardsActiveCount').textContent = String(activeCards.length);
+    $('#cardsArchivedCount').textContent = String(archivedCards.length);
+    $('#cardsTotalLimit').textContent = money(totalLimit);
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão.</div>'; return; }
     target.innerHTML = state.cards.map(card => {
       const theme = bankTheme(card.issuer);
