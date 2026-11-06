@@ -4,7 +4,7 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const money = cents => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((Number(cents) || 0) / 100);
-  const moneyInputToCents = value => Math.round(Number(String(value).replace(',', '.')) * 100);
+  const moneyInputToCents = value => { const digits = String(value ?? '').replace(/\D/g, ''); return digits ? Number(digits) : 0; };
   const saoPauloDate = () => {
     const parts = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Sao_Paulo',
@@ -798,12 +798,19 @@
       openModal('budgetModal');
     });
     $$('[data-close]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.close)));
-    $$('.modal-backdrop').forEach(backdrop => backdrop.addEventListener('click', event => { if (event.target === backdrop) closeModal(backdrop.id); }));
+    // Preserve form data: backdrop clicks do not dismiss open modals.
     document.addEventListener('keydown', event => { if (event.key === 'Escape') $$('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id)); });
     $$('.type-switch button').forEach(button => button.addEventListener('click', () => setKind(button.dataset.kind)));
     $('#ongoingCheck').addEventListener('change', updateOngoingFields);
     $('#valueMode').addEventListener('change', updateOngoingFields);
-    $('#purchaseForm').elements.amount.addEventListener('input', updateCalculation);
+    const purchaseAmountInput = $('#purchaseForm').elements.amount;
+    purchaseAmountInput.addEventListener('input', () => {
+      const digits = purchaseAmountInput.value.replace(/\D/g, '');
+      purchaseAmountInput.value = digits
+        ? (Number(digits) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : '';
+      updateCalculation();
+    });
     $('#purchaseForm').elements.installment_count.addEventListener('input', updateCalculation);
     $('#purchaseForm').elements.current_installment.addEventListener('input', updateCalculation);
     $('#purchaseForm').elements.direction.addEventListener('change', updateDirectionOptions);
