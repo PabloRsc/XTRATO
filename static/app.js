@@ -66,6 +66,7 @@
     home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/>',
     book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M4 4.5v17.5M8 6h8"/>',
     download: '<path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
+    upload: '<path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
   };
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
@@ -588,7 +589,50 @@
     $('#logoutButton').addEventListener('click', logout);
     $('#mobileLogout').addEventListener('click', logout);
     $('#backupButton').addEventListener('click', () => window.location.assign('/api/backup'));
+    $('#restoreButton').addEventListener('click', () => $('#backupRestoreFile').click());
+    $('#backupRestoreFile').addEventListener('change', restoreBackupFromFile);
     $('#loginForm').addEventListener('submit', login);
+  }
+
+  async function restoreBackupFromFile(event) {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast('O arquivo excede o limite de 10 MB.');
+      return;
+    }
+
+    let backup;
+    try {
+      backup = JSON.parse(await file.text());
+    } catch {
+      toast('Não foi possível ler o arquivo. Selecione um backup JSON válido.');
+      return;
+    }
+    if (!backup || backup.format !== 'xtrato-backup' || backup.version !== 1) {
+      toast('Formato de backup não reconhecido ou versão incompatível.');
+      return;
+    }
+
+    const confirmation = window.prompt(
+      'A restauração só funciona em uma conta sem cartões, compras ou limites. Digite RESTAURAR para continuar.'
+    );
+    if (confirmation !== 'RESTAURAR') {
+      toast('Restauração cancelada.');
+      return;
+    }
+
+    try {
+      const result = await api('/api/backup/restore', {
+        method: 'POST',
+        body: JSON.stringify({ ...backup, confirmation: 'RESTAURAR' }),
+      });
+      await loadInitialData();
+      toast(`Backup restaurado: ${result.restored.purchases} compras e ${result.restored.cards} cartões.`);
+    } catch (error) {
+      toast(error.message);
+    }
   }
 
   async function login(event) {
