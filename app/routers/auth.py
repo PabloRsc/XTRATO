@@ -7,9 +7,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.deps import authenticated_user
 from app.models import User
-from app.schemas import LoginIn
-from app.security import verify_password
+from app.schemas import LoginIn, PasswordChangeIn
+from app.security import hash_password, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 _attempts: dict[str, deque[float]] = defaultdict(deque)
@@ -18,15 +19,23 @@ _ATTEMPT_WINDOW_SECONDS = 15 * 60
 _MAX_FAILED_ATTEMPTS = 8
 
 
-def _check_login_rate(request: Request) -> str:
-    ip = request.client.host if request.client else "unknown"
+def _check_attempt_rate(key: str) -> None:
     now = monotonic()
     with _attempts_lock:
-        attempts = _attempts[ip]
+        attempts = _attempts[key]
         while attempts and now - attempts[0] > _ATTEMPT_WINDOW_SECONDS:
             attempts.popleft()
         if len(attempts) >= _MAX_FAILED_ATTEMPTS:
-            raise HTTPException(status_code=429, detail="Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.", headers={"Retry-After": str(_ATTEMPT_WINDOW_SECONDS)})
+            raise HTTPException(
+                status_code=429,
+                detail="Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
+                headers={"Retry-After": str(_ATTEMPT_WINDOW_SECONDS)},
+            )
+
+
+def _check_login_rate(request: Request) -> str:
+    ip = request.client.host if request.client else "unknown"
+    _check_attempt_rate(ip)
     return ip
 
 
@@ -50,6 +59,7 @@ def login(payload: LoginIn, request: Request, db: Session = Depends(get_db)):
         _attempts.pop(ip, None)
     request.session.clear()
     request.session["user_id"] = user.id
+    request.session["auth_version"] = user.session_version
     return {"id": user.id, "username": user.username}
 
 
@@ -59,10 +69,27 @@ def logout(request: Request):
     return {"ok": True}
 
 
+@router.post("/password")
+def change_password(payload: PasswordChangeIn, request: Request, db: Session = Depends(get_db)):
+    user = authenticated_user(request, db)
+    rate_key = f"password-change-user:{user.id}"
+    _check_attempt_rate(rate_key)
+    if not verify_password(payload.current_password, user.password_hash):
+        _record_failed_login(rate_key)
+        raise HTTPException(status_code=400, detail="A senha atual está incorreta.")
+    if verify_password(payload.new_password, user.password_hash):
+        raise HTTPException(status_code=422, detail="Escolha uma senha diferente da atual.")
+
+    user.password_hash = hash_password(payload.new_password)
+    user.session_version += 1
+    db.commit()
+    with _attempts_lock:
+        _attempts.pop(rate_key, None)
+    request.session.clear()
+    return {"ok": True, "reauthenticate": True}
+
+
 @router.get("/me")
 def me(request: Request, db: Session = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    user = db.get(User, user_id) if isinstance(user_id, int) else None
-    if not user:
-        raise HTTPException(status_code=401, detail="Não autenticado.")
+    user = authenticated_user(request, db)
     return {"id": user.id, "username": user.username}
