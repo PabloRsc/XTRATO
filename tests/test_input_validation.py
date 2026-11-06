@@ -6,7 +6,7 @@ from app.schemas import CardIn, CategoryIn, PasswordChangeIn, PurchaseIn
 
 def test_card_name_is_trimmed_and_optional_fields_can_be_empty():
     card = CardIn(name="  Ultravioleta  ", issuer="  Nubank ", brand=" ", limit_cents=500000, closing_day=25, due_day=5)
-    assert card.name == "Nubank principal"
+    assert card.name == "Ultravioleta"
     assert card.issuer == "Nubank"
     assert card.brand == ""
     assert card.limit_cents == 500000
