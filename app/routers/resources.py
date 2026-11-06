@@ -8,8 +8,8 @@ from app.config import local_today
 from app.database import get_db
 from app.deps import authenticated_user
 from app.models import Card, Category
-from app.schemas import CardIn, CategoryIn
-from app.services.backup import build_user_backup
+from app.schemas import BackupRestoreIn, CardIn, CategoryIn
+from app.services.backup import build_user_backup, restore_user_backup
 
 router = APIRouter(prefix="/api", tags=["cadastros"])
 
@@ -129,3 +129,21 @@ def download_backup(request: Request, db: Session = Depends(get_db)):
             "Pragma": "no-cache",
         },
     )
+
+
+@router.post("/backup/restore")
+def restore_backup(payload: BackupRestoreIn, request: Request, db: Session = Depends(get_db)):
+    user = user_or_401(request, db)
+    try:
+        restored = restore_user_backup(db, user, payload)
+        db.commit()
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc))
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=422,
+            detail="O backup contém vínculos incompatíveis ou dados duplicados.",
+        )
+    return {"ok": True, "restored": restored}
