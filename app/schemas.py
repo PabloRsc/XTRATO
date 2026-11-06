@@ -214,7 +214,19 @@ class BackupPurchaseIn(BaseModel):
     end_invoice_month: date | None = None
     active: bool
     notes: str = Field(default="", max_length=300)
-    created_at: datetime | None = None
+    created_at: datetime
+
+    @field_validator("created_at")
+    @classmethod
+    def require_timezone_aware_created_at(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("A data de criação da compra deve conter fuso horário.")
+        return value
+
+    @field_validator("description", "notes")
+    @classmethod
+    def normalize_backup_purchase_text(cls, value: str) -> str:
+        return value.strip()
 
     @field_validator("description")
     @classmethod
@@ -235,6 +247,8 @@ class BackupPurchaseIn(BaseModel):
             raise ValueError("O mês inicial da compra deve usar o primeiro dia.")
         if self.end_invoice_month and self.end_invoice_month.day != 1:
             raise ValueError("O mês final da recorrência deve usar o primeiro dia.")
+        if self.end_invoice_month and self.end_invoice_month < self.first_invoice_month:
+            raise ValueError("O mês final da recorrência antecede o início.")
         if self.kind == "parcelado" and self.installment_count < 2:
             raise ValueError("Parcelamentos precisam ter ao menos duas parcelas.")
         if self.kind in {"avista", "recorrente"} and self.installment_count != 1:
@@ -278,6 +292,13 @@ class BackupRestoreIn(BaseModel):
     version: Literal[1]
     exported_at: datetime
     account: BackupAccountIn
+
+    @field_validator("exported_at")
+    @classmethod
+    def require_timezone_aware_exported_at(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("A data de exportação deve conter fuso horário.")
+        return value
     cards: list[BackupCardIn] = Field(max_length=50)
     categories: list[BackupCategoryIn] = Field(max_length=200)
     budgets: list[BackupBudgetIn] = Field(max_length=600)
@@ -332,6 +353,10 @@ class BackupRestoreIn(BaseModel):
                     raise ValueError("O backup não contém todas as parcelas de uma compra.")
                 if sum(row.amount_cents for row in rows) != purchase.total_cents:
                     raise ValueError("A soma das parcelas não corresponde ao valor total da compra.")
+                base_amount, remainder = divmod(purchase.total_cents, purchase.installment_count)
+                expected_amounts = [base_amount] * (purchase.installment_count - 1) + [base_amount + remainder]
+                if [row.amount_cents for row in rows] != expected_amounts:
+                    raise ValueError("A distribuição dos centavos das parcelas não corresponde ao cálculo do XTRATO.")
                 for index, row in enumerate(rows, start=1):
                     expected_month = purchase.first_invoice_month.replace(
                         year=(purchase.first_invoice_month.year + (purchase.first_invoice_month.month - 1 + index - 1) // 12),
