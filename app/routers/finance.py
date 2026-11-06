@@ -13,7 +13,7 @@ from app.deps import authenticated_user
 from app.models import Budget, Card, Category, InvoiceEntry, Purchase
 from app.schemas import BudgetIn, PurchaseIn, PurchaseUpdateIn
 from app.services.billing import (
-    add_months, card_suggested_invoice_month, cancel_purchase_entries, create_invoice_entries,
+    add_months, budget_usage_percentage, card_suggested_invoice_month, cancel_purchase_entries, create_invoice_entries,
     ensure_recurring_entries, parse_month, query_month_entries, signed_entry_amount,
 )
 
@@ -101,7 +101,7 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
         "limit_cents": limit_cents,
         "limit_effective_from": budget.month.strftime("%Y-%m") if budget else None,
         "available_cents": (limit_cents - total) if limit_cents is not None else None,
-        "percentage": (round((total / limit_cents) * 100, 1) if limit_cents > 0 else (100.0 if total > 0 else 0.0)) if limit_cents is not None else None,
+        "percentage": budget_usage_percentage(total, limit_cents) if limit_cents is not None else None,
         "cards": [{"id": c.id, "name": c.name, "color": c.color, "active": c.active, "total_cents": card_totals.get(c.id, {}).get("total_cents", 0)} for c in visible_cards],
         "card_totals": list(card_totals.values()),
         "categories": sorted(category_totals.values(), key=lambda x: x["total_cents"], reverse=True),
