@@ -66,7 +66,7 @@ jobs:
 
           ready=0
           for attempt in $(seq 1 45); do
-            if curl --fail --silent http://127.0.0.1:8000/healthz >/dev/null; then
+            if curl --fail --silent http://127.0.0.1:8000/readyz >/dev/null; then
               ready=1
               break
             fi
@@ -161,7 +161,7 @@ jobs:
 
           ready_after_restart=0
           for attempt in $(seq 1 45); do
-            if curl --fail --silent http://127.0.0.1:8000/healthz >/dev/null; then
+            if curl --fail --silent http://127.0.0.1:8000/readyz >/dev/null; then
               ready_after_restart=1
               break
             fi

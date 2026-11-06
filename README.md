@@ -79,7 +79,7 @@ A imagem Docker aceita a variável `PORT` definida pela plataforma de hospedagem
 
 Não use SQLite nem armazenamento local efêmero para produção. Em camadas gratuitas, confirme antes os limites de suspensão, memória, horas de execução, armazenamento, backups, limites de conexão e eventual expiração do banco. Uma aplicação que “hospeda grátis” mas apaga o banco ou o disco não é adequada para guardar seu histórico financeiro.
 
-A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo`, `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` e a variável `PORT` fornecida pelo ambiente. Use HTTPS na plataforma e não coloque segredos no GitHub.
+A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo` e a variável `PORT` fornecida pelo ambiente. Na primeira inicialização de um banco vazio, defina também `INITIAL_ADMIN_USERNAME` e `INITIAL_ADMIN_PASSWORD`; depois de criar a conta e confirmar o acesso, essas duas variáveis podem ser removidas. Use HTTPS na plataforma e não coloque segredos no GitHub.
 
 ## Backup pessoal
 
@@ -126,6 +126,13 @@ Na barra lateral, a opção **Alterar senha** solicita a senha atual e uma nova 
 
 Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_URL=sqlite:///./xtrato.db`, `APP_SECRET_KEY`, `INITIAL_ADMIN_USERNAME` e `INITIAL_ADMIN_PASSWORD`, então execute `alembic upgrade head` e `uvicorn app.main:app --reload`. Em um banco vazio, a primeira inicialização cria a conta e as categorias padrão. Para validar a lógica, execute `python -m pytest -q`.
 
+## Verificações de disponibilidade
+
+- `GET /healthz` confirma que o processo da aplicação está respondendo (liveness).
+- `GET /readyz` confirma que a aplicação consegue consultar o banco de dados configurado (readiness). Retorna HTTP 503 quando o banco não está acessível.
+
+Em plataformas de hospedagem, use `/readyz` como verificação de disponibilidade do serviço para evitar considerar a aplicação pronta quando o PostgreSQL estiver indisponível.
+
 ## Endpoints principais
 
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/password`
@@ -139,4 +146,4 @@ Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_UR
 - `GET /api/backup`, `POST /api/backup/restore` (restauração em conta vazia)
 - `GET /api/cards?include_archived=true`, `POST /api/cards/{id}/reactivate`
 - `GET /api/categories?include_archived=true`, `POST /api/categories/{id}/reactivate`
-- `GET /healthz`
+- `GET /healthz`, `GET /readyz`
