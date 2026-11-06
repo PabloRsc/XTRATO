@@ -100,3 +100,27 @@ jobs:
             --data-binary @restore.json \
             http://127.0.0.1:8000/api/backup/restore)"
           echo "$restore_response" | grep -q '"ok":true'
+
+          card_response="$(curl --fail --silent --show-error \
+            -b cookies.txt \
+            -H 'Content-Type: application/json' \
+            -H 'X-Xtrato-Request: 1' \
+            -d '{"name":"CI Card","closing_day":25,"due_day":5,"due_month_offset":1,"color":"#247a57"}' \
+            http://127.0.0.1:8000/api/cards)"
+          card_id="$(echo "$card_response" | jq -r '.id')"
+
+          curl --fail --silent --show-error -b cookies.txt -X DELETE \
+            -H 'X-Xtrato-Request: 1' \
+            "http://127.0.0.1:8000/api/cards/$card_id" >/dev/null
+
+          curl --fail --silent --show-error -b cookies.txt \
+            "http://127.0.0.1:8000/api/cards?include_archived=true" \
+            | jq -e --argjson id "$card_id" 'any(.[]; .id == $id and .active == false)' >/dev/null
+
+          curl --fail --silent --show-error -b cookies.txt -X POST \
+            -H 'X-Xtrato-Request: 1' \
+            "http://127.0.0.1:8000/api/cards/$card_id/reactivate" >/dev/null
+
+          curl --fail --silent --show-error -b cookies.txt \
+            http://127.0.0.1:8000/api/cards \
+            | jq -e --argjson id "$card_id" 'any(.[]; .id == $id and .active == true)' >/dev/null
