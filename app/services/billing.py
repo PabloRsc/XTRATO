@@ -5,6 +5,8 @@ import re
 from datetime import date
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
 
 from app.models import Card, InvoiceEntry, Purchase
@@ -99,18 +101,32 @@ def ensure_recurring_entries(db: Session, user_id: int, through_month: date) -> 
         final_month = min(purchase.end_invoice_month, through_month) if purchase.end_invoice_month else through_month
         cursor = purchase.first_invoice_month
         while cursor <= final_month:
-            existing = db.scalar(select(InvoiceEntry.id).where(
-                InvoiceEntry.purchase_id == purchase.id,
-                InvoiceEntry.invoice_month == cursor,
-            ))
-            if existing is None:
-                db.add(InvoiceEntry(
-                    purchase_id=purchase.id,
-                    invoice_month=cursor,
-                    installment_number=None,
-                    amount_cents=purchase.total_cents,
-                    status="open",
+            values = {
+                "purchase_id": purchase.id,
+                "invoice_month": cursor,
+                "installment_number": None,
+                "amount_cents": purchase.total_cents,
+                "status": "open",
+            }
+            dialect = db.get_bind().dialect.name
+            if dialect == "postgresql":
+                statement = pg_insert(InvoiceEntry).values(**values).on_conflict_do_nothing(
+                    index_elements=[InvoiceEntry.purchase_id, InvoiceEntry.invoice_month]
+                )
+                db.execute(statement)
+            elif dialect == "sqlite":
+                statement = sqlite_insert(InvoiceEntry).values(**values).on_conflict_do_nothing(
+                    index_elements=[InvoiceEntry.purchase_id, InvoiceEntry.invoice_month]
+                )
+                db.execute(statement)
+            else:
+                # Keep a portable fallback for any future database dialect.
+                existing = db.scalar(select(InvoiceEntry.id).where(
+                    InvoiceEntry.purchase_id == purchase.id,
+                    InvoiceEntry.invoice_month == cursor,
                 ))
+                if existing is None:
+                    db.add(InvoiceEntry(**values))
             cursor = add_months(cursor, 1)
     db.flush()
 

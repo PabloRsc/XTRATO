@@ -344,3 +344,76 @@ def test_archived_card_and_category_do_not_hide_existing_invoice_entries():
         assert db.get(Category, restored_purchase.category_id).active is False
         assert entry.amount_cents == 4_500
     engine.dispose()
+
+def test_recurring_generation_preserves_existing_cancelled_and_historical_entries():
+    from app.services.billing import ensure_recurring_entries
+
+    engine = make_db()
+    with Session(engine) as db:
+        user = User(username="owner", password_hash="test")
+        db.add(user)
+        db.flush()
+        card = Card(user_id=user.id, name="Inter", closing_day=20, due_day=10, color="#247a57")
+        category = Category(user_id=user.id, name="Assinaturas", color="#78a88b", icon="repeat")
+        db.add_all([card, category])
+        db.flush()
+        purchase = Purchase(
+            user_id=user.id,
+            description="Streaming",
+            kind="recorrente",
+            direction="expense",
+            purchase_date=date(2026, 10, 1),
+            card_id=card.id,
+            category_id=category.id,
+            total_cents=3_990,
+            installment_count=1,
+            first_invoice_month=date(2026, 10, 1),
+            current_installment=1,
+            active=True,
+        )
+        db.add(purchase)
+        db.flush()
+        db.add_all([
+            InvoiceEntry(
+                purchase_id=purchase.id,
+                invoice_month=date(2026, 10, 1),
+                installment_number=None,
+                amount_cents=3_990,
+                status="historical",
+            ),
+            InvoiceEntry(
+                purchase_id=purchase.id,
+                invoice_month=date(2026, 11, 1),
+                installment_number=None,
+                amount_cents=3_990,
+                status="cancelled",
+            ),
+        ])
+        db.flush()
+
+        ensure_recurring_entries(db, user.id, date(2026, 12, 1))
+        db.commit()
+
+        rows = db.scalars(
+            select(InvoiceEntry)
+            .where(InvoiceEntry.purchase_id == purchase.id)
+            .order_by(InvoiceEntry.invoice_month)
+        ).all()
+        assert [(row.invoice_month, row.status, row.amount_cents) for row in rows] == [
+            (date(2026, 10, 1), "historical", 3_990),
+            (date(2026, 11, 1), "cancelled", 3_990),
+            (date(2026, 12, 1), "open", 3_990),
+        ]
+
+        ensure_recurring_entries(db, user.id, date(2026, 12, 1))
+        db.commit()
+        rows = db.scalars(
+            select(InvoiceEntry)
+            .where(InvoiceEntry.purchase_id == purchase.id)
+            .order_by(InvoiceEntry.invoice_month)
+        ).all()
+        assert len(rows) == 3
+        assert [row.status for row in rows] == ["historical", "cancelled", "open"]
+
+    engine.dispose()
+
