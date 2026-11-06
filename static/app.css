@@ -579,3 +579,42 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
 @media(max-width:900px){.login-shell{grid-template-columns:minmax(0,1fr) minmax(360px,.9fr)}.login-art{padding:32px 6%}.login-message h1{font-size:clamp(42px,5.2vw,60px)}}
 @media(max-width:680px){.login-shell{display:flex;flex-direction:column;min-height:100vh}.login-art{min-height:290px;padding:25px 25px 23px}.login-art .brand-mark{width:36px;height:36px}.login-message{margin:43px 0 35px}.login-message .eyebrow{font-size:8px}.login-message h1{font-size:43px;letter-spacing:-2px;margin:15px 0 12px}.login-message p{font-size:11px;line-height:1.6;max-width:360px;margin:0}.login-benefits{display:none}.login-art-foot{font-size:8px}.login-art:after{width:340px;height:340px;right:-170px;bottom:-190px}.login-form-side{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:34px 25px 45px}.login-card{max-width:430px}.login-card h2{font-size:28px}.login-card>p{margin-bottom:25px}.mobile-brand{display:flex;margin-bottom:30px}}
 @media(max-width:380px){.login-art{min-height:265px}.login-message h1{font-size:38px}.login-art-foot span:last-child{max-width:180px;text-align:right}}
+
+
+/* Shared interaction polish — accessible states across every screen */
+:where(button,a,input,select,textarea,[tabindex]):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--green) 38%,transparent);
+  outline-offset:3px;
+}
+:where(button,input,select,textarea){font:inherit}
+:where(button):disabled,[aria-disabled="true"]{
+  cursor:not-allowed!important;opacity:.52;transform:none!important;box-shadow:none!important;
+}
+:where(input,select,textarea):disabled{
+  cursor:not-allowed;opacity:.65;background:var(--surface-2);color:var(--muted);
+}
+:where(input,select,textarea):not(:disabled):hover{
+  border-color:color-mix(in srgb,var(--green) 38%,var(--line));
+}
+:where(.btn-primary,.btn-quiet,.btn-secondary,.icon-button,.mini-action){
+  transition:background-color .18s,border-color .18s,color .18s,box-shadow .18s,transform .18s;
+}
+:where(.btn-primary,.btn-quiet,.btn-secondary):not(:disabled):active,
+:where(.icon-button,.mini-action):not(:disabled):active{transform:translateY(1px)}
+.modal-backdrop{padding:clamp(12px,3vw,28px);overscroll-behavior:contain}
+.modal-card{max-height:min(90dvh,900px);overflow:auto;overscroll-behavior:contain}
+.modal-close{flex:0 0 auto}
+.toast{max-width:min(420px,calc(100vw - 28px));z-index:1000}
+.empty-inline{color:var(--muted);line-height:1.6}
+:root[data-theme="dark"] .month-control,
+:root[data-theme="dark"] .icon-button,
+:root[data-theme="dark"] .modal-card{
+  background:var(--surface);border-color:var(--line);color:var(--ink);
+}
+:root[data-theme="dark"] .month-control input{color:var(--ink)}
+:root[data-theme="dark"] :where(input,select,textarea){
+  background:var(--surface-2);border-color:var(--line);color:var(--ink);
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
