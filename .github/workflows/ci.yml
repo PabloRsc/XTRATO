@@ -90,3 +90,13 @@ jobs:
             -b cookies.txt \
             http://127.0.0.1:8000/api/backup)"
           echo "$backup_response" | grep -q '"format":"xtrato-backup"'
+
+          echo "$backup_response" > backup.json
+          jq '. + {confirmation: "RESTAURAR"}' backup.json > restore.json
+          restore_response="$(curl --fail --silent --show-error \
+            -b cookies.txt \
+            -H 'Content-Type: application/json' \
+            -H 'X-Xtrato-Request: 1' \
+            --data-binary @restore.json \
+            http://127.0.0.1:8000/api/backup/restore)"
+          echo "$restore_response" | grep -q '"ok":true'
