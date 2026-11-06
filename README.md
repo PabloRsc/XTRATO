@@ -17,6 +17,8 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 - Limite mensal global entre todos os cartões, independente do limite de crédito bancário. O último limite configurado continua valendo nos meses seguintes até você criar uma nova alteração.
 - Visão geral, extrato unificado, categorias, evolução mensal e lista de despesas fixas.
 - Cancelamento preserva parcelas históricas e cancela lançamentos a partir do mês atual.
+- Estornos/créditos são lançamentos eventuais; não podem ser cadastrados como despesas fixas ou compras em andamento.
+- Valores de estorno reduzem o total líquido da fatura nos indicadores gerais, por cartão, por categoria e na evolução mensal.
 - Migrações com Alembic e execução com Docker Compose.
 - Fuso horário configurável (`APP_TIMEZONE`), por padrão `America/Sao_Paulo`, para decisões de virada do mês.
 - Valores monetários em centavos inteiros com colunas de 64 bits para evitar estouro em parcelamentos maiores.

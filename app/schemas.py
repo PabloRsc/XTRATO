@@ -96,6 +96,14 @@ class PurchaseIn(BaseModel):
         if self.kind == "recorrente":
             self.ongoing = False
             self.value_mode = "total"
+        if self.direction == "credit" and self.kind == "recorrente":
+            raise ValueError("Estornos e créditos não podem ser despesas fixas recorrentes.")
+        if self.direction == "credit" and self.ongoing:
+            raise ValueError("Um estorno deve ser registrado como crédito novo, não como compra em andamento.")
+        if self.value_mode == "installment" and not (self.kind == "parcelado" and self.ongoing):
+            raise ValueError("O valor por parcela só pode ser informado para uma compra parcelada em andamento.")
+        if self.end_invoice_month and self.kind != "recorrente":
+            raise ValueError("A data final só se aplica a despesas fixas recorrentes.")
         if self.ongoing and not self.current_invoice_month:
             raise ValueError("Informe o mês da fatura da parcela atual.")
         if self.kind == "recorrente" and self.first_invoice_month is None:

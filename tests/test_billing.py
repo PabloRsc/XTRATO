@@ -258,3 +258,38 @@ def test_parse_month_rejects_noncanonical_or_invalid_month_values():
     for value in ["2026-1", "26-01", "2026-00", "2026-13", "2026/01", "2026-01-01", "abcd-01"]:
         with pytest.raises(ValueError):
             parse_month(value)
+
+
+
+def test_signed_invoice_amount_applies_credits_to_spending():
+    from app.services.billing import signed_entry_amount
+
+    purchases = [12_500, 4_000]
+    credits = [2_000, 1_500]
+    net = sum(signed_entry_amount(value, "expense") for value in purchases)
+    net += sum(signed_entry_amount(value, "credit") for value in credits)
+
+    assert net == 13_000
+
+
+def test_signed_invoice_amount_allows_credit_balance_and_rejects_invalid_values():
+    import pytest
+    from app.services.billing import signed_entry_amount
+
+    assert signed_entry_amount(15_000, "credit") + signed_entry_amount(10_000, "expense") == -5_000
+    with pytest.raises(ValueError):
+        signed_entry_amount(-1, "expense")
+    with pytest.raises(ValueError):
+        signed_entry_amount(100, "unknown")
+
+
+def test_budget_usage_percentage_never_goes_below_zero():
+    import pytest
+    from app.services.billing import budget_usage_percentage
+
+    assert budget_usage_percentage(75_000, 100_000) == 75.0
+    assert budget_usage_percentage(-5_000, 100_000) == 0.0
+    assert budget_usage_percentage(500, 0) == 100.0
+    assert budget_usage_percentage(-500, 0) == 0.0
+    with pytest.raises(ValueError):
+        budget_usage_percentage(100, -1)
