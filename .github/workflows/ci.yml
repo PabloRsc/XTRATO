@@ -42,3 +42,47 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t xtrato:ci .
+
+      - name: Smoke-test app with PostgreSQL using Docker Compose
+        env:
+          APP_ENV: development
+          COOKIE_SECURE: "false"
+          APP_TIMEZONE: America/Sao_Paulo
+          POSTGRES_DB: xtrato_ci
+          POSTGRES_USER: xtrato
+          POSTGRES_PASSWORD: ci-test-postgres-password
+          INITIAL_ADMIN_USERNAME: ci-admin
+          INITIAL_ADMIN_PASSWORD: ci-test-initial-password
+          APP_PORT: "8000"
+          DOMAIN: localhost
+        run: |
+          set -euo pipefail
+          docker compose up -d --build
+          trap 'docker compose down -v' EXIT
+
+          ready=0
+          for attempt in $(seq 1 45); do
+            if curl --fail --silent http://127.0.0.1:8000/healthz >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            docker compose logs --no-color app db
+            exit 1
+          fi
+
+          login_response="$(curl --fail --silent --show-error \
+            -c cookies.txt \
+            -H 'Content-Type: application/json' \
+            -H 'X-Xtrato-Request: 1' \
+            -d '{"username":"ci-admin","password":"ci-test-initial-password"}' \
+            http://127.0.0.1:8000/api/auth/login)"
+          echo "$login_response" | grep -q '"username":"ci-admin"'
+
+          backup_response="$(curl --fail --silent --show-error \
+            -b cookies.txt \
+            http://127.0.0.1:8000/api/backup)"
+          echo "$backup_response" | grep -q '"format":"xtrato-backup"'
