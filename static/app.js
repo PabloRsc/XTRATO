@@ -370,6 +370,10 @@
   }
   function renderCategories() {
     const target = $('#categoriesList');
+    const activeCategories = state.categories.filter(category => category.active !== false);
+    const archivedCategories = state.categories.filter(category => category.active === false);
+    $('#categoriesActiveCount').textContent = String(activeCategories.length);
+    $('#categoriesArchivedCount').textContent = String(archivedCategories.length);
     if (!state.categories.length) { target.innerHTML = '<div class="empty-inline">Nenhuma categoria cadastrada.</div>'; return; }
     target.innerHTML = state.categories.map(category => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(category.color)}">${icon(category.icon || categoryIcon(category.name))}</div><div class="managed-copy"><b>${escapeHtml(category.name)} ${category.active === false ? '<span class="status-pill historical">Arquivada</span>' : ''}</b><small>Categoria de gastos</small></div><div class="managed-actions">${category.active === false ? `<button type="button" data-reactivate-category="${category.id}">Reativar</button>` : `<button type="button" data-edit-category="${category.id}">Editar</button><button type="button" data-archive-category="${category.id}">Arquivar</button>`}</div></div>`).join('');
     target.querySelectorAll('[data-edit-category]').forEach(button => button.addEventListener('click', () => startEditCategory(Number(button.dataset.editCategory))));
