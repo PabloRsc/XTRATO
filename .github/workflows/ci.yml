@@ -2,7 +2,7 @@ name: XTRATO CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'fix/**', 'chore/**']
   pull_request:
     branches: [main]
 
