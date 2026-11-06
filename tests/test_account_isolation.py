@@ -114,7 +114,7 @@ def test_authenticated_account_can_only_list_its_own_cards_and_categories():
 def test_authenticated_account_cannot_read_another_accounts_statement_dashboard_or_backup():
     engine = make_db()
     with Session(engine) as db:
-        owner, stranger, owner_card, owner_category, *_ = seed_two_accounts(db)
+        owner, stranger, owner_card, owner_category, stranger_card, stranger_category, *_ = seed_two_accounts(db)
         request = make_request(stranger.id)
 
         entries = finance.list_entries("2026-11", request, db=db)
