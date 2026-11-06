@@ -32,7 +32,7 @@ def make_request(user_id: int):
         "path": "/api",
         "headers": [],
         "query_string": b"",
-        "session": {"user_id": user_id},
+        "session": {"user_id": user_id, "auth_version": 0},
     })
 
 
