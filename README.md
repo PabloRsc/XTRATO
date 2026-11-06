@@ -62,6 +62,20 @@ docker compose --profile proxy up -d --build
 
 Não publique o app sem HTTPS. Em produção, mantenha o acesso à porta interna da aplicação restrito e use o Caddy ou outro proxy HTTPS.
 
+## Hospedagem em plataforma gratuita
+
+A imagem Docker aceita a variável `PORT` definida pela plataforma de hospedagem (com fallback para 8000). Para publicar em qualquer plataforma compatível, ela precisa oferecer:
+
+- Execução de uma imagem Docker ou do `Dockerfile` deste repositório.
+- Variáveis de ambiente secretas para as credenciais e configurações.
+- Conexão de rede persistente com PostgreSQL externo.
+- HTTPS gerenciado pela plataforma ou por proxy reverso.
+- Um PostgreSQL com armazenamento persistente e política de retenção conhecida.
+
+Não use SQLite nem armazenamento local efêmero para produção. Em camadas gratuitas, confirme antes os limites de suspensão, memória, horas de execução, armazenamento, backups, limites de conexão e eventual expiração do banco. Uma aplicação que “hospeda grátis” mas apaga o banco ou o disco não é adequada para guardar seu histórico financeiro.
+
+A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo`, `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` e a variável `PORT` fornecida pelo ambiente. Use HTTPS na plataforma e não coloque segredos no GitHub.
+
 ## Banco de dados e backup
 
 Os dados do PostgreSQL ficam no volume Docker `xtrato_pgdata`. Um backup lógico pode ser feito com:
