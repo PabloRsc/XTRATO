@@ -320,10 +320,12 @@
 
   function updateOngoingFields() {
     const active = $('#ongoingCheck').checked;
+    const installment = $('#purchaseForm').elements.kind.value === 'parcelado';
     $('#ongoingFields').classList.toggle('hidden', !active);
     $('#invoiceMonthField').classList.toggle('hidden', active);
     $('#firstInvoiceMonth').required = !active;
-    $('#valueMode').disabled = !active;
+    if (!active || !installment) $('#valueMode').value = 'total';
+    $('#valueMode').disabled = !active || !installment;
     const label = $('#amountLabel').querySelector('span');
     const direction = $('#purchaseForm').elements.direction.value;
     label.textContent = direction === 'credit' ? 'Valor do estorno (R$)' : (active && $('#valueMode').value === 'installment' ? 'Valor de cada parcela (R$)' : 'Valor da compra (R$)');
