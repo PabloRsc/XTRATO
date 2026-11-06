@@ -23,13 +23,16 @@ class PasswordChangeIn(BaseModel):
 
 
 class CardIn(BaseModel):
-    name: str = Field(min_length=1, max_length=60)
-    issuer: str = Field(default="", max_length=60)
+    # Optional nickname; issuer identifies the bank.
+    name: str = Field(default="", max_length=60)
+    issuer: str = Field(min_length=1, max_length=60)
+    limit_cents: int = Field(default=0, ge=0, le=100_000_000_000)
+    # Legacy fields remain accepted for older clients/backups.
     brand: str = Field(default="", max_length=30)
     last_four: str | None = Field(default=None, pattern=r"^\d{4}$")
     closing_day: int = Field(ge=1, le=31, default=25)
     due_day: int = Field(ge=1, le=31, default=5)
-    due_month_offset: int = Field(ge=0, le=1, default=1)
+    due_month_offset: int | None = Field(default=None, ge=0, le=1)
     color: str = Field(default="#247a57", pattern=r"^#[0-9A-Fa-f]{6}$")
 
     @field_validator("name", "issuer", "brand")
@@ -37,12 +40,13 @@ class CardIn(BaseModel):
     def normalize_card_text(cls, value: str) -> str:
         return value.strip()
 
-    @field_validator("name")
-    @classmethod
-    def require_card_name(cls, value: str) -> str:
-        if not value:
-            raise ValueError("Informe um nome para o cartão.")
-        return value
+    @model_validator(mode="after")
+    def normalize_card(self):
+        if not self.issuer:
+            raise ValueError("Selecione um banco ou instituição.")
+        if self.due_month_offset is None:
+            self.due_month_offset = 1 if self.due_day <= self.closing_day else 0
+        return self
 
 
 class CategoryIn(BaseModel):
@@ -148,6 +152,7 @@ class BackupCardIn(BaseModel):
     issuer: str = Field(default="", max_length=60)
     brand: str = Field(default="", max_length=30)
     last_four: str | None = Field(default=None, pattern=r"^\d{4}$")
+    limit_cents: int = Field(default=0, ge=0, le=100_000_000_000)
     closing_day: int = Field(ge=1, le=31)
     due_day: int = Field(ge=1, le=31)
     due_month_offset: int = Field(ge=0, le=1, default=1)
