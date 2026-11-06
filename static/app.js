@@ -252,10 +252,46 @@
     const activeCategories = state.categories.filter(category => category.active !== false);
     $('#purchaseCategory').innerHTML = `<option value="">Selecione uma categoria</option>${activeCategories.map(category => `<option value="${category.id}">${escapeHtml(category.name)}</option>`).join('')}`;
   }
+  const BANK_THEMES = {
+    'Nubank': { mark: 'nu', color: '#820AD1', ink: '#fff' },
+    'Itaú': { mark: 'itaú', color: '#EC7000', ink: '#fff' },
+    'Bradesco': { mark: 'b', color: '#CC092F', ink: '#fff' },
+    'Banco do Brasil': { mark: 'bb', color: '#F7D117', ink: '#173B78' },
+    'Caixa Econômica Federal': { mark: 'caixa', color: '#0066A1', ink: '#fff' },
+    'Santander': { mark: 's', color: '#EC0000', ink: '#fff' },
+    'Inter': { mark: 'inter', color: '#FF7A00', ink: '#fff' },
+    'C6 Bank': { mark: 'c6', color: '#242424', ink: '#fff' },
+    'BTG Pactual': { mark: 'btg', color: '#153D5B', ink: '#fff' },
+    'Banco PAN': { mark: 'pan', color: '#00AEEF', ink: '#08334A' },
+    'Mercado Pago': { mark: 'mp', color: '#009EE3', ink: '#fff' },
+    'PicPay': { mark: 'pic', color: '#21C25E', ink: '#083B20' },
+    'PagBank': { mark: 'pag', color: '#00A868', ink: '#fff' },
+    'Sicredi': { mark: 'sicredi', color: '#3FAE29', ink: '#fff' },
+    'Sicoob': { mark: 'sicoob', color: '#003641', ink: '#fff' },
+    'Banrisul': { mark: 'banri', color: '#005CA9', ink: '#fff' },
+    'Banco Original': { mark: 'o', color: '#00A859', ink: '#fff' },
+    'Neon': { mark: 'neon', color: '#0075FF', ink: '#fff' },
+    'XP': { mark: 'xp', color: '#111827', ink: '#fff' },
+    'Outro': { mark: 'cartão', color: '#247a57', ink: '#fff' },
+  };
+  function bankTheme(issuer) { return BANK_THEMES[issuer] || BANK_THEMES.Outro; }
   function renderCards() {
     const target = $('#cardsList');
-    if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão ao lado.</div>'; return; }
-    target.innerHTML = state.cards.map(card => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(card.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(card.name)}${card.last_four ? ` ···· ${card.last_four}` : ''} ${card.active === false ? '<span class="status-pill historical">Arquivado</span>' : ''}</b><small>${escapeHtml(card.issuer || card.brand || 'Cartão')} · Fecha dia ${card.closing_day} · Vence dia ${card.due_day} · ${Number(card.due_month_offset) === 0 ? 'mesmo mês' : 'mês seguinte'}</small></div><div class="managed-actions">${card.active === false ? `<button type="button" data-reactivate-card="${card.id}">Reativar</button>` : `<button type="button" data-edit-card="${card.id}">Editar</button><button type="button" data-archive-card="${card.id}">Arquivar</button>`}</div></div>`).join('');
+    if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão.</div>'; return; }
+    target.innerHTML = state.cards.map(card => {
+      const theme = bankTheme(card.issuer);
+      const nickname = card.name && card.name !== card.issuer ? card.name : 'Cartão de crédito';
+      const archived = card.active === false;
+      return '<article class="bank-card-entry ' + (archived ? 'is-archived' : '') + '">' +
+        '<div class="bank-card-face" style="--bank-color:' + theme.color + ';--bank-ink:' + theme.ink + '">' +
+          '<div class="bank-card-top"><span class="bank-logo-mark">' + escapeHtml(theme.mark) + '</span><span class="bank-card-network">CRÉDITO</span></div>' +
+          '<div class="bank-card-bank">' + escapeHtml(card.issuer || 'Instituição') + '</div>' +
+          '<div class="bank-card-nickname">' + escapeHtml(nickname) + '</div>' +
+          '<div class="bank-card-bottom"><span>FECHAMENTO <b>dia ' + card.closing_day + '</b></span><span>VENCIMENTO <b>dia ' + card.due_day + '</b></span></div>' +
+        '</div><div class="bank-card-details"><div><small>Limite total</small><strong>' + money(card.limit_cents || 0) + '</strong></div><div class="bank-card-actions">' +
+          (archived ? '<span class="status-pill historical">Arquivado</span><button type="button" data-reactivate-card="' + card.id + '">Reativar</button>' : '<button type="button" data-edit-card="' + card.id + '">Editar</button><button type="button" data-archive-card="' + card.id + '">Arquivar</button>') +
+        '</div></div></article>';
+    }).join('');
     target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(Number(button.dataset.editCard))));
     target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveResource('cards', Number(button.dataset.archiveCard), 'cartão')));
     target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateResource('cards', Number(button.dataset.reactivateCard), 'cartão')));
@@ -488,9 +524,8 @@
     if (!card) return;
     state.editingCardId = id;
     const form = $('#cardForm');
-    for (const key of ['name', 'issuer', 'brand', 'last_four', 'closing_day', 'due_day', 'due_month_offset', 'color']) {
-      form.elements[key].value = card[key] ?? '';
-    }
+    for (const key of ['name', 'issuer', 'closing_day', 'due_day']) form.elements[key].value = card[key] ?? '';
+    form.elements.limit.value = ((card.limit_cents || 0) / 100).toFixed(2);
     $('#cardFormTitle').textContent = 'Editar cartão';
     $('#cardFormSubmit').textContent = 'Salvar alterações';
     $('#cancelCardEdit').classList.remove('hidden');
@@ -502,10 +537,10 @@
     state.editingCardId = null;
     const form = $('#cardForm');
     form.reset();
+    form.elements.issuer.value = '';
     form.elements.closing_day.value = 25;
     form.elements.due_day.value = 5;
-    form.elements.due_month_offset.value = 1;
-    form.elements.color.value = '#247a57';
+    form.elements.limit.value = '';
     $('#cardFormTitle').textContent = 'Adicionar cartão';
     $('#cardFormSubmit').textContent = 'Salvar cartão';
     $('#cancelCardEdit').classList.add('hidden');
@@ -515,7 +550,9 @@
     event.preventDefault();
     const form = event.currentTarget;
     const fd = new FormData(form);
-    const payload = { name: fd.get('name').trim(), issuer: fd.get('issuer').trim(), brand: fd.get('brand'), last_four: fd.get('last_four') || null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), due_month_offset: Number(fd.get('due_month_offset')), color: fd.get('color') };
+    const issuer = fd.get('issuer').trim();
+    const theme = bankTheme(issuer);
+    const payload = { name: fd.get('name').trim(), issuer, limit_cents: Math.round(Number(fd.get('limit')) * 100), brand: '', last_four: null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), color: theme.color };
     try {
       const editing = state.editingCardId;
       await api(editing ? `/api/cards/${editing}` : '/api/cards', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
