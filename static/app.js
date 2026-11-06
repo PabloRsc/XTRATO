@@ -329,8 +329,12 @@
   function brandLogoMarkup(issuer) {
     const theme = bankTheme(issuer);
     if (BRAND_PATHS[issuer]) return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + BRAND_PATHS[issuer] + '"/></svg>';
+    if (issuer === 'Mercado Pago') return '<svg class="mercado-pago-logo" viewBox="0 0 150 48" role="img" aria-label="Mercado Pago"><g fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 23 22 10c5-4 11-4 16 0l8 7 8-7c5-4 11-4 16 0l14 13-13 13-13-9-8 6-8-6-13 9Z"/><path d="m38 19 13 12c3 3 8-1 5-4l-7-7m-12 5 10 9c3 3 8-1 5-4m-12 1 6 6c3 3 8-1 5-4"/></g><text x="91" y="30" fill="currentColor" font-size="15" font-weight="800" letter-spacing="-1">mercado</text><text x="91" y="43" fill="currentColor" font-size="12" font-weight="700" letter-spacing="-.3">pago</text></svg>';
+    if (issuer === 'Santander') return '<svg viewBox="0 0 150 42" role="img" aria-label="Santander"><path d="M16 4c-1 8 8 10 8 17 0 5-4 8-9 8-4 0-7-2-8-6 0 9 6 14 15 14 10 0 17-7 17-16 0-10-9-14-13-21 0 7-4 9-6 12-2-3-3-5-4-8Z" fill="currentColor"/><text x="45" y="28" fill="currentColor" font-size="23" font-weight="700" letter-spacing="-1">Santander</text></svg>';
+    if (issuer === 'Itaú') return '<svg viewBox="0 0 90 42" role="img" aria-label="Itaú"><rect x="1" y="1" width="40" height="40" rx="8" fill="#003399"/><text x="21" y="28" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">itaú</text><text x="48" y="27" fill="currentColor" font-size="18" font-weight="700">Itaú</text></svg>';
     if (issuer === 'Amazon') return '<svg class="amazon-wordmark" viewBox="0 0 120 42" role="img" aria-label="Amazon"><text x="3" y="25">amazon</text><path d="M18 31 Q59 47 101 29" /></svg>';
-    return '<span class="brand-wordmark">' + escapeHtml(theme.mark) + '</span>';
+    const wordmarks = { 'Banco do Brasil':'Banco do Brasil', 'Caixa Econômica Federal':'CAIXA', 'C6 Bank':'C6 Bank', 'BTG Pactual':'BTG Pactual', 'Banco PAN':'Banco PAN', 'Mercado Livre':'mercado livre', 'Will Bank':'will bank', 'Porto Bank':'porto', 'PicPay':'PicPay', 'Nubank':'nu', 'Inter':'inter', 'Bradesco':'bradesco', 'Neon':'neon', 'XP':'XP' };
+    return '<span class="brand-wordmark">' + escapeHtml(wordmarks[issuer] || issuer || theme.mark) + '</span>';
   }
   function bankTheme(issuer) { return BANK_THEMES[issuer] || BANK_THEMES.Outro; }
   function applyBankChoiceBrand(mark, issuer) {
