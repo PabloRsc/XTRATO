@@ -217,12 +217,17 @@ class BackupInvoiceEntryIn(BaseModel):
         return self
 
 
+class BackupAccountIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    username: str = Field(min_length=1, max_length=80)
+
+
 class BackupRestoreIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
     format: Literal["xtrato-backup"]
     version: Literal[1]
     exported_at: datetime
-    account: dict
+    account: BackupAccountIn
     cards: list[BackupCardIn] = Field(max_length=50)
     categories: list[BackupCategoryIn] = Field(max_length=200)
     budgets: list[BackupBudgetIn] = Field(max_length=600)
@@ -249,8 +254,39 @@ class BackupRestoreIn(BaseModel):
             if purchase.card_id not in card_ids or purchase.category_id not in category_ids:
                 raise ValueError("Uma compra aponta para cartão ou categoria inexistente.")
         entry_purchase_ids = []
+        entries_by_purchase: dict[int, list[BackupInvoiceEntryIn]] = {}
         for entry in self.invoice_entries:
             if entry.purchase_id not in purchase_ids:
                 raise ValueError("Uma parcela aponta para uma compra inexistente.")
-            entry_purchase_ids.append(entry.purchase_id)
+            entries_by_purchase.setdefault(entry.purchase_id, []).append(entry)
+
+        for purchase in self.purchases:
+            rows = sorted(entries_by_purchase.get(purchase.id, []), key=lambda row: row.invoice_month)
+            if purchase.kind == "recorrente":
+                if any(row.installment_number is not None for row in rows):
+                    raise ValueError("Despesas fixas não podem ter número de parcela.")
+                if any(row.invoice_month < purchase.first_invoice_month for row in rows):
+                    raise ValueError("Uma cobrança recorrente antecede seu início.")
+                if purchase.end_invoice_month and any(row.invoice_month > purchase.end_invoice_month for row in rows):
+                    raise ValueError("Uma cobrança recorrente ultrapassa seu mês final.")
+                if any(row.amount_cents != purchase.total_cents for row in rows):
+                    raise ValueError("O valor de uma cobrança recorrente não corresponde ao cadastro.")
+            else:
+                if len(rows) != purchase.installment_count:
+                    raise ValueError("O backup não contém todas as parcelas de uma compra.")
+                if sum(row.amount_cents for row in rows) != purchase.total_cents:
+                    raise ValueError("A soma das parcelas não corresponde ao valor total da compra.")
+                for index, row in enumerate(rows, start=1):
+                    expected_month = purchase.first_invoice_month.replace(
+                        year=(purchase.first_invoice_month.year + (purchase.first_invoice_month.month - 1 + index - 1) // 12),
+                        month=((purchase.first_invoice_month.month - 1 + index - 1) % 12) + 1,
+                    )
+                    if row.invoice_month != expected_month:
+                        raise ValueError("Os meses das parcelas não são consecutivos.")
+                    expected_number = index if purchase.kind == "parcelado" else None
+                    if row.installment_number != expected_number:
+                        raise ValueError("A numeração das parcelas não corresponde à compra.")
+            months = [row.invoice_month for row in rows]
+            if len(months) != len(set(months)):
+                raise ValueError("O backup contém parcelas duplicadas no mesmo mês.")
         return self
