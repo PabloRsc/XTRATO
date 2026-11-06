@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import calendar
+import re
 from datetime import date
 
 from sqlalchemy import select
@@ -10,9 +11,9 @@ from app.models import Card, InvoiceEntry, Purchase
 
 
 def parse_month(value: str) -> date:
+    if not isinstance(value, str) or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", value):
+        raise ValueError("Mês inválido. Use AAAA-MM.")
     year, month = (int(part) for part in value.split("-", 1))
-    if month < 1 or month > 12:
-        raise ValueError("Mês inválido.")
     return date(year, month, 1)
 
 
