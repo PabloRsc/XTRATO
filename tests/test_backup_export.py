@@ -152,6 +152,9 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
         ])
         source_db.commit()
         exported = build_user_backup(source_db, source)
+        source_card_id = source_card.id
+        source_category_id = source_category.id
+        source_purchase_id = purchase.id
 
     source_engine.dispose()
     target_engine = make_db()
@@ -196,12 +199,12 @@ def test_backup_can_be_restored_into_empty_account_with_history_preserved():
             "purchases": 1,
             "invoice_entries": 2,
         }
-        assert restored_card.id == source_card.id
+        assert restored_card.id == source_card_id
         assert restored_card.active is False
         assert restored_card.due_month_offset == 1
-        assert restored_category.id == source_category.id
+        assert restored_category.id == source_category_id
         assert restored_budget.limit_cents == 100_000
-        assert restored_purchase.id == purchase.id
+        assert restored_purchase.id == source_purchase_id
         assert [row.status for row in restored_entries] == ["historical", "cancelled"]
         assert [row.installment_number for row in restored_entries] == [1, 2]
         assert target_db.get(User, target.id).password_hash == "target-password-hash"
