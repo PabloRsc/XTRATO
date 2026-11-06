@@ -90,7 +90,8 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
         amount = sum((e.amount_cents if p.direction == "expense" else -e.amount_cents) for e, p, _c in trend_rows)
         trends.append({"month": trend_month.strftime("%Y-%m"), "label": trend_month.strftime("%b").replace("Jan", "Jan").replace("Feb", "Fev").replace("Mar", "Mar").replace("Apr", "Abr").replace("May", "Mai").replace("Jun", "Jun").replace("Jul", "Jul").replace("Aug", "Ago").replace("Sep", "Set").replace("Oct", "Out").replace("Nov", "Nov").replace("Dec", "Dez"), "total_cents": amount})
 
-    cards = db.scalars(select(Card).where(Card.user_id == user.id, Card.active.is_(True)).order_by(Card.name)).all()
+    cards = db.scalars(select(Card).where(Card.user_id == user.id).order_by(Card.name)).all()
+    visible_cards = [card for card in cards if card.active or card.id in card_totals]
     entries = [_entry_dict(db, e, p, c) for e, p, c in rows]
     return {
         "month": month,
@@ -101,7 +102,7 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
         "limit_effective_from": budget.month.strftime("%Y-%m") if budget else None,
         "available_cents": (limit_cents - total) if limit_cents is not None else None,
         "percentage": (round((total / limit_cents) * 100, 1) if limit_cents > 0 else (100.0 if total > 0 else 0.0)) if limit_cents is not None else None,
-        "cards": [{"id": c.id, "name": c.name, "color": c.color, "total_cents": card_totals.get(c.id, {}).get("total_cents", 0)} for c in cards],
+        "cards": [{"id": c.id, "name": c.name, "color": c.color, "active": c.active, "total_cents": card_totals.get(c.id, {}).get("total_cents", 0)} for c in visible_cards],
         "card_totals": list(card_totals.values()),
         "categories": sorted(category_totals.values(), key=lambda x: x["total_cents"], reverse=True),
         "trend": trends,
