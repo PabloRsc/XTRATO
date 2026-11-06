@@ -874,3 +874,7 @@ h1,h2,h3,.xtrato-balance-value,.dark-total,.budget-numbers strong{font-family:"B
  .xtrato-section-head{gap:9px}
  .xtrato-section-head .link-button{font-size:11px}
 }
+
+/* Purchase form: natural Brazilian currency entry */
+#purchaseForm input[name="amount"]{font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.01em}
+#purchaseForm #amountHelp{display:block;margin-top:5px;line-height:1.4}
