@@ -81,33 +81,45 @@ app.add_middleware(
 MAX_BACKUP_UPLOAD_BYTES = 10 * 1024 * 1024
 
 
+def private_api_error(detail: str, status_code: int) -> JSONResponse:
+    response = JSONResponse({"detail": detail}, status_code=status_code)
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Vary"] = "Cookie"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    if COOKIE_SECURE:
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+
 @app.middleware("http")
 async def protect_mutations(request: Request, call_next):
     if request.url.path == "/api/backup/restore" and request.method == "POST":
         content_length = request.headers.get("content-length")
         if content_length is None:
-            return JSONResponse(
-                {"detail": "Informe o tamanho do arquivo de backup na requisição."},
-                status_code=411,
-            )
+            return private_api_error("Informe o tamanho do arquivo de backup na requisição.", 411)
         try:
             upload_size = int(content_length)
         except ValueError:
-            return JSONResponse({"detail": "Cabeçalho de tamanho da requisição inválido."}, status_code=400)
+            return private_api_error("Cabeçalho de tamanho da requisição inválido.", 400)
         if upload_size < 0:
             return JSONResponse({"detail": "Cabeçalho de tamanho da requisição inválido."}, status_code=400)
         if upload_size > MAX_BACKUP_UPLOAD_BYTES:
-            return JSONResponse({"detail": "O arquivo de backup excede o limite de 10 MB."}, status_code=413)
+            return private_api_error("O arquivo de backup excede o limite de 10 MB.", 413)
 
     if request.url.path.startswith("/api/") and request.method in {"POST", "PUT", "PATCH", "DELETE"}:
         if request.headers.get("x-xtrato-request") != "1":
-            return JSONResponse({"detail": "Requisição não autorizada."}, status_code=403)
+            return private_api_error("Requisição não autorizada.", 403)
         origin = request.headers.get("origin")
         host = request.headers.get("host", "").lower()
         if origin:
             from urllib.parse import urlparse
             if (urlparse(origin).netloc or "").lower() != host:
-                return JSONResponse({"detail": "Origem não autorizada."}, status_code=403)
+                return private_api_error("Origem não autorizada.", 403)
     response = await call_next(request)
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store"
