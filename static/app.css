@@ -79,7 +79,7 @@
 .card-registration-fields .two-fields label{display:flex;flex-direction:column;gap:7px;color:var(--ink);font-size:12px;font-weight:700}
 .card-registration-fields .form-submit{height:49px;border-radius:12px;font-size:13px;font-weight:800;margin-top:4px}
 .card-registration-fields .btn-quiet{background:transparent;color:var(--muted);border:0;box-shadow:none}
-.card-preview-column{position:sticky;top:18px}
+.card-preview-column{position:static;top:auto}
 .card-preview-panel{overflow:hidden}
 .card-live-preview{display:grid;gap:14px}
 .preview-card-face{--preview-color:#820ad1;--preview-ink:#fff;min-height:188px;padding:22px 20px;border-radius:17px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;position:relative;overflow:hidden;background:linear-gradient(130deg,var(--preview-color),color-mix(in srgb,var(--preview-color) 72%,#111));color:var(--preview-ink);box-shadow:0 12px 25px #15251b20}
@@ -100,3 +100,67 @@
 @media(max-width:1050px){.card-registration-layout{grid-template-columns:minmax(0,1fr) minmax(270px,.8fr);gap:12px}.card-registration-form,.card-preview-panel,.card-registered-panel{padding:18px}}
 @media(max-width:760px){.card-registration-layout{grid-template-columns:1fr}.card-preview-column{position:static;grid-row:2}.card-registered-panel{grid-column:auto;grid-row:3}.card-registration-form{grid-row:1}.bank-choice{min-height:90px}.preview-card-face{min-height:170px}}
 @media(max-width:390px){.bank-picker{gap:8px}.bank-choice{min-height:82px;border-radius:12px}.bank-choice-mark{width:39px;height:39px}.bank-choice b{font-size:10px}.card-registration-fields .two-fields{gap:8px}.card-registration-form,.card-preview-panel,.card-registered-panel{padding:14px}}
+
+/* Catalog, brand identity and non-overlapping card preview */
+.card-preview-column{position:static;top:auto;align-self:start}
+.bank-search-label{display:block;color:var(--ink);font-size:11px;font-weight:700;margin:0 0 -10px}
+.bank-search{width:100%;height:42px;border:1px solid #e1e8e4;border-radius:10px;background:#fbfcfb;padding:9px 12px;color:var(--ink);font-size:12px}
+.bank-search:focus{outline:0;border-color:#15965f;box-shadow:0 0 0 3px #15965f18}
+.bank-picker{max-height:370px;overflow:auto;overscroll-behavior:contain;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:5px 3px 7px;scrollbar-width:thin}
+.bank-picker-heading{grid-column:1/-1;padding:7px 2px 1px;color:#7b887f;font-size:10px;font-weight:800;letter-spacing:.7px;text-transform:uppercase}
+.bank-choice{min-height:83px;gap:7px;border-radius:12px;padding:8px 5px}
+.bank-choice-mark{width:43px;height:39px;border-radius:10px;background:var(--bank-tile,#eef2ef);color:var(--bank-tile-ink,#fff);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bank-choice-mark svg{width:27px;height:27px;fill:currentColor;display:block}
+.bank-choice-mark .brand-wordmark{font-size:12px;font-weight:900;letter-spacing:-.6px;line-height:1;text-align:center;overflow-wrap:anywhere}
+.bank-choice-mark .amazon-wordmark{width:41px;height:28px;overflow:visible}
+.bank-choice-mark .amazon-wordmark text{font:700 18px Arial,sans-serif;fill:#fff;letter-spacing:-1px}
+.bank-choice-mark .amazon-wordmark path{fill:none;stroke:#ff9900;stroke-width:3.4;stroke-linecap:round}
+.bank-choice[data-bank="Nubank"] .bank-choice-mark{--bank-tile:#820ad1}
+.bank-choice[data-bank="Itaú"] .bank-choice-mark{--bank-tile:#ec7000}
+.bank-choice[data-bank="Bradesco"] .bank-choice-mark{--bank-tile:#cc092f}
+.bank-choice[data-bank="Inter"] .bank-choice-mark{--bank-tile:#ff7a00}
+.bank-choice[data-bank="Santander"] .bank-choice-mark{--bank-tile:#ec0000}
+.bank-choice[data-bank="Banco do Brasil"] .bank-choice-mark{--bank-tile:#ffdf00;--bank-tile-ink:#173b78}
+.bank-choice[data-bank="Caixa Econômica Federal"] .bank-choice-mark{--bank-tile:#0875b9}
+.bank-choice[data-bank="C6 Bank"] .bank-choice-mark{--bank-tile:#171717}
+.bank-choice[data-bank="Amazon"] .bank-choice-mark{--bank-tile:#232f3e}
+.bank-choice[data-bank="Mercado Livre"] .bank-choice-mark{--bank-tile:#ffe600;--bank-tile-ink:#263238}
+.bank-choice[data-bank="Will Bank"] .bank-choice-mark{--bank-tile:#ffdf00;--bank-tile-ink:#171717}
+.bank-choice[data-bank="Atacadão"] .bank-choice-mark{--bank-tile:#e6b800;--bank-tile-ink:#173b78}
+.bank-choice[data-bank="Outro"] .bank-choice-mark{--bank-tile:#edf1ef;--bank-tile-ink:#53635b}
+.bank-choice[data-bank="Nubank"] .bank-choice-mark svg,.bank-choice[data-bank="Neon"] .bank-choice-mark svg,.bank-choice[data-bank="PicPay"] .bank-choice-mark svg{fill:#fff}
+.bank-search-empty{margin:0;color:var(--muted);font-size:11px}
+.bank-card-face{isolation:isolate;min-height:190px;padding:16px 17px 14px}
+.bank-card-face:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.22;background:radial-gradient(ellipse at 88% 8%,#fff 0 1%,transparent 38%),linear-gradient(145deg,transparent 45%,#fff2 46%,transparent 47%)}
+.bank-card-face:after{width:180px;height:180px;right:-66px;top:26px;opacity:.75}
+.bank-card-top{min-height:30px}
+.bank-logo-mark{min-width:48px;min-height:30px;display:inline-flex;align-items:center;justify-content:flex-start;background:transparent;border:0;border-radius:0;padding:0;max-width:150px}
+.bank-logo-mark svg{width:42px;height:34px;fill:currentColor;display:block}
+.bank-logo-mark .brand-wordmark{font-size:18px;font-weight:900;letter-spacing:-.7px;line-height:1;white-space:nowrap}
+.bank-logo-mark .amazon-wordmark{width:105px;height:38px;overflow:visible}
+.bank-logo-mark .amazon-wordmark text{font:700 27px Arial,sans-serif;fill:currentColor;letter-spacing:-1.3px}
+.bank-logo-mark .amazon-wordmark path{fill:none;stroke:#ff9900;stroke-width:4;stroke-linecap:round}
+.bank-card-chip-row{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-top:5px;height:28px}
+.bank-card-chip{width:34px;height:25px;border-radius:6px;border:1px solid #ffffffa8;background:linear-gradient(135deg,#fff9,#ffffff45);position:relative;overflow:hidden}
+.bank-card-chip:before,.bank-card-chip:after,.bank-card-chip i{content:"";position:absolute;border:1px solid #ffffffa8}
+.bank-card-chip:before{inset:0 10px}
+.bank-card-chip:after{inset:8px 0}
+.bank-card-chip i{inset:0 0;border-radius:5px}
+.bank-card-contactless{font-size:17px;font-weight:800;letter-spacing:-6px;transform:rotate(90deg);opacity:.8;margin-right:5px}
+.bank-card-bank{margin-top:8px;font-size:15px}
+.bank-card-nickname{font-size:10px}
+.bank-card-network{font-size:8px;letter-spacing:1.3px}
+.preview-card-face{isolation:isolate;min-height:205px}
+.preview-card-face:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.2;background:radial-gradient(ellipse at 88% 8%,#fff 0 1%,transparent 38%),linear-gradient(145deg,transparent 45%,#fff2 46%,transparent 47%)}
+.preview-card-face[data-issuer="Amazon"]{--preview-color:#232f3e!important}
+.preview-card-face[data-issuer="Amazon"] .preview-card-brand .amazon-wordmark{width:108px;height:37px}
+.preview-card-brand .amazon-wordmark text{font:700 27px Arial,sans-serif;fill:currentColor;letter-spacing:-1.3px}
+.preview-card-brand .amazon-wordmark path{fill:none;stroke:#ff9900;stroke-width:4;stroke-linecap:round}
+.preview-card-brand svg{width:34px;height:34px;fill:currentColor}
+.preview-card-brand .brand-wordmark{font-size:21px;font-weight:900;letter-spacing:-.8px}
+.preview-card-chip-row{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;height:25px}
+.preview-card-chip{width:32px;height:23px;border:1px solid #ffffffa8;border-radius:5px;background:linear-gradient(135deg,#fff9,#ffffff45);position:relative}
+.preview-card-chip:after{content:"";position:absolute;inset:7px 0;border-top:1px solid #ffffffa8;border-bottom:1px solid #ffffffa8}
+@media(max-width:1050px){.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:340px}}
+@media(max-width:760px){.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:320px}.card-preview-column{position:static}}
+@media(max-width:390px){.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.bank-choice{min-height:75px}.bank-choice-mark{width:38px;height:35px}.bank-choice b{font-size:9px}}
