@@ -961,3 +961,128 @@ h1,h2,h3,.xtrato-balance-value,.dark-total,.budget-numbers strong{font-family:"B
  .xtrato-cards-page .bank-card-entry{max-width:100%!important}
  .xtrato-cards-page .preview-card-face.wallet-card-face{max-width:100%!important}
 }
+
+/* XTRATO phase 3 — unified shell, typography and accessible surfaces */
+:root{
+  --font-display:"Bricolage Grotesque",sans-serif;
+  --font-body:"DM Sans",system-ui,sans-serif;
+  font-family:var(--font-body);
+}
+body,button,input,select,textarea{font-family:var(--font-body)}
+h1,h2,h3,h4,.brand-lockup b,.budget-numbers strong,.modal-heading h2{font-family:var(--font-display)}
+button,input,select,textarea{accent-color:var(--green)}
+::selection{background:color-mix(in srgb,var(--green) 22%,transparent);color:var(--ink)}
+.panel-card,.xtrato-wallet-panel,.xtrato-forecast-panel,.xtrato-category-panel,.xtrato-history-panel,.xtrato-recent-panel{
+  border-color:var(--line);
+}
+.page-view{min-width:0}
+.topbar{border:1px solid var(--line);border-radius:15px;padding:0 14px}
+.month-control,.icon-button{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.month-control input{color:var(--ink)}
+.nav-item{transition:background .18s ease,color .18s ease,transform .18s ease}
+.nav-item.active{background:var(--green-soft);color:var(--green)}
+.nav-item:focus-visible,.link-button:focus-visible,.backup-link:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.btn-primary{background:var(--green);box-shadow:0 6px 16px color-mix(in srgb,var(--green) 18%,transparent)}
+.btn-primary:hover{background:var(--green-dark)}
+.xtrato-balance{background:linear-gradient(140deg,#0b2b1f 0%,#0f4a33 100%)}
+.xtrato-balance-value{font-variant-numeric:tabular-nums}
+.xtrato-forecast-panel,.xtrato-wallet-panel,.xtrato-category-panel,.xtrato-history-panel,.xtrato-recent-panel{
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.xtrato-forecast-panel:hover,.xtrato-wallet-panel:hover,.xtrato-category-panel:hover,.xtrato-history-panel:hover,.xtrato-recent-panel:hover{
+  border-color:color-mix(in srgb,var(--green) 24%,var(--line));
+}
+.forecast-value,.trend-value,.category-value,.entry-amount,.xtrato-balance-value{font-variant-numeric:tabular-nums}
+.statement-filter-label{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 13px;color:var(--muted);font-size:11px}
+.statement-filter-label select{border:0;min-width:0;flex:1}
+input,select,textarea{color:var(--ink)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
+.form-grid input,.form-grid select,.modal-card input,.modal-card select,.login-card input,
+.card-registration-fields input,.bank-search,.statement-toolbar select{
+  background:var(--surface);border-color:var(--line);color:var(--ink)
+}
+.modal-card{background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.modal-close,.btn-quiet{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.search-box{background:var(--surface-2);border-color:var(--line)}
+.entry-row,.managed-item{border-color:var(--line)}
+.empty-inline{color:var(--muted)}
+.login-shell{background:var(--bg)}
+.login-form-side{background:var(--surface)}
+.login-card h2{font-family:var(--font-display)}
+.login-card label,.form-grid label,.modal-card label,.field-label{color:var(--ink)}
+.login-note{color:var(--muted)}
+:root[data-theme="dark"] .sidebar{background:var(--surface);border-color:var(--line)}
+:root[data-theme="dark"] .sidebar-tip,
+:root[data-theme="dark"] .search-box,
+:root[data-theme="dark"] .category-symbol,
+:root[data-theme="dark"] .merchant-symbol,
+:root[data-theme="dark"] .entry-type span,
+:root[data-theme="dark"] .modal-close,
+:root[data-theme="dark"] .type-switch,
+:root[data-theme="dark"] .btn-quiet{
+  background:var(--surface-2);border-color:var(--line);color:var(--ink)
+}
+:root[data-theme="dark"] .form-grid input,
+:root[data-theme="dark"] .form-grid select,
+:root[data-theme="dark"] .modal-card input,
+:root[data-theme="dark"] .modal-card select,
+:root[data-theme="dark"] .login-card input,
+:root[data-theme="dark"] .card-registration-fields input,
+:root[data-theme="dark"] .bank-search,
+:root[data-theme="dark"] .statement-toolbar select{
+  background:var(--surface-2);border-color:var(--line);color:var(--ink)
+}
+:root[data-theme="dark"] .modal-card,
+:root[data-theme="dark"] .login-form-side{background:var(--surface);color:var(--ink)}
+:root[data-theme="dark"] .login-shell{background:var(--bg)}
+:root[data-theme="dark"] .statement-summary-card{background:var(--surface-2)}
+:root[data-theme="dark"] .xtrato-cards-page .bank-card-entry{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.14)}
+:root[data-theme="dark"] .bank-choice{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+:root[data-theme="dark"] .bank-choice.is-selected{background:var(--green-soft);border-color:var(--green)}
+@media(min-width:861px){
+  .app-shell{display:block;min-height:100vh}
+  .sidebar{
+    height:auto;min-height:76px;position:relative;top:auto;width:100%;
+    display:flex;flex-direction:row;align-items:center;gap:clamp(12px,2vw,28px);
+    padding:12px clamp(16px,4vw,48px);background:var(--surface);
+    border-right:0;border-bottom:1px solid var(--line)
+  }
+  .brand-lockup{flex:0 0 auto;padding:0;gap:9px}
+  .brand-lockup .brand-mark-image{width:42px;height:42px;flex-basis:42px}
+  .brand-lockup b{font-size:17px}
+  .brand-lockup small{font-size:8px}
+  .nav-caption{display:none}
+  .nav-list{display:flex;align-items:center;justify-content:center;gap:4px;flex:1;min-width:0}
+  .nav-item{white-space:nowrap;padding:10px 12px;gap:8px;font-size:11px}
+  .nav-icon,.nav-item svg{width:16px;height:16px}
+  .sidebar-bottom{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin:0}
+  .sidebar-tip{display:none}
+  .backup-link{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    border:1px solid var(--line);border-radius:10px;background:var(--surface-2);
+    color:var(--muted);padding:8px 9px;font-size:9px;font-weight:700;white-space:nowrap
+  }
+  .backup-link svg{width:14px;height:14px}
+  .profile-row{border:0;padding:0 0 0 8px;margin-left:2px;gap:7px}
+  .profile-row .avatar{width:30px;height:30px}
+  .profile-info b{font-size:10px}
+  .profile-password{font-size:9px}
+  .logout-button{width:30px;height:30px}
+  .main-area{max-width:1320px;padding:24px clamp(16px,4vw,48px) 40px}
+  .topbar{margin-bottom:24px}
+}
+@media(min-width:861px) and (max-width:1120px){
+  .sidebar{gap:12px;padding-inline:14px}
+  .nav-item{padding:9px 8px;font-size:10px}
+  .backup-link{font-size:0;padding:8px}
+  .backup-link svg{width:16px;height:16px}
+  .profile-info{display:none}
+}
+@media(max-width:760px){
+  .statement-summary-card{gap:12px;align-items:flex-start}
+  .statement-summary-total strong{font-size:20px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
