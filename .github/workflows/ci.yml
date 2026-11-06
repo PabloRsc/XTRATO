@@ -26,6 +26,9 @@ jobs:
       - name: Install test dependencies
         run: pip install -r requirements-dev.txt
 
+      - name: Compile Python sources
+        run: python -m compileall -q app tests
+
       - name: Run test suite
         run: python -m pytest -q
 

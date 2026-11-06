@@ -83,3 +83,84 @@ def test_production_configuration_accepts_unique_secret_and_strong_password():
 
     validate_production_settings("production", "c" * 48, True, "a-strong-initial-password")
     validate_production_settings("development", "short", False, "dev")
+
+
+def test_credit_cannot_be_recurring_or_ongoing():
+    base = {
+        "description": "Estorno",
+        "kind": "recorrente",
+        "direction": "credit",
+        "purchase_date": "2026-11-06",
+        "card_id": 1,
+        "category_id": 1,
+        "amount_cents": 2500,
+        "first_invoice_month": "2026-11",
+    }
+    with pytest.raises(ValidationError):
+        PurchaseIn(**base)
+
+    ongoing = {
+        "description": "Estorno parcelado",
+        "kind": "parcelado",
+        "direction": "credit",
+        "purchase_date": "2026-11-06",
+        "card_id": 1,
+        "category_id": 1,
+        "amount_cents": 2500,
+        "installment_count": 2,
+        "ongoing": True,
+        "current_installment": 1,
+        "current_invoice_month": "2026-11",
+    }
+    with pytest.raises(ValidationError):
+        PurchaseIn(**ongoing)
+
+
+def test_installment_value_mode_requires_ongoing_installment_purchase():
+    payload = {
+        "description": "Compra",
+        "kind": "parcelado",
+        "purchase_date": "2026-11-06",
+        "card_id": 1,
+        "category_id": 1,
+        "amount_cents": 2500,
+        "installment_count": 2,
+        "value_mode": "installment",
+    }
+    with pytest.raises(ValidationError):
+        PurchaseIn(**payload)
+
+    payload["ongoing"] = True
+    payload["current_installment"] = 1
+    payload["current_invoice_month"] = "2026-11"
+    assert PurchaseIn(**payload).value_mode == "installment"
+
+
+def test_end_invoice_month_is_only_allowed_for_recurring_purchases():
+    payload = {
+        "description": "Compra",
+        "kind": "avista",
+        "purchase_date": "2026-11-06",
+        "card_id": 1,
+        "category_id": 1,
+        "amount_cents": 2500,
+        "end_invoice_month": "2027-01",
+    }
+    with pytest.raises(ValidationError):
+        PurchaseIn(**payload)
+
+
+def test_disabling_ongoing_purchase_cannot_leave_installment_value_mode():
+    payload = {
+        "description": "Compra",
+        "kind": "parcelado",
+        "purchase_date": "2026-11-06",
+        "card_id": 1,
+        "category_id": 1,
+        "amount_cents": 2500,
+        "installment_count": 2,
+        "value_mode": "installment",
+        "ongoing": False,
+    }
+    with pytest.raises(ValidationError):
+        PurchaseIn(**payload)
