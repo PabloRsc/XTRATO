@@ -69,7 +69,7 @@
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
 
-  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false };
+  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null };
 
   async function api(path, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
@@ -208,10 +208,12 @@
       const status = row.entry_status === 'historical' ? '<span class="status-pill historical">Parcela anterior</span>' : credit ? '<span class="status-pill credit">Estorno</span>' : '';
       const amount = `${credit ? '− ' : ''}${money(row.amount_cents)}`;
       const date = formatDate(row.purchase_date);
+      const edit = allowCancel && row.purchase_active ? `<button class="mini-action" data-edit-purchase="${row.purchase_id}" data-description="${escapeHtml(row.description)}" data-notes="${escapeHtml(row.notes || '')}" title="Editar descrição e observações">Editar</button>` : '';
       const cancel = allowCancel && row.purchase_active && row.entry_status !== 'historical' ? `<button class="mini-action" data-cancel="${row.purchase_id}" title="Cancelar esta compra">Cancelar</button>` : '';
-      return `<div class="entry-row"><div class="merchant"><div class="merchant-symbol" style="color:${escapeHtml(row.category_color)};background:${escapeHtml(row.category_color)}18">${icon(row.category_icon || categoryIcon(row.category_name))}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${date} · ${escapeHtml(row.category_name)} ${status}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>${escapeHtml(kind)}</span></div><div class="entry-amount" style="${credit ? 'color:var(--green)' : ''}">${amount}<small>${credit ? 'Crédito na fatura' : row.kind === 'parcelado' ? 'Parcela da fatura' : row.kind === 'recorrente' ? 'Cobrança mensal' : 'Compra única'}</small></div><div class="entry-actions">${cancel}</div></div>`;
+      return `<div class="entry-row"><div class="merchant"><div class="merchant-symbol" style="color:${escapeHtml(row.category_color)};background:${escapeHtml(row.category_color)}18">${icon(row.category_icon || categoryIcon(row.category_name))}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${date} · ${escapeHtml(row.category_name)} ${status}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>${escapeHtml(kind)}</span></div><div class="entry-amount" style="${credit ? 'color:var(--green)' : ''}">${amount}<small>${credit ? 'Crédito na fatura' : row.kind === 'parcelado' ? 'Parcela da fatura' : row.kind === 'recorrente' ? 'Cobrança mensal' : 'Compra única'}</small></div><div class="entry-actions">${edit}${cancel}</div></div>`;
     }).join('');
-    $$('[data-cancel]', target).forEach(button => button.addEventListener('click', () => cancelPurchase(Number(button.dataset.cancel))));
+    target.querySelectorAll('[data-edit-purchase]').forEach(button => button.addEventListener('click', () => openPurchaseEdit(Number(button.dataset.editPurchase), button.dataset.description, button.dataset.notes)));
+    target.querySelectorAll('[data-cancel]').forEach(button => button.addEventListener('click', () => cancelPurchase(Number(button.dataset.cancel))));
   }
 
   async function loadStatement() {
@@ -248,14 +250,16 @@
   function renderCards() {
     const target = $('#cardsList');
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão ao lado.</div>'; return; }
-    target.innerHTML = state.cards.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</b><small>${escapeHtml(c.issuer || c.brand || 'Cartão')} · Fecha dia ${c.closing_day} · Vence dia ${c.due_day}</small></div><button data-archive-card="${c.id}" title="Arquivar cartão">Arquivar</button></div>`).join('');
-    $$('[data-archive-card]').forEach(b => b.addEventListener('click', () => archiveResource('cards', Number(b.dataset.archiveCard), 'cartão')));
+    target.innerHTML = state.cards.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</b><small>${escapeHtml(c.issuer || c.brand || 'Cartão')} · Fecha dia ${c.closing_day} · Vence dia ${c.due_day}</small></div><div class="managed-actions"><button type="button" data-edit-card="${c.id}">Editar</button><button type="button" data-archive-card="${c.id}">Arquivar</button></div></div>`).join('');
+    target.querySelectorAll('[data-edit-card]').forEach(b => b.addEventListener('click', () => startEditCard(Number(b.dataset.editCard))));
+    target.querySelectorAll('[data-archive-card]').forEach(b => b.addEventListener('click', () => archiveResource('cards', Number(b.dataset.archiveCard), 'cartão')));
   }
   function renderCategories() {
     const target = $('#categoriesList');
     if (!state.categories.length) { target.innerHTML = '<div class="empty-inline">Nenhuma categoria cadastrada.</div>'; return; }
-    target.innerHTML = state.categories.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon(c.icon || categoryIcon(c.name))}</div><div class="managed-copy"><b>${escapeHtml(c.name)}</b><small>Categoria de gastos</small></div><button data-archive-category="${c.id}" title="Arquivar categoria">Arquivar</button></div>`).join('');
-    $$('[data-archive-category]').forEach(b => b.addEventListener('click', () => archiveResource('categories', Number(b.dataset.archiveCategory), 'categoria')));
+    target.innerHTML = state.categories.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon(c.icon || categoryIcon(c.name))}</div><div class="managed-copy"><b>${escapeHtml(c.name)}</b><small>Categoria de gastos</small></div><div class="managed-actions"><button type="button" data-edit-category="${c.id}">Editar</button><button type="button" data-archive-category="${c.id}">Arquivar</button></div></div>`).join('');
+    target.querySelectorAll('[data-edit-category]').forEach(b => b.addEventListener('click', () => startEditCategory(Number(b.dataset.editCategory))));
+    target.querySelectorAll('[data-archive-category]').forEach(b => b.addEventListener('click', () => archiveResource('categories', Number(b.dataset.archiveCategory), 'categoria')));
   }
   async function archiveResource(resource, id, label) {
     if (!window.confirm(`Arquivar este ${label}? Os lançamentos existentes serão preservados.`)) return;
@@ -273,8 +277,9 @@
     const rows = await api('/api/recurrences');
     const target = $('#recurrencesList');
     if (!rows.length) { target.innerHTML = '<div class="empty-inline">Nenhuma despesa fixa cadastrada. Use “Nova compra” e escolha “Fixo mensal”.</div>'; return; }
-    target.innerHTML = rows.map(row => `<div class="entry-row"><div class="merchant"><div class="merchant-symbol">${icon('repeat')}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${escapeHtml(row.category_name)} · Início ${formatMonth(row.first_invoice_month)}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>Fixo mensal</span></div><div class="entry-amount">${money(row.amount_cents)}<small>${row.active ? 'Ativa' : 'Arquivada'}</small></div><div class="entry-actions">${row.active ? `<button class="mini-action" data-cancel="${row.id}">Encerrar</button>` : ''}</div></div>`).join('');
-    $$('[data-cancel]', target).forEach(b => b.addEventListener('click', () => cancelPurchase(Number(b.dataset.cancel))));
+    target.innerHTML = rows.map(row => `<div class="entry-row"><div class="merchant"><div class="merchant-symbol">${icon('repeat')}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${escapeHtml(row.category_name)} · Início ${formatMonth(row.first_invoice_month)}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>Fixo mensal</span></div><div class="entry-amount">${money(row.amount_cents)}<small>${row.active ? 'Ativa' : 'Arquivada'}</small></div><div class="entry-actions">${row.active ? `<button class="mini-action" data-edit-purchase="${row.id}" data-description="${escapeHtml(row.description)}" data-notes="${escapeHtml(row.notes || '')}">Editar</button><button class="mini-action" data-cancel="${row.id}">Encerrar</button>` : ''}</div></div>`).join('');
+    target.querySelectorAll('[data-edit-purchase]').forEach(b => b.addEventListener('click', () => openPurchaseEdit(Number(b.dataset.editPurchase), b.dataset.description, b.dataset.notes)));
+    target.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => cancelPurchase(Number(b.dataset.cancel))));
   }
 
   function suggestInvoiceMonth() {
@@ -396,6 +401,30 @@
     } catch (error) { $('#purchaseError').textContent = error.message; }
   }
 
+  function openPurchaseEdit(id, description, notes) {
+    state.editingPurchaseId = id;
+    $('#purchaseEditForm').elements.description.value = description || '';
+    $('#purchaseEditForm').elements.notes.value = notes || '';
+    $('#purchaseEditError').textContent = '';
+    openModal('purchaseEditModal');
+  }
+  async function submitPurchaseEdit(event) {
+    event.preventDefault();
+    if (!state.editingPurchaseId) return;
+    const form = $('#purchaseEditForm');
+    const payload = {
+      description: form.elements.description.value.trim(),
+      notes: form.elements.notes.value.trim(),
+    };
+    try {
+      await api(`/api/purchases/${state.editingPurchaseId}`, { method: 'PATCH', body: JSON.stringify(payload) });
+      state.editingPurchaseId = null;
+      closeModal('purchaseEditModal');
+      await refreshDashboard();
+      toast('Descrição e observações atualizadas.');
+    } catch (error) { $('#purchaseEditError').textContent = error.message; }
+  }
+
   async function submitBudget(event) {
     event.preventDefault();
     const amount = moneyInputToCents($('#budgetForm').elements.amount.value);
@@ -408,21 +437,70 @@
     } catch (error) { $('#budgetError').textContent = error.message; }
   }
 
+  function startEditCard(id) {
+    const card = state.cards.find(item => item.id === id);
+    if (!card) return;
+    state.editingCardId = id;
+    const form = $('#cardForm');
+    for (const key of ['name', 'issuer', 'brand', 'last_four', 'closing_day', 'due_day', 'color']) {
+      form.elements[key].value = card[key] ?? '';
+    }
+    $('#cardFormTitle').textContent = 'Editar cartão';
+    $('#cardFormSubmit').textContent = 'Salvar alterações';
+    $('#cancelCardEdit').classList.remove('hidden');
+    $('#cardFormMessage').textContent = 'Alterar fechamento ou vencimento afeta apenas sugestões de novas compras.';
+    setPage('cards');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function resetCardEditor() {
+    state.editingCardId = null;
+    const form = $('#cardForm');
+    form.reset();
+    form.elements.closing_day.value = 25;
+    form.elements.due_day.value = 5;
+    form.elements.color.value = '#247a57';
+    $('#cardFormTitle').textContent = 'Adicionar cartão';
+    $('#cardFormSubmit').textContent = 'Salvar cartão';
+    $('#cancelCardEdit').classList.add('hidden');
+    $('#cardFormMessage').textContent = '';
+  }
   async function submitCard(event) {
     event.preventDefault();
     const form = event.currentTarget;
     const fd = new FormData(form);
     const payload = { name: fd.get('name').trim(), issuer: fd.get('issuer').trim(), brand: fd.get('brand'), last_four: fd.get('last_four') || null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), color: fd.get('color') };
     try {
-      await api('/api/cards', { method: 'POST', body: JSON.stringify(payload) });
-      form.reset();
-      form.elements.closing_day.value = 25;
-      form.elements.due_day.value = 5;
-      form.elements.color.value = '#247a57';
+      const editing = state.editingCardId;
+      await api(editing ? `/api/cards/${editing}` : '/api/cards', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
+      resetCardEditor();
       state.cards = await api('/api/cards');
       renderCards(); renderCardOptions();
-      toast('Cartão cadastrado.');
+      await refreshDashboard();
+      toast(editing ? 'Cartão atualizado.' : 'Cartão cadastrado.');
     } catch (error) { $('#cardFormMessage').textContent = error.message; }
+  }
+  function startEditCategory(id) {
+    const category = state.categories.find(item => item.id === id);
+    if (!category) return;
+    state.editingCategoryId = id;
+    const form = $('#categoryForm');
+    for (const key of ['name', 'color', 'icon']) form.elements[key].value = category[key] ?? '';
+    $('#categoryFormTitle').textContent = 'Editar categoria';
+    $('#categoryFormSubmit').textContent = 'Salvar alterações';
+    $('#cancelCategoryEdit').classList.remove('hidden');
+    $('#categoryFormMessage').textContent = 'Os lançamentos existentes manterão os valores financeiros originais.';
+    setPage('categories');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function resetCategoryEditor() {
+    state.editingCategoryId = null;
+    const form = $('#categoryForm');
+    form.reset();
+    form.elements.color.value = '#78a88b';
+    $('#categoryFormTitle').textContent = 'Nova categoria';
+    $('#categoryFormSubmit').textContent = 'Salvar categoria';
+    $('#cancelCategoryEdit').classList.add('hidden');
+    $('#categoryFormMessage').textContent = '';
   }
   async function submitCategory(event) {
     event.preventDefault();
@@ -430,12 +508,13 @@
     const fd = new FormData(form);
     const payload = { name: fd.get('name').trim(), color: fd.get('color'), icon: fd.get('icon') };
     try {
-      await api('/api/categories', { method: 'POST', body: JSON.stringify(payload) });
-      form.reset();
-      form.elements.color.value = '#78a88b';
+      const editing = state.editingCategoryId;
+      await api(editing ? `/api/categories/${editing}` : '/api/categories', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
+      resetCategoryEditor();
       state.categories = await api('/api/categories');
       renderCategories(); renderCategoryOptions();
-      toast('Categoria cadastrada.');
+      await refreshDashboard();
+      toast(editing ? 'Categoria atualizada.' : 'Categoria cadastrada.');
     } catch (error) { $('#categoryFormMessage').textContent = error.message; }
   }
 
@@ -473,6 +552,9 @@
     $('#budgetForm').addEventListener('submit', submitBudget);
     $('#cardForm').addEventListener('submit', submitCard);
     $('#categoryForm').addEventListener('submit', submitCategory);
+    $('#cancelCardEdit').addEventListener('click', resetCardEditor);
+    $('#cancelCategoryEdit').addEventListener('click', resetCategoryEditor);
+    $('#purchaseEditForm').addEventListener('submit', submitPurchaseEdit);
     $('#statementSearch').addEventListener('input', () => { clearTimeout(loadStatement.timer); loadStatement.timer = setTimeout(loadStatement, 180); });
     $('#statementCardFilter').addEventListener('change', loadStatement);
     $('#logoutButton').addEventListener('click', logout);
