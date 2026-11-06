@@ -402,9 +402,19 @@
   function openPurchase(kind = 'avista') {
     resetPurchaseForm();
     if (kind === 'recorrente') setKind('recorrente');
-    if (!state.cards.length || !state.categories.length) {
-      toast('Antes de lançar, cadastre ao menos um cartão e uma categoria.');
-      if (!state.cards.length) setPage('cards'); else setPage('categories');
+    const hasActiveCards = state.cards.some(card => card.active !== false);
+    const hasActiveCategories = state.categories.some(category => category.active !== false);
+    if (!hasActiveCards || !hasActiveCategories) {
+      if (!hasActiveCards && !hasActiveCategories) {
+        toast('Cadastre ou reative um cartão e uma categoria antes de lançar.');
+        setPage('cards');
+      } else if (!hasActiveCards) {
+        toast('Cadastre ou reative um cartão antes de lançar.');
+        setPage('cards');
+      } else {
+        toast('Cadastre ou reative uma categoria antes de lançar.');
+        setPage('categories');
+      }
       return;
     }
     renderCardOptions();
