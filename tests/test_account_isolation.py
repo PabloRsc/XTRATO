@@ -236,3 +236,59 @@ def test_account_budget_changes_do_not_affect_another_account():
         assert stranger_budget.limit_cents == 25_000
 
     engine.dispose()
+
+def test_dashboard_applies_credits_consistently_to_budget_cards_categories_and_trend():
+    engine = make_db()
+    with Session(engine) as db:
+        owner, _stranger, owner_card, owner_category, *_ = seed_two_accounts(db)
+        credit_purchase = Purchase(
+            user_id=owner.id,
+            description="Estorno parcial",
+            kind="avista",
+            direction="credit",
+            purchase_date=date(2026, 11, 12),
+            card_id=owner_card.id,
+            category_id=owner_category.id,
+            total_cents=1_500,
+            installment_count=1,
+            first_invoice_month=date(2026, 11, 1),
+            current_installment=1,
+            active=True,
+        )
+        db.add(credit_purchase)
+        db.flush()
+        db.add(InvoiceEntry(
+            purchase_id=credit_purchase.id,
+            invoice_month=date(2026, 11, 1),
+            installment_number=None,
+            amount_cents=1_500,
+            status="open",
+        ))
+        db.commit()
+
+        dashboard = finance.dashboard("2026-11", make_request(owner.id), db=db)
+
+        assert dashboard["expenses_cents"] == 4_000
+        assert dashboard["credits_cents"] == 1_500
+        assert dashboard["spent_cents"] == 2_500
+        assert dashboard["limit_cents"] == 100_000
+        assert dashboard["available_cents"] == 97_500
+        assert dashboard["percentage"] == 2.5
+        assert dashboard["card_totals"] == [{
+            "id": owner_card.id,
+            "name": owner_card.name,
+            "color": owner_card.color,
+            "total_cents": 2_500,
+        }]
+        assert dashboard["categories"] == [{
+            "id": owner_category.id,
+            "name": owner_category.name,
+            "color": owner_category.color,
+            "icon": owner_category.icon,
+            "total_cents": 2_500,
+        }]
+        november = next(item for item in dashboard["trend"] if item["month"] == "2026-11")
+        assert november["total_cents"] == 2_500
+
+    engine.dispose()
+
