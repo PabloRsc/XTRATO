@@ -210,3 +210,103 @@
 .preview-card-facts>div b{font-size:13px}
 @media(max-width:1050px){.bank-card-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}}
 @media(max-width:760px){.bank-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:360px}.bank-card-list{grid-template-columns:1fr}.bank-card-face{min-height:205px}}
+
+
+/* XTRATO Design System v2 — semantic tokens and complete light/dark themes */
+:root{
+  color-scheme:light;
+  --bg:#f4f7f5;--surface:#ffffff;--surface-2:#f0f5f1;--surface-3:#e8efea;
+  --ink:#17251e;--muted:#718078;--line:#e1e9e3;--green:#087f55;--green-dark:#075f42;
+  --green-soft:#e4f4eb;--shadow:0 12px 34px rgba(19,54,36,.065);
+  --radius:18px;--focus:rgba(8,127,85,.24);
+  --brand-gradient:linear-gradient(145deg,#0ab978,#08734e);
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0b1110;--surface:#121b18;--surface-2:#192520;--surface-3:#22322b;
+  --ink:#edf5ef;--muted:#9aada2;--line:#293a31;--green:#31d695;--green-dark:#83e9b9;
+  --green-soft:#163b2b;--shadow:0 14px 38px rgba(0,0,0,.24);--focus:rgba(49,214,149,.25);
+  --brand-gradient:linear-gradient(145deg,#20d58d,#08734e);
+}
+html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,color .2s}
+.brand-mark{background:var(--brand-gradient);color:#fff;border:1px solid #ffffff20;box-shadow:0 7px 18px rgba(8,127,85,.2)}
+.brand-mark svg{width:25px;height:25px;display:block}
+.brand-lockup b{letter-spacing:-.85px;font-weight:850}
+.sidebar{background:var(--surface);border-color:var(--line)}
+.nav-caption,.brand-lockup small{color:var(--muted)}
+.nav-item{color:var(--muted)}
+.nav-item:hover{background:var(--surface-2);color:var(--ink)}
+.nav-item.active{background:var(--green-soft);color:var(--green-dark)}
+.sidebar-tip{background:var(--surface-2);border-color:var(--line)}
+.sidebar-tip p,.profile-info small{color:var(--muted)}
+.avatar{background:var(--surface-3);color:var(--ink)}
+.profile-row{border-color:var(--line)}
+.main-area{color:var(--ink)}
+.breadcrumb b{color:var(--ink)}
+.month-control,.icon-button{background:var(--surface);border-color:var(--line);color:var(--muted)}
+.month-control input{color:var(--ink);color-scheme:inherit}
+.theme-toggle{color:var(--green);flex:none}
+.theme-toggle:hover{background:var(--green-soft);color:var(--green-dark)}
+.theme-toggle svg{width:18px;height:18px}
+.page-heading h1,.section-heading h2,.modal-heading h2{color:var(--ink)}
+.page-heading p,.section-heading p,.modal-heading p{color:var(--muted)}
+.panel-card,.management-form,.management-list,.modal-card,.login-card,.card-registration-form,.card-preview-panel,.card-registered-panel{background:var(--surface);border-color:var(--line);box-shadow:var(--shadow)}
+.budget-card{background:var(--surface);border-color:var(--line)}
+.category-panel,.trend-panel,.recent-panel,.statement-panel{background:var(--surface);border-color:var(--line)}
+.section-heading h2,.merchant-copy b,.managed-copy b,.entry-row,.statement-summary strong{color:var(--ink)}
+.merchant-copy small,.managed-copy small,.entry-amount small,.category-name,.category-value,.trend-column small{color:var(--muted)}
+.progress-track,.category-track,.trend-bar-area{background:var(--surface-3)}
+.search-box,.statement-toolbar select,.form-grid input,.form-grid select,.modal-card input,.modal-card select,.login-card input,.card-registration-fields input,.bank-search,.calculation-box{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.search-box input{background:transparent;color:var(--ink)}
+.form-grid label,.login-card label,.modal-card label,.card-registration-fields>label{color:var(--ink)}
+.form-grid small,.modal-card label small,.card-registration-fields>label small{color:var(--muted)}
+.managed-item,.entry-row,.statement-summary,.preview-card-facts>div{border-color:var(--line)}
+.managed-item{background:var(--surface)}
+.managed-item button,.mini-action,.managed-actions button,.bank-card-actions button,.modal-close{background:var(--surface-2);border-color:var(--line);color:var(--muted)}
+.managed-item button:hover,.mini-action:hover,.managed-actions button:hover,.bank-card-actions button:hover{background:var(--green-soft);color:var(--green-dark)}
+.backup-link{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.backup-link:hover{background:var(--green-soft);border-color:var(--green);color:var(--green-dark)}
+.profile-password{color:var(--green-dark)}
+.bank-choice{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.bank-choice:hover{background:var(--surface-3)}
+.bank-choice.is-selected{background:var(--green-soft);border-color:var(--green)}
+.bank-choice b{color:var(--ink)}
+.card-registration-fields input:focus,.bank-search:focus,.form-grid input:focus,.form-grid select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--focus)}
+.btn-primary{background:var(--brand-gradient);box-shadow:0 6px 15px rgba(8,127,85,.16)}
+.btn-quiet,.link-button{color:var(--green-dark)}
+.app-footer{color:var(--muted);border-color:var(--line)}
+.modal-backdrop{background:rgba(4,12,8,.58);backdrop-filter:blur(7px)}
+.modal-card{color:var(--ink)}
+.type-switch{background:var(--surface-2)}
+.type-switch button{color:var(--muted)}
+.type-switch button.selected{background:var(--surface);color:var(--green-dark);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.calculation-box{background:var(--surface-2);border-color:var(--line)}
+.toast{box-shadow:var(--shadow)}
+.login-form-side{background:var(--bg)}
+.login-card{color:var(--ink)}
+.login-card>p,.login-note{color:var(--muted)}
+.login-art{background:radial-gradient(ellipse at 15% 15%,#0c8d60 0,transparent 45%),linear-gradient(145deg,#092c20,#071710 70%,#0d4530)}
+.mobile-brand b{color:var(--ink)}
+:root[data-theme="dark"] .bank-choice{background:var(--surface-2)}
+:root[data-theme="dark"] .bank-choice.is-selected{background:var(--green-soft)}
+:root[data-theme="dark"] .bank-choice-mark{box-shadow:0 5px 14px #0005,inset 0 1px #ffffff35}
+:root[data-theme="dark"] .bank-card-entry{background:var(--surface);border-color:var(--line)}
+:root[data-theme="dark"] .bank-card-details{color:var(--ink)}
+:root[data-theme="dark"] .bank-card-details small{color:var(--muted)}
+:root[data-theme="dark"] .bank-card-details>div:first-child{border-color:var(--line)}
+:root[data-theme="dark"] .preview-card-facts>div{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+:root[data-theme="dark"] .preview-card-facts>div span{color:var(--muted)}
+:root[data-theme="dark"] .dark-card{background:linear-gradient(135deg,#102d22,#101b17)}
+:root[data-theme="dark"] .budget-card{background:linear-gradient(145deg,#14241c,#121b18)}
+:root[data-theme="dark"] .status-pill{background:var(--surface-3);color:var(--ink)}
+:root[data-theme="dark"] .status-pill.historical{background:#30291c;color:#e8c77c}
+:root[data-theme="dark"] .status-pill.credit{background:#143b2b;color:#83e9b9}
+:root[data-theme="dark"] .login-art{background:radial-gradient(ellipse at 15% 15%,#087b52 0,transparent 45%),linear-gradient(145deg,#061b14,#050d09 70%,#0b3826)}
+:root[data-theme="dark"] .login-form-side{background:var(--bg)}
+:root[data-theme="dark"] .login-card input{background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+:root[data-theme="dark"] .login-card label{color:var(--ink)}
+:root[data-theme="dark"] .search-box input::placeholder,:root[data-theme="dark"] input::placeholder{color:#71877a}
+:root[data-theme="dark"] .category-symbol{background:var(--surface-3)}
+:root[data-theme="dark"] .empty-inline,:root[data-theme="dark"] .bank-search-empty{color:var(--muted)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:860px){.theme-toggle{width:34px;height:34px}}
