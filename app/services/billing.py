@@ -89,6 +89,17 @@ def ensure_recurring_entries(db: Session, user_id: int, through_month: date) -> 
     db.flush()
 
 
+def cancel_purchase_entries(purchase: Purchase, from_month: date) -> int:
+    """Cancel current and future invoice entries, keeping earlier history intact."""
+    cancelled = 0
+    for entry in purchase.entries:
+        if entry.invoice_month >= from_month and entry.status != "cancelled":
+            entry.status = "cancelled"
+            cancelled += 1
+    purchase.active = False
+    return cancelled
+
+
 def card_suggested_invoice_month(db: Session, card_id: int, purchase_date: date) -> date:
     card = db.get(Card, card_id)
     if card is None:
