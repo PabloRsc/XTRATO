@@ -19,11 +19,7 @@ class CardIn(BaseModel):
     @field_validator("name", "issuer", "brand")
     @classmethod
     def normalize_card_text(cls, value: str) -> str:
-        value = value.strip()
-        if not value and cls.model_fields.get("name") is not None:
-            # Name is required; issuer and brand may be left empty.
-            pass
-        return value
+        return value.strip()
 
     @field_validator("name")
     @classmethod
