@@ -624,3 +624,35 @@ def test_recurring_purchase_backup_round_trip_preserves_end_month_and_cancelled_
         assert target.password_hash == "keep-this-password"
 
     target_engine.dispose()
+
+def test_backup_restore_rejects_destination_user_removed_before_restore():
+    import pytest
+
+    from app.schemas import BackupRestoreIn
+    from app.services.backup import restore_user_backup
+
+    engine = make_db()
+    with Session(engine) as db:
+        user = User(username="target", password_hash="target-hash")
+        db.add(user)
+        db.commit()
+        db.delete(user)
+        db.flush()
+
+        payload = BackupRestoreIn.model_validate({
+            "confirmation": "RESTAURAR",
+            "format": "xtrato-backup",
+            "version": 1,
+            "exported_at": "2026-11-06T12:00:00+00:00",
+            "account": {"username": "source"},
+            "cards": [],
+            "categories": [],
+            "budgets": [],
+            "purchases": [],
+            "invoice_entries": [],
+        })
+        with pytest.raises(ValueError, match="conta de destino"):
+            restore_user_backup(db, user, payload)
+
+    engine.dispose()
+
