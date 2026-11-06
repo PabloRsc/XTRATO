@@ -618,3 +618,72 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Wallet-inspired bank cards: brand-first, clean and softly translucent */
+.bank-card-entry{
+  padding:9px;border-radius:19px;
+  background:color-mix(in srgb,var(--surface) 78%,transparent);
+  border-color:color-mix(in srgb,var(--line) 72%,transparent);
+  box-shadow:0 12px 30px #173d2910, inset 0 1px 0 #ffffffa8;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.bank-card-face.wallet-card-face{
+  min-height:178px;padding:18px 19px 15px;border-radius:15px;
+  isolation:isolate;justify-content:space-between;
+  background:
+    radial-gradient(ellipse at 85% 12%,#ffffff38 0,transparent 42%),
+    linear-gradient(138deg,color-mix(in srgb,var(--bank-color) 94%,#fff),var(--bank-color) 55%,color-mix(in srgb,var(--bank-color) 70%,#101820));
+  box-shadow:inset 0 1px 0 #ffffff66,inset 0 -1px 0 #00000018,0 10px 24px color-mix(in srgb,var(--bank-color) 22%,transparent);
+}
+.wallet-card-face:before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(118deg,transparent 0 35%,#ffffff20 35.2%,transparent 35.8% 66%,#ffffff12 66.2%,transparent 66.8%);
+  opacity:.85;
+}
+.wallet-card-face:after{
+  content:"";position:absolute;z-index:-1;width:230px;height:230px;right:-100px;bottom:-160px;
+  border:1px solid #ffffff55;border-radius:50%;
+  box-shadow:0 0 0 18px #ffffff12,0 0 0 38px #ffffff0b,0 0 0 60px #ffffff08;
+}
+.wallet-card-glass{
+  position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(145deg,#ffffff24,transparent 42%,#ffffff0a 72%,#0000000b);
+  backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px);
+}
+.wallet-card-face .bank-card-top{z-index:2;justify-content:flex-start}
+.wallet-card-face .bank-logo-mark{
+  display:flex;align-items:center;justify-content:flex-start;max-width:150px;
+  min-height:34px;padding:0;background:transparent;border:0;border-radius:0;
+  color:var(--bank-ink);font-size:25px;letter-spacing:-1px;
+  filter:drop-shadow(0 2px 5px #00000020);
+}
+.wallet-card-face .bank-logo-mark svg{width:auto;height:34px;max-width:138px;fill:currentColor;display:block}
+.wallet-card-face .bank-logo-mark .brand-wordmark{font-size:24px;font-weight:900;letter-spacing:-1px}
+.wallet-card-bottom{
+  position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+}
+.wallet-card-label{font-size:9px;font-weight:650;letter-spacing:.9px;text-transform:uppercase;opacity:.78}
+.wallet-card-orbit{width:34px;height:34px;border-radius:50%;border:1px solid #ffffff70;background:#ffffff16;box-shadow:inset 0 1px 5px #ffffff2b,0 2px 10px #00000012;backdrop-filter:blur(8px)}
+.wallet-card-face[data-issuer="Banco do Brasil"]{background:radial-gradient(ellipse at 82% 12%,#fff8 0,transparent 40%),linear-gradient(135deg,#ffdf52,#e6b900 55%,#173b78)}
+.wallet-card-face[data-issuer="Ourocard"]{background:linear-gradient(135deg,#252522,#454039 54%,#171717)}
+.wallet-card-face[data-issuer="Santander"]{background:radial-gradient(ellipse at 90% 8%,#ffffff30,transparent 38%),linear-gradient(140deg,#292522,#5a2422 48%,#b51225)}
+.wallet-card-face[data-issuer="C6 Bank"]{background:radial-gradient(ellipse at 90% 8%,#ffffff20,transparent 40%),linear-gradient(140deg,#343434,#111 68%,#050505)}
+.bank-card-entry.is-archived .wallet-card-face{filter:grayscale(.7);opacity:.68}
+.preview-card-face.wallet-card-face{min-height:190px;padding:20px;border-radius:17px}
+.preview-card-face .bank-logo-mark{max-width:150px}
+.preview-card-face .bank-logo-mark svg{height:38px}
+.preview-card-face .wallet-card-label{font-size:10px}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+:root[data-theme="dark"] .bank-card-entry{
+  background:color-mix(in srgb,var(--surface) 76%,transparent);
+  box-shadow:0 14px 34px #0005,inset 0 1px 0 #ffffff14;
+}
+@media(max-width:760px){
+  .bank-card-face.wallet-card-face{min-height:164px;padding:16px}
+  .preview-card-face.wallet-card-face{min-height:174px}
+}
+@media(prefers-reduced-transparency:reduce){
+  .bank-card-entry{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)}
+  .wallet-card-orbit{backdrop-filter:none;-webkit-backdrop-filter:none}
+}
