@@ -17,15 +17,34 @@ _attempts: dict[str, deque[float]] = defaultdict(deque)
 _attempts_lock = Lock()
 _ATTEMPT_WINDOW_SECONDS = 15 * 60
 _MAX_FAILED_ATTEMPTS = 8
+_CLEANUP_EVERY_OPERATIONS = 128
+_operations_since_cleanup = 0
+
+
+def _cleanup_expired_attempts(now: float) -> None:
+    """Remove expired IP/account buckets so abandoned keys cannot accumulate."""
+    global _operations_since_cleanup
+    _operations_since_cleanup += 1
+    if _operations_since_cleanup < _CLEANUP_EVERY_OPERATIONS:
+        return
+    _operations_since_cleanup = 0
+    expired_keys = [
+        key for key, attempts in _attempts.items()
+        if not attempts or now - attempts[-1] > _ATTEMPT_WINDOW_SECONDS
+    ]
+    for key in expired_keys:
+        _attempts.pop(key, None)
 
 
 def _check_attempt_rate(key: str) -> None:
     now = monotonic()
     with _attempts_lock:
-        attempts = _attempts[key]
-        while attempts and now - attempts[0] > _ATTEMPT_WINDOW_SECONDS:
-            attempts.popleft()
-        if len(attempts) >= _MAX_FAILED_ATTEMPTS:
+        _cleanup_expired_attempts(now)
+        attempts = _attempts.get(key)
+        if attempts:
+            while attempts and now - attempts[0] > _ATTEMPT_WINDOW_SECONDS:
+                attempts.popleft()
+        if attempts and len(attempts) >= _MAX_FAILED_ATTEMPTS:
             raise HTTPException(
                 status_code=429,
                 detail="Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
@@ -41,8 +60,9 @@ def _check_login_rate(request: Request) -> str:
 
 def _record_failed_login(ip: str) -> None:
     with _attempts_lock:
-        attempts = _attempts[ip]
         now = monotonic()
+        _cleanup_expired_attempts(now)
+        attempts = _attempts[ip]
         while attempts and now - attempts[0] > _ATTEMPT_WINDOW_SECONDS:
             attempts.popleft()
         attempts.append(now)
