@@ -79,7 +79,7 @@ A imagem Docker aceita a variável `PORT` definida pela plataforma de hospedagem
 
 Não use SQLite nem armazenamento local efêmero para produção. Em camadas gratuitas, confirme antes os limites de suspensão, memória, horas de execução, armazenamento, backups, limites de conexão e eventual expiração do banco. Uma aplicação que “hospeda grátis” mas apaga o banco ou o disco não é adequada para guardar seu histórico financeiro.
 
-A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo`, `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` e a variável `PORT` fornecida pelo ambiente. Use HTTPS na plataforma e não coloque segredos no GitHub.
+A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo` e a variável `PORT` fornecida pelo ambiente. Na primeira inicialização de um banco vazio, defina também `INITIAL_ADMIN_USERNAME` e `INITIAL_ADMIN_PASSWORD`; depois de criar a conta e confirmar o acesso, essas duas variáveis podem ser removidas. Use HTTPS na plataforma e não coloque segredos no GitHub.
 
 ## Backup pessoal
 
