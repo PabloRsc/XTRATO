@@ -184,6 +184,11 @@ class BackupPurchaseIn(BaseModel):
     notes: str = Field(default="", max_length=300)
     created_at: datetime | None = None
 
+    @field_validator("description", "notes")
+    @classmethod
+    def normalize_backup_purchase_text(cls, value: str) -> str:
+        return value.strip()
+
     @model_validator(mode="after")
     def validate_dates_and_kind(self):
         if self.first_invoice_month.day != 1:
@@ -192,6 +197,10 @@ class BackupPurchaseIn(BaseModel):
             raise ValueError("O mês final da recorrência deve usar o primeiro dia.")
         if self.kind == "parcelado" and self.installment_count < 2:
             raise ValueError("Parcelamentos precisam ter ao menos duas parcelas.")
+        if self.kind in {"avista", "recorrente"} and self.installment_count != 1:
+            raise ValueError("Compras à vista e despesas fixas devem ter uma única parcela.")
+        if self.kind in {"avista", "recorrente"} and self.current_installment != 1:
+            raise ValueError("Compras à vista e despesas fixas não possuem parcela atual.")
         if self.kind != "recorrente" and self.end_invoice_month is not None:
             raise ValueError("Apenas despesas fixas podem ter mês final.")
         if self.kind == "recorrente" and self.direction != "expense":
@@ -248,13 +257,19 @@ class BackupRestoreIn(BaseModel):
             if len(values) != len(set(values)):
                 raise ValueError(f"O backup contém IDs duplicados em {name}.")
 
+        if len({row.name.casefold() for row in self.cards}) != len(self.cards):
+            raise ValueError("O backup contém nomes de cartões repetidos.")
+        if len({row.name.casefold() for row in self.categories}) != len(self.categories):
+            raise ValueError("O backup contém nomes de categorias repetidos.")
+        if len({row.month for row in self.budgets}) != len(self.budgets):
+            raise ValueError("O backup contém limites duplicados para o mesmo mês.")
+
         card_ids = set(ids["cards"])
         category_ids = set(ids["categories"])
         purchase_ids = set(ids["purchases"])
         for purchase in self.purchases:
             if purchase.card_id not in card_ids or purchase.category_id not in category_ids:
                 raise ValueError("Uma compra aponta para cartão ou categoria inexistente.")
-        entry_purchase_ids = []
         entries_by_purchase: dict[int, list[BackupInvoiceEntryIn]] = {}
         for entry in self.invoice_entries:
             if entry.purchase_id not in purchase_ids:
