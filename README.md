@@ -4,7 +4,7 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 ## O que esta base já implementa
 
-- Login privado, sem cadastro público.
+- Login privado, sem cadastro público, com troca de senha dentro da conta e revogação de todas as sessões anteriores.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
 - Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento, vencimento e escolha do mês de pagamento (mesmo mês ou mês seguinte).
 - Cartões e categorias arquivados permanecem visíveis na área de cadastros e podem ser reativados; não aparecem nos seletores de novas compras enquanto arquivados.
@@ -106,6 +106,10 @@ docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"' < back
 
 Guarde os backups fora do servidor e teste a restauração periodicamente. O volume sozinho não substitui backup.
 
+## Segurança da conta
+
+Na barra lateral, a opção **Alterar senha** solicita a senha atual e uma nova senha de pelo menos 12 caracteres. Após a troca, o sistema incrementa a versão de sessão do usuário, encerra o acesso atual e rejeita cookies assinados anteriormente em qualquer navegador. É necessário entrar novamente com a nova senha.
+
 ## Regras importantes do produto
 
 - O limite mensal global é calculado pelo mês em que a fatura será paga, não pelo mês em que a compra foi realizada.
@@ -123,7 +127,7 @@ Crie um ambiente virtual, instale `requirements-dev.txt`, configure `DATABASE_UR
 
 ## Endpoints principais
 
-- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/password`
 - `GET/POST/PUT/DELETE /api/cards`
 - `GET/POST/PUT/DELETE /api/categories`
 - `POST /api/purchases`, `PATCH /api/purchases/{id}` (descrição/observações), `POST /api/purchases/{id}/cancel`
