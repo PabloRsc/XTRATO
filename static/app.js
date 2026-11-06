@@ -311,8 +311,8 @@
       const nickname = card.name && card.name !== card.issuer ? card.name : 'Cartão de crédito';
       const archived = card.active === false;
       return '<article class="bank-card-entry ' + (archived ? 'is-archived' : '') + '">' +
-        '<div class="bank-card-face" style="--bank-color:' + theme.color + ';--bank-ink:' + theme.ink + '">' +
-          '<div class="bank-card-top"><span class="bank-logo-mark">' + escapeHtml(theme.mark) + '</span><span class="bank-card-network">CRÉDITO</span></div>' +
+        '<div class="bank-card-face" data-issuer="' + escapeHtml(card.issuer || 'Outro') + '" style="--bank-color:' + theme.color + ';--bank-ink:' + theme.ink + '">' +
+          '<div class="bank-card-top"><span class="bank-logo-mark">' + brandLogoMarkup(card.issuer) + '</span><span class="bank-card-network">CRÉDITO</span></div>' +
           '<div class="bank-card-bank">' + escapeHtml(card.issuer || 'Instituição') + '</div>' +
           '<div class="bank-card-nickname">' + escapeHtml(nickname) + '</div>' +
           '<div class="bank-card-bottom"><span>FECHAMENTO <b>dia ' + card.closing_day + '</b></span><span>VENCIMENTO <b>dia ' + card.due_day + '</b></span></div>' +
@@ -567,7 +567,7 @@
       choice.className = 'bank-choice';
       choice.dataset.bank = issuer;
       choice.innerHTML = '<span class="bank-choice-mark"></span><b></b>';
-      choice.querySelector('.bank-choice-mark').textContent = bankTheme(issuer).mark;
+      choice.querySelector('.bank-choice-mark').innerHTML = brandLogoMarkup(issuer);
       choice.querySelector('b').textContent = issuer;
       picker.insertBefore(choice, picker.lastElementChild);
       choice.addEventListener('click', () => { setSelectedBank(issuer); updateCardPreview(); });
@@ -578,7 +578,26 @@
       item.classList.toggle('is-selected', selected);
       item.setAttribute('aria-pressed', selected ? 'true' : 'false');
     });
+    picker.querySelectorAll('.bank-choice-mark').forEach(mark => { const item = mark.closest('[data-bank]'); mark.innerHTML = brandLogoMarkup(item.dataset.bank); });
     updateCardPreview();
+  }
+  function filterBankCatalog() {
+    const query = ($('#bankSearch')?.value || '').trim().toLocaleLowerCase('pt-BR');
+    const picker = $('#bankPicker');
+    let visible = 0;
+    picker.querySelectorAll('[data-bank]').forEach(item => {
+      const show = item.dataset.bank.toLocaleLowerCase('pt-BR').includes(query);
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    picker.querySelectorAll('[data-bank-heading]').forEach(heading => {
+      const next = heading.nextElementSibling;
+      let hasVisible = false;
+      let node = next;
+      while (node && !node.hasAttribute('data-bank-heading')) { if (node.matches('[data-bank]') && !node.classList.contains('hidden')) hasVisible = true; node = node.nextElementSibling; }
+      heading.classList.toggle('hidden', !hasVisible);
+    });
+    $('#bankSearchEmpty').classList.toggle('hidden', visible > 0);
   }
   function updateCardPreview() {
     const form = $('#cardForm');
@@ -589,7 +608,8 @@
     const nickname = form.elements.name.value.trim() || (issuer === 'Outro' ? 'Cartão de crédito' : issuer + ' principal');
     $('#previewCardFace').style.setProperty('--preview-color', theme.color);
     $('#previewCardFace').style.setProperty('--preview-ink', theme.ink);
-    $('#previewBankMark').textContent = theme.mark;
+    $('#previewBankMark').innerHTML = brandLogoMarkup(issuer);
+    $('#previewCardFace').dataset.issuer = issuer;
     $('#previewBankName').textContent = issuer;
     $('#previewCardName').textContent = nickname;
     $('#previewCardLimit').textContent = Number.isFinite(amount) ? formatMoneyInput(amount) : '—';
@@ -720,6 +740,9 @@
     $('#budgetForm').addEventListener('submit', submitBudget);
     $('#cardForm').addEventListener('submit', submitCard);
     $('#bankPicker').querySelectorAll('[data-bank]').forEach(button => button.addEventListener('click', () => setSelectedBank(button.dataset.bank)));
+    $('#bankSearch').addEventListener('input', filterBankCatalog);
+    $('#bankPicker').querySelectorAll('.bank-choice-mark').forEach(mark => { const item = mark.closest('[data-bank]'); mark.innerHTML = brandLogoMarkup(item.dataset.bank); });
+    filterBankCatalog();
     ['name', 'limit', 'closing_day', 'due_day'].forEach(key => $('#cardForm').elements[key].addEventListener('input', updateCardPreview));
     setSelectedBank('Nubank');
     $('#categoryForm').addEventListener('submit', submitCategory);
