@@ -277,8 +277,9 @@
     const rows = await api('/api/recurrences');
     const target = $('#recurrencesList');
     if (!rows.length) { target.innerHTML = '<div class="empty-inline">Nenhuma despesa fixa cadastrada. Use “Nova compra” e escolha “Fixo mensal”.</div>'; return; }
-    target.innerHTML = rows.map(row => `<div class="entry-row"><div class="merchant"><div class="merchant-symbol">${icon('repeat')}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${escapeHtml(row.category_name)} · Início ${formatMonth(row.first_invoice_month)}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>Fixo mensal</span></div><div class="entry-amount">${money(row.amount_cents)}<small>${row.active ? 'Ativa' : 'Arquivada'}</small></div><div class="entry-actions">${row.active ? `<button class="mini-action" data-cancel="${row.id}">Encerrar</button>` : ''}</div></div>`).join('');
-    $$('[data-cancel]', target).forEach(b => b.addEventListener('click', () => cancelPurchase(Number(b.dataset.cancel))));
+    target.innerHTML = rows.map(row => `<div class="entry-row"><div class="merchant"><div class="merchant-symbol">${icon('repeat')}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${escapeHtml(row.category_name)} · Início ${formatMonth(row.first_invoice_month)}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>Fixo mensal</span></div><div class="entry-amount">${money(row.amount_cents)}<small>${row.active ? 'Ativa' : 'Arquivada'}</small></div><div class="entry-actions">${row.active ? `<button class="mini-action" data-edit-purchase="${row.id}" data-description="${escapeHtml(row.description)}" data-notes="${escapeHtml(row.notes || '')}">Editar</button><button class="mini-action" data-cancel="${row.id}">Encerrar</button>` : ''}</div></div>`).join('');
+    $('[data-edit-purchase]', target).forEach(b => b.addEventListener('click', () => openPurchaseEdit(Number(b.dataset.editPurchase), b.dataset.description, b.dataset.notes)));
+    $('[data-cancel]', target).forEach(b => b.addEventListener('click', () => cancelPurchase(Number(b.dataset.cancel))));
   }
 
   function suggestInvoiceMonth() {
