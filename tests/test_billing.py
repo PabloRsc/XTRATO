@@ -293,3 +293,54 @@ def test_budget_usage_percentage_never_goes_below_zero():
     assert budget_usage_percentage(-500, 0) == 0.0
     with pytest.raises(ValueError):
         budget_usage_percentage(100, -1)
+
+
+def test_archived_card_and_category_do_not_hide_existing_invoice_entries():
+    engine = make_db()
+    with Session(engine) as db:
+        user = User(username="owner", password_hash="test")
+        db.add(user)
+        db.flush()
+        card = Card(
+            user_id=user.id, name="Cartão antigo", closing_day=25, due_day=5,
+            color="#247a57", active=False,
+        )
+        category = Category(
+            user_id=user.id, name="Categoria antiga", color="#78a88b",
+            icon="tag", active=False,
+        )
+        db.add_all([card, category])
+        db.flush()
+        purchase = Purchase(
+            user_id=user.id,
+            description="Compra preservada",
+            kind="avista",
+            direction="expense",
+            purchase_date=date(2026, 10, 10),
+            card_id=card.id,
+            category_id=category.id,
+            total_cents=4_500,
+            installment_count=1,
+            first_invoice_month=date(2026, 11, 1),
+            current_installment=1,
+            active=True,
+        )
+        db.add(purchase)
+        db.flush()
+        db.add(InvoiceEntry(
+            purchase_id=purchase.id,
+            invoice_month=date(2026, 11, 1),
+            installment_number=None,
+            amount_cents=4_500,
+            status="open",
+        ))
+        db.commit()
+
+        rows = query_month_entries(db, user.id, date(2026, 11, 1))
+        assert len(rows) == 1
+        entry, restored_purchase, archived_card = rows[0]
+        assert restored_purchase.description == "Compra preservada"
+        assert archived_card.active is False
+        assert db.get(Category, restored_purchase.category_id).active is False
+        assert entry.amount_cents == 4_500
+    engine.dispose()
