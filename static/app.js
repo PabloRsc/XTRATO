@@ -520,9 +520,9 @@
   }
 
   function parseMoneyInput(value) {
-    const raw = String(value ?? '').trim().replace(/R\\$/gi, '').replace(/\\s/g, '');
+    const raw = String(value ?? '').trim().replace(/R\$/gi, '').replace(/\s/g, '');
     if (!raw) return 0;
-    const normalized = raw.includes(',') ? raw.replace(/\\./g, '').replace(',', '.') : raw;
+    const normalized = raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw;
     const amount = Number(normalized);
     return Number.isFinite(amount) && amount >= 0 ? amount : NaN;
   }
