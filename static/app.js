@@ -4,7 +4,8 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const money = cents => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((Number(cents) || 0) / 100);
-  const moneyInputToCents = value => { const digits = String(value ?? '').replace(/\D/g, ''); return digits ? Number(digits) : 0; };
+  const moneyInputToCents = value => Math.round(Number(String(value).replace(',', '.')) * 100);
+  const purchaseInputToCents = value => { const digits = String(value ?? '').replace(/\D/g, ''); return digits ? Number(digits) : 0; };
   const saoPauloDate = () => {
     const parts = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Sao_Paulo',
@@ -554,7 +555,7 @@
     const form = $('#purchaseForm');
     const data = new FormData(form);
     const kind = data.get('kind');
-    const amountCents = moneyInputToCents(data.get('amount'));
+    const amountCents = purchaseInputToCents(data.get('amount'));
     const payload = {
       description: data.get('description').trim(),
       kind,
