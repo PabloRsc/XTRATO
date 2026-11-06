@@ -243,7 +243,7 @@
 
   function renderCardOptions() {
     const activeCards = state.cards.filter(card => card.active !== false);
-    const purchaseOptions = activeCards.map(card => `<option value="${card.id}">${escapeHtml(card.name)}${card.last_four ? ` ···· ${card.last_four}` : ''}</option>`).join('');
+    const purchaseOptions = activeCards.map(card => `<option value="${card.id}">${escapeHtml(card.name)}</option>`).join('');
     const filterOptions = state.cards.map(card => `<option value="${card.id}">${escapeHtml(card.name)}${card.active === false ? ' · arquivado' : ''}</option>`).join('');
     $('#purchaseCard').innerHTML = `<option value="">${activeCards.length ? 'Selecione um cartão' : 'Cadastre um cartão ativo'}</option>${purchaseOptions}`;
     $('#statementCardFilter').innerHTML = `<option value="">Todos os cartões</option>${filterOptions}`;
