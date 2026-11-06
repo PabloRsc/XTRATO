@@ -19,11 +19,24 @@ def user_or_401(request: Request, db: Session):
 
 
 @router.get("/cards")
-def list_cards(request: Request, db: Session = Depends(get_db)):
+def list_cards(request: Request, include_archived: bool = False, db: Session = Depends(get_db)):
     user = user_or_401(request, db)
-    cards = db.scalars(select(Card).where(Card.user_id == user.id, Card.active.is_(True)).order_by(Card.name)).all()
-    return [{"id": c.id, "name": c.name, "issuer": c.issuer, "brand": c.brand, "last_four": c.last_four,
-             "closing_day": c.closing_day, "due_day": c.due_day, "due_month_offset": c.due_month_offset, "color": c.color} for c in cards]
+    stmt = select(Card).where(Card.user_id == user.id)
+    if not include_archived:
+        stmt = stmt.where(Card.active.is_(True))
+    cards = db.scalars(stmt.order_by(Card.name)).all()
+    return [{
+        "id": card.id,
+        "name": card.name,
+        "issuer": card.issuer,
+        "brand": card.brand,
+        "last_four": card.last_four,
+        "closing_day": card.closing_day,
+        "due_day": card.due_day,
+        "due_month_offset": card.due_month_offset,
+        "color": card.color,
+        "active": card.active,
+    } for card in cards]
 
 
 @router.post("/cards", status_code=201)
@@ -67,11 +80,25 @@ def archive_card(card_id: int, request: Request, db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@router.get("/categories")
-def list_categories(request: Request, db: Session = Depends(get_db)):
+@router.post("/cards/{card_id}/reactivate")
+def reactivate_card(card_id: int, request: Request, db: Session = Depends(get_db)):
     user = user_or_401(request, db)
-    categories = db.scalars(select(Category).where(Category.user_id == user.id, Category.active.is_(True)).order_by(Category.name)).all()
-    return [{"id": c.id, "name": c.name, "color": c.color, "icon": c.icon} for c in categories]
+    card = db.scalar(select(Card).where(Card.id == card_id, Card.user_id == user.id))
+    if not card:
+        raise HTTPException(status_code=404, detail="Cartão não encontrado.")
+    card.active = True
+    db.commit()
+    return {"ok": True}
+
+
+@router.get("/categories")
+def list_categories(request: Request, include_archived: bool = False, db: Session = Depends(get_db)):
+    user = user_or_401(request, db)
+    stmt = select(Category).where(Category.user_id == user.id)
+    if not include_archived:
+        stmt = stmt.where(Category.active.is_(True))
+    categories = db.scalars(stmt.order_by(Category.name)).all()
+    return [{"id": category.id, "name": category.name, "color": category.color, "icon": category.icon, "active": category.active} for category in categories]
 
 
 @router.post("/categories", status_code=201)
@@ -114,6 +141,17 @@ def archive_category(category_id: int, request: Request, db: Session = Depends(g
     db.commit()
     return {"ok": True}
 
+
+
+@router.post("/categories/{category_id}/reactivate")
+def reactivate_category(category_id: int, request: Request, db: Session = Depends(get_db)):
+    user = user_or_401(request, db)
+    category = db.scalar(select(Category).where(Category.id == category_id, Category.user_id == user.id))
+    if not category:
+        raise HTTPException(status_code=404, detail="Categoria não encontrada.")
+    category.active = True
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/backup")
