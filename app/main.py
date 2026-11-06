@@ -59,29 +59,6 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(
-    title="XTRATO",
-    description="Controle pessoal de gastos em cartões de crédito.",
-    version="0.1.0",
-    lifespan=lifespan,
-    docs_url=None,
-    redoc_url=None,
-    openapi_url=None,
-)
-app.add_middleware(
-    BackupRestoreSizeLimitMiddleware,
-    max_bytes=MAX_BACKUP_UPLOAD_BYTES,
-)
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=SECRET_KEY,
-    session_cookie="xtrato_session",
-    max_age=SESSION_MAX_AGE,
-    same_site="strict",
-    https_only=COOKIE_SECURE,
-)
-
-
 MAX_BACKUP_UPLOAD_BYTES = 10 * 1024 * 1024
 
 
@@ -158,6 +135,30 @@ class BackupRestoreSizeLimitMiddleware:
             return await receive()
 
         await self.app(scope, replay_receive, send)
+
+
+app = FastAPI(
+    title="XTRATO",
+    description="Controle pessoal de gastos em cartões de crédito.",
+    version="0.1.0",
+    lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
+app.add_middleware(
+    BackupRestoreSizeLimitMiddleware,
+    max_bytes=MAX_BACKUP_UPLOAD_BYTES,
+)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    session_cookie="xtrato_session",
+    max_age=SESSION_MAX_AGE,
+    same_site="strict",
+    https_only=COOKIE_SECURE,
+)
+
 
 def private_api_error(detail: str, status_code: int) -> JSONResponse:
     response = JSONResponse({"detail": detail}, status_code=status_code)
