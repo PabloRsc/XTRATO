@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class LoginIn(BaseModel):
@@ -15,6 +15,10 @@ class CardIn(BaseModel):
     name: str = Field(min_length=1, max_length=60)
     issuer: str = Field(default="", max_length=60)
     brand: str = Field(default="", max_length=30)
+    last_four: str | None = Field(default=None, pattern=r"^\d{4}$")
+    closing_day: int = Field(ge=1, le=31, default=25)
+    due_day: int = Field(ge=1, le=31, default=5)
+    color: str = Field(default="#247a57", pattern=r"^#[0-9A-Fa-f]{6}$")
 
     @field_validator("name", "issuer", "brand")
     @classmethod
@@ -27,10 +31,6 @@ class CardIn(BaseModel):
         if not value:
             raise ValueError("Informe um nome para o cartão.")
         return value
-    last_four: str | None = Field(default=None, pattern=r"^\d{4}$")
-    closing_day: int = Field(ge=1, le=31, default=25)
-    due_day: int = Field(ge=1, le=31, default=5)
-    color: str = Field(default="#247a57", pattern=r"^#[0-9A-Fa-f]{6}$")
 
 
 class CategoryIn(BaseModel):
