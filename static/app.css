@@ -47,3 +47,56 @@
 .bank-card-actions button:hover{background:var(--green-soft)}
 .bank-card-entry.is-archived .bank-card-face{filter:grayscale(.75);opacity:.72}
 @media(max-width:760px){.bank-card-list{grid-template-columns:1fr}.bank-card-face{min-height:155px}.bank-card-details strong{font-size:14px}}
+
+/* Card registration: bank picker and live preview */
+.card-registration-layout{display:grid;grid-template-columns:minmax(430px,1.18fr) minmax(300px,.82fr);gap:18px;align-items:start}
+.card-registration-form,.card-preview-panel,.card-registered-panel{padding:22px 23px}
+.card-registration-form .section-heading,.card-preview-panel .section-heading,.card-registered-panel .section-heading{margin-bottom:20px}
+.card-registration-form .section-heading h2,.card-preview-panel .section-heading h2,.card-registered-panel .section-heading h2{font-size:17px;color:var(--ink)}
+.card-registration-form .section-heading p,.card-preview-panel .section-heading p,.card-registered-panel .section-heading p{font-size:11px;color:var(--muted);margin-top:5px}
+.card-registration-fields{display:grid;gap:17px}
+.card-registration-fields>label{display:flex;flex-direction:column;gap:7px;color:var(--ink);font-size:12px;font-weight:700}
+.card-registration-fields>label small{font-size:11px;color:var(--muted);font-weight:500}
+.card-registration-fields input{width:100%;height:46px;padding:11px 14px;border:1px solid #e1e8e4;border-radius:11px;background:#fbfcfb;color:var(--ink);font-size:14px;min-width:0}
+.card-registration-fields input:focus{outline:0;border-color:#15965f;box-shadow:0 0 0 3px #15965f18}
+.bank-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.bank-choice{position:relative;min-width:0;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border:1px solid #e0e7e3;border-radius:15px;background:linear-gradient(145deg,#fff,#fafcfb);color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.bank-choice:hover{border-color:#7bc59c;transform:translateY(-1px)}
+.bank-choice.is-selected{border:2px solid #16a05e;background:#f1faf5;box-shadow:0 0 0 2px #16a05e0d}
+.bank-choice.is-selected:after{content:"✓";position:absolute;right:-2px;top:-9px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#13a365;color:#fff;font-size:14px;font-weight:900;box-shadow:0 2px 6px #0002}
+.bank-choice-mark{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:var(--bank-tile,#eee);color:var(--bank-tile-ink,#fff);font-size:16px;font-weight:900;letter-spacing:-.5px;box-shadow:inset 0 0 0 1px #00000008}
+.bank-choice[data-bank="Nubank"] .bank-choice-mark{--bank-tile:#820ad1}
+.bank-choice[data-bank="Itaú"] .bank-choice-mark{--bank-tile:#ec7000}
+.bank-choice[data-bank="Bradesco"] .bank-choice-mark{--bank-tile:#cc092f}
+.bank-choice[data-bank="Inter"] .bank-choice-mark{--bank-tile:#ff7a00}
+.bank-choice[data-bank="Santander"] .bank-choice-mark{--bank-tile:#ec0000}
+.bank-choice[data-bank="Banco do Brasil"] .bank-choice-mark{--bank-tile:#ffdf00;--bank-tile-ink:#173b78}
+.bank-choice[data-bank="Caixa Econômica Federal"] .bank-choice-mark{--bank-tile:#0875b9}
+.bank-choice[data-bank="C6 Bank"] .bank-choice-mark{--bank-tile:#222}
+.bank-choice[data-bank="Outro"] .bank-choice-mark{--bank-tile:#edf1ef;--bank-tile-ink:#53635b;border:1px solid #dce5df;border-radius:50%}
+.bank-choice b{font-size:12px;font-weight:700;text-align:center;overflow-wrap:anywhere}
+.card-registration-fields .two-fields{gap:14px}
+.card-registration-fields .two-fields label{display:flex;flex-direction:column;gap:7px;color:var(--ink);font-size:12px;font-weight:700}
+.card-registration-fields .form-submit{height:49px;border-radius:12px;font-size:13px;font-weight:800;margin-top:4px}
+.card-registration-fields .btn-quiet{background:transparent;color:var(--muted);border:0;box-shadow:none}
+.card-preview-column{position:sticky;top:18px}
+.card-preview-panel{overflow:hidden}
+.card-live-preview{display:grid;gap:14px}
+.preview-card-face{--preview-color:#820ad1;--preview-ink:#fff;min-height:188px;padding:22px 20px;border-radius:17px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;position:relative;overflow:hidden;background:linear-gradient(130deg,var(--preview-color),color-mix(in srgb,var(--preview-color) 72%,#111));color:var(--preview-ink);box-shadow:0 12px 25px #15251b20}
+.preview-card-face:after{content:"";position:absolute;right:-56px;top:-66px;width:190px;height:190px;border-radius:50%;background:#ffffff20;box-shadow:0 0 0 23px #ffffff0c,0 0 0 47px #ffffff08}
+.preview-card-brand{position:relative;z-index:1;display:flex;align-items:center;gap:11px}
+.preview-card-brand span{font-size:26px;line-height:1;font-weight:900;letter-spacing:-1px}
+.preview-card-brand b{font-size:13px;font-weight:600}
+.preview-card-face>strong{position:relative;z-index:1;font-size:17px;font-weight:800;overflow-wrap:anywhere}
+.preview-card-face>span{position:relative;z-index:1;font-size:13px}
+.preview-card-facts{display:grid;gap:0}
+.preview-card-facts>div{min-height:51px;padding:0 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #e9efeb;border-radius:12px;background:#fff;font-size:12px}
+.preview-card-facts>div+div{margin-top:-1px}
+.preview-card-facts>div span{color:#39433e}
+.preview-card-facts>div b{font-size:12px;color:var(--ink);white-space:nowrap}
+.preview-card-facts i{font-style:normal}
+.card-registered-panel{grid-column:1/-1}
+.card-registered-panel .bank-card-list{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+@media(max-width:1050px){.card-registration-layout{grid-template-columns:minmax(0,1fr) minmax(270px,.8fr);gap:12px}.card-registration-form,.card-preview-panel,.card-registered-panel{padding:18px}}
+@media(max-width:760px){.card-registration-layout{grid-template-columns:1fr}.card-preview-column{position:static;grid-row:2}.card-registered-panel{grid-column:auto;grid-row:3}.card-registration-form{grid-row:1}.bank-choice{min-height:90px}.preview-card-face{min-height:170px}}
+@media(max-width:390px){.bank-picker{gap:8px}.bank-choice{min-height:82px;border-radius:12px}.bank-choice-mark{width:39px;height:39px}.bank-choice b{font-size:10px}.card-registration-fields .two-fields{gap:8px}.card-registration-form,.card-preview-panel,.card-registered-panel{padding:14px}}
