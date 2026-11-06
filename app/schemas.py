@@ -224,6 +224,7 @@ class BackupAccountIn(BaseModel):
 
 class BackupRestoreIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    confirmation: Literal["RESTAURAR"]
     format: Literal["xtrato-backup"]
     version: Literal[1]
     exported_at: datetime
