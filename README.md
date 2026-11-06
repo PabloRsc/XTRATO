@@ -82,8 +82,9 @@ Guarde os backups fora do servidor e teste a restauração periodicamente. O vol
 
 - O orçamento é calculado pelo mês da fatura, não pelo mês da compra.
 - O limite configurado é global e continua valendo nos meses seguintes; uma nova configuração cria uma alteração a partir daquele mês.
-- O fechamento do cartão sugere o mês de fatura; o usuário pode alterar o mês manualmente para refletir a fatura real da instituição.
-- O vencimento fica cadastrado para organização, mas não altera o mês de competência da fatura.
+- O limite mensal acompanha o mês em que a fatura será paga, e não apenas o mês em que a compra foi feita.
+- O fechamento e o vencimento do cartão são usados juntos para sugerir o mês de pagamento: compras após o fechamento entram no ciclo seguinte; o dia de vencimento define se o ciclo é pago no mesmo mês do fechamento ou no mês seguinte.
+- A sugestão pode ser alterada manualmente para refletir a fatura real da instituição, inclusive quando a administradora usa regras específicas.
 - Uma compra parcelada gera uma linha por parcela. O valor total é dividido em centavos e a soma das parcelas sempre fecha com o total informado.
 - Para compra antiga em andamento, o mês informado é o da parcela atual. O sistema deduz o mês inicial conforme o número da parcela e marca as anteriores como históricas.
 - Despesas fixas geram lançamentos mensais de forma idempotente, sem duplicar a mesma recorrência no mesmo mês.
