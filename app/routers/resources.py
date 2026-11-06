@@ -123,5 +123,9 @@ def download_backup(request: Request, db: Session = Depends(get_db)):
     filename = f"xtrato-backup-{local_today().isoformat()}.json"
     return JSONResponse(
         content=payload,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
+        },
     )
