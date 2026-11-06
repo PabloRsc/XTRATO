@@ -251,7 +251,7 @@
   function renderCards() {
     const target = $('#cardsList');
     if (!state.cards.length) { target.innerHTML = '<div class="empty-inline">Nenhum cartão cadastrado. Adicione seu primeiro cartão ao lado.</div>'; return; }
-    target.innerHTML = state.cards.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</b><small>${escapeHtml(c.issuer || c.brand || 'Cartão')} · Fecha dia ${c.closing_day} · Vence dia ${c.due_day}</small></div><div class="managed-actions"><button type="button" data-edit-card="${c.id}">Editar</button><button type="button" data-archive-card="${c.id}">Arquivar</button></div></div>`).join('');
+    target.innerHTML = state.cards.map(c => `<div class="managed-item"><div class="managed-color" style="background:${escapeHtml(c.color)}">${icon('card')}</div><div class="managed-copy"><b>${escapeHtml(c.name)}${c.last_four ? ` ···· ${c.last_four}` : ''}</b><small>${escapeHtml(c.issuer || c.brand || 'Cartão')} · Fecha dia ${c.closing_day} · Vence dia ${c.due_day} · ${Number(c.due_month_offset) === 0 ? 'mesmo mês' : 'mês seguinte'}</small></div><div class="managed-actions"><button type="button" data-edit-card="${c.id}">Editar</button><button type="button" data-archive-card="${c.id}">Arquivar</button></div></div>`).join('');
     $('[data-edit-card]').forEach(b => b.addEventListener('click', () => startEditCard(Number(b.dataset.editCard))));
     $('[data-archive-card]').forEach(b => b.addEventListener('click', () => archiveResource('cards', Number(b.dataset.archiveCard), 'cartão')));
   }
@@ -290,7 +290,7 @@
     const d = new Date(`${dateValue}T12:00:00`);
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const statementOffset = d.getDate() > card.closing_day ? 1 : 0;
-    const paymentOffset = card.due_day <= card.closing_day ? 1 : 0;
+    const paymentOffset = Number(card.due_month_offset ?? 1);
     $('#firstInvoiceMonth').value = addMonth(month, statementOffset + paymentOffset);
   }
   function setKind(kind) {
@@ -454,7 +454,7 @@
     if (!card) return;
     state.editingCardId = id;
     const form = $('#cardForm');
-    for (const key of ['name', 'issuer', 'brand', 'last_four', 'closing_day', 'due_day', 'color']) {
+    for (const key of ['name', 'issuer', 'brand', 'last_four', 'closing_day', 'due_day', 'due_month_offset', 'color']) {
       form.elements[key].value = card[key] ?? '';
     }
     $('#cardFormTitle').textContent = 'Editar cartão';
@@ -470,6 +470,7 @@
     form.reset();
     form.elements.closing_day.value = 25;
     form.elements.due_day.value = 5;
+    form.elements.due_month_offset.value = 1;
     form.elements.color.value = '#247a57';
     $('#cardFormTitle').textContent = 'Adicionar cartão';
     $('#cardFormSubmit').textContent = 'Salvar cartão';
@@ -480,7 +481,7 @@
     event.preventDefault();
     const form = event.currentTarget;
     const fd = new FormData(form);
-    const payload = { name: fd.get('name').trim(), issuer: fd.get('issuer').trim(), brand: fd.get('brand'), last_four: fd.get('last_four') || null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), color: fd.get('color') };
+    const payload = { name: fd.get('name').trim(), issuer: fd.get('issuer').trim(), brand: fd.get('brand'), last_four: fd.get('last_four') || null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), due_month_offset: Number(fd.get('due_month_offset')), color: fd.get('color') };
     try {
       const editing = state.editingCardId;
       await api(editing ? `/api/cards/${editing}` : '/api/cards', { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
