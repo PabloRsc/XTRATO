@@ -1,6 +1,6 @@
 # XTRATO — controle pessoal de cartões
 
-Aplicação web pessoal para centralizar compras de vários cartões, acompanhar parcelas por mês de fatura e controlar um orçamento mensal global.
+Aplicação web pessoal para centralizar compras de vários cartões, organizar parcelas pelo mês em que a fatura será paga e controlar um orçamento mensal global.
 
 ## O que esta base já implementa
 
@@ -62,6 +62,20 @@ docker compose --profile proxy up -d --build
 
 Não publique o app sem HTTPS. Em produção, mantenha o acesso à porta interna da aplicação restrito e use o Caddy ou outro proxy HTTPS.
 
+## Hospedagem em plataforma gratuita
+
+A imagem Docker aceita a variável `PORT` definida pela plataforma de hospedagem (com fallback para 8000). Para publicar em qualquer plataforma compatível, ela precisa oferecer:
+
+- Execução de uma imagem Docker ou do `Dockerfile` deste repositório.
+- Variáveis de ambiente secretas para as credenciais e configurações.
+- Conexão de rede persistente com PostgreSQL externo.
+- HTTPS gerenciado pela plataforma ou por proxy reverso.
+- Um PostgreSQL com armazenamento persistente e política de retenção conhecida.
+
+Não use SQLite nem armazenamento local efêmero para produção. Em camadas gratuitas, confirme antes os limites de suspensão, memória, horas de execução, armazenamento, backups, limites de conexão e eventual expiração do banco. Uma aplicação que “hospeda grátis” mas apaga o banco ou o disco não é adequada para guardar seu histórico financeiro.
+
+A implantação é independente do provedor: o serviço web recebe `DATABASE_URL`, `APP_SECRET_KEY`, `APP_ENV=production`, `COOKIE_SECURE=true`, `APP_TIMEZONE=America/Sao_Paulo`, `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` e a variável `PORT` fornecida pelo ambiente. Use HTTPS na plataforma e não coloque segredos no GitHub.
+
 ## Banco de dados e backup
 
 Os dados do PostgreSQL ficam no volume Docker `xtrato_pgdata`. Um backup lógico pode ser feito com:
@@ -80,10 +94,11 @@ Guarde os backups fora do servidor e teste a restauração periodicamente. O vol
 
 ## Regras importantes do produto
 
-- O orçamento é calculado pelo mês da fatura, não pelo mês da compra.
+- O orçamento é calculado pelo mês em que a fatura será paga, não pelo mês em que a compra foi realizada.
 - O limite configurado é global e continua valendo nos meses seguintes; uma nova configuração cria uma alteração a partir daquele mês.
-- O fechamento do cartão sugere o mês de fatura; o usuário pode alterar o mês manualmente para refletir a fatura real da instituição.
-- O vencimento fica cadastrado para organização, mas não altera o mês de competência da fatura.
+- O limite mensal acompanha o mês em que a fatura será paga, e não apenas o mês em que a compra foi feita.
+- O fechamento e o vencimento do cartão são usados juntos para sugerir o mês de pagamento: compras após o fechamento entram no ciclo seguinte; o dia de vencimento define se o ciclo é pago no mesmo mês do fechamento ou no mês seguinte.
+- A sugestão pode ser alterada manualmente para refletir a fatura real da instituição, inclusive quando a administradora usa regras específicas.
 - Uma compra parcelada gera uma linha por parcela. O valor total é dividido em centavos e a soma das parcelas sempre fecha com o total informado.
 - Para compra antiga em andamento, o mês informado é o da parcela atual. O sistema deduz o mês inicial conforme o número da parcela e marca as anteriores como históricas.
 - Despesas fixas geram lançamentos mensais de forma idempotente, sem duplicar a mesma recorrência no mesmo mês.
