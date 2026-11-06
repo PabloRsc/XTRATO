@@ -784,3 +784,7 @@ html,body{background:var(--bg);color:var(--ink);transition:background-color .2s,
  .login-art .brand-mark-image{width:46px;height:46px;flex-basis:46px}
  .mobile-brand .brand-mark-image{width:42px;height:42px;flex-basis:42px}
 }
+
+/* Purchase form: natural Brazilian currency entry */
+#purchaseForm input[name="amount"]{font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.01em}
+#purchaseForm #amountHelp{display:block;margin-top:5px;line-height:1.4}
