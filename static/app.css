@@ -874,3 +874,87 @@ h1,h2,h3,.xtrato-balance-value,.dark-total,.budget-numbers strong{font-family:"B
  .xtrato-section-head{gap:9px}
  .xtrato-section-head .link-button{font-size:11px}
 }
+
+
+/* XTRATO phase 2 — statement and wallet */
+.statement-page{max-width:1440px}
+.statement-welcome{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:4px 0 24px}
+.statement-welcome h1{font-family:"Bricolage Grotesque",sans-serif;font-size:clamp(30px,3vw,40px);letter-spacing:-1.2px;margin:7px 0}
+.statement-welcome p{color:var(--muted);font-size:13px;margin:0}
+.statement-workspace{padding:24px!important;border-radius:22px!important;background:var(--surface)!important;border:1px solid var(--line)!important;box-shadow:var(--shadow)!important}
+.statement-workspace-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.statement-workspace-heading h2{font-family:"Bricolage Grotesque",sans-serif;font-size:22px;letter-spacing:-.5px;margin:0 0 4px}
+.statement-workspace-heading p{font-size:12px;color:var(--muted);margin:0}
+.statement-section-icon{display:none!important}
+.statement-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) 230px;gap:12px!important;margin:20px 0!important}
+.statement-search-box,.statement-filter-label{background:var(--bg)!important;border:1px solid var(--line)!important;border-radius:12px!important;min-height:48px}
+.statement-search-box input,.statement-filter-label select{background:transparent!important;color:var(--ink)!important}
+.statement-summary-card{background:var(--surface-2)!important;border:1px solid var(--line)!important;border-radius:15px!important;padding:17px 19px!important}
+.statement-summary-label{color:var(--muted)!important;font-size:10px!important;letter-spacing:.35px}
+.statement-summary-card #statementCount{font-size:14px!important;font-weight:700;color:var(--ink)}
+.statement-summary-total strong{font-family:"Bricolage Grotesque",sans-serif;font-size:24px!important;color:var(--green)!important}
+.statement-results-heading{margin:25px 0 8px!important}
+.statement-results-heading h3{font-family:"Bricolage Grotesque",sans-serif;font-size:17px!important}
+.statement-results{border-top:1px solid var(--line)}
+.statement-results .entry-row,.statement-results .entry-item{padding:15px 4px!important;border-bottom:1px solid var(--line)!important}
+.xtrato-cards-page .cards-page-heading{margin:4px 0 22px}
+.xtrato-cards-page .cards-page-heading h1{font-family:"Bricolage Grotesque",sans-serif;font-size:clamp(32px,3vw,42px);letter-spacing:-1.4px}
+.xtrato-cards-page .cards-overview-strip{margin-bottom:18px}
+.xtrato-cards-page .cards-overview-strip>div{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:16px!important;padding:17px 19px!important;box-shadow:var(--shadow)}
+.xtrato-cards-page .cards-overview-strip strong{font-family:"Bricolage Grotesque",sans-serif;font-size:24px!important}
+.xtrato-cards-page .card-registration-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:17px;align-items:start}
+.xtrato-cards-page .card-registration-form,.xtrato-cards-page .card-preview-panel,.xtrato-cards-page .card-registered-panel{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:20px!important;box-shadow:var(--shadow)!important;padding:22px!important}
+.xtrato-cards-page .card-preview-column{position:sticky;top:20px}
+.xtrato-cards-page .card-registered-panel{grid-column:1/-1}
+.xtrato-cards-page .card-registration-fields{gap:14px}
+.xtrato-cards-page .bank-picker{max-height:230px!important;background:var(--bg)!important;border:1px solid var(--line)!important;border-radius:14px!important;padding:10px!important}
+.xtrato-cards-page .bank-choice{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:10px!important}
+.xtrato-cards-page .bank-choice[aria-pressed="true"]{border-color:var(--green)!important;background:var(--green-soft)!important}
+.xtrato-cards-page .card-live-preview{padding:4px 0 0}
+.xtrato-cards-page .preview-card-face.wallet-card-face,.xtrato-cards-page .bank-card-face.wallet-card-face{
+ aspect-ratio:1.586/1!important;width:100%!important;max-width:320px!important;min-height:0!important;height:auto!important;
+ border-radius:17px!important;padding:18px!important;overflow:hidden!important;position:relative!important;
+ background:linear-gradient(135deg,color-mix(in srgb,var(--bank-color) 88%,#fff 12%),color-mix(in srgb,var(--bank-color) 70%,#071a13 30%))!important;
+ box-shadow:0 14px 30px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.35)!important;
+ isolation:isolate;
+}
+.xtrato-cards-page .wallet-card-glass{position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;
+ background:linear-gradient(120deg,rgba(255,255,255,.23),transparent 36%,rgba(255,255,255,.08) 68%,transparent)!important;
+ backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;
+}
+.xtrato-cards-page .wallet-card-glass:after{content:"";position:absolute;width:180px;height:180px;right:-65px;bottom:-125px;border:1px solid rgba(255,255,255,.38);border-radius:50%;box-shadow:0 0 0 18px rgba(255,255,255,.07),0 0 0 40px rgba(255,255,255,.045)}
+.xtrato-cards-page .bank-card-top,.xtrato-cards-page .wallet-card-bottom{position:relative!important;z-index:2!important}
+.xtrato-cards-page .bank-card-top{display:flex;align-items:flex-start;justify-content:flex-start}
+.xtrato-cards-page .wallet-card-face .bank-logo-mark{max-width:78%;min-height:36px;filter:drop-shadow(0 2px 5px rgba(0,0,0,.22))}
+.xtrato-cards-page .wallet-card-face .bank-logo-mark svg{height:34px!important;max-width:100%}
+.xtrato-cards-page .wallet-card-face .bank-logo-mark .brand-wordmark{font-size:23px!important}
+.xtrato-cards-page .wallet-card-bottom{margin-top:auto;min-height:25px}
+.xtrato-cards-page .wallet-card-label{font-size:9px!important;letter-spacing:.7px}
+.xtrato-cards-page .wallet-card-orbit{width:34px!important;height:34px!important;border-radius:50%!important;background:rgba(255,255,255,.2)!important;border:1px solid rgba(255,255,255,.55)!important;backdrop-filter:blur(15px)!important;-webkit-backdrop-filter:blur(15px)!important}
+.xtrato-cards-page .bank-card-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))!important;gap:18px!important;align-items:start}
+.xtrato-cards-page .bank-card-entry{max-width:340px!important;width:100%!important;padding:12px!important;border:1px solid rgba(255,255,255,.42)!important;border-radius:19px!important;background:rgba(255,255,255,.42)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;box-shadow:0 12px 30px rgba(20,35,27,.08)!important}
+.xtrato-cards-page .bank-card-entry .bank-card-face{max-width:100%!important}
+.xtrato-cards-page .bank-card-details{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 2px 2px!important}
+.xtrato-cards-page .bank-card-details small{font-size:10px!important;color:var(--muted)!important}
+.xtrato-cards-page .bank-card-details strong{font-family:"Bricolage Grotesque",sans-serif;font-size:16px!important;color:var(--ink)!important}
+.xtrato-cards-page .bank-card-actions{display:flex;gap:6px;flex-wrap:wrap}
+.xtrato-cards-page .bank-card-actions button{font-size:10px!important;padding:7px 9px!important;border-radius:9px!important}
+:root[data-theme="dark"] .xtrato-cards-page .bank-card-entry{background:rgba(255,255,255,.055)!important;border-color:rgba(255,255,255,.14)!important}
+@media(max-width:850px){
+ .xtrato-cards-page .card-registration-layout{grid-template-columns:1fr}
+ .xtrato-cards-page .card-preview-column{position:static}
+ .xtrato-cards-page .card-registered-panel{grid-column:auto}
+}
+@media(max-width:680px){
+ .statement-welcome{align-items:flex-start;flex-direction:column}
+ .statement-add-button{width:100%;justify-content:center}
+ .statement-workspace{padding:16px!important}
+ .statement-toolbar{grid-template-columns:1fr!important}
+ .xtrato-cards-page .cards-page-heading{align-items:flex-start;flex-direction:column}
+ .xtrato-cards-page .cards-overview-strip{grid-template-columns:1fr 1fr!important}
+ .xtrato-cards-page .cards-overview-strip>div:nth-child(2){grid-column:1/-1}
+ .xtrato-cards-page .card-registration-form,.xtrato-cards-page .card-preview-panel,.xtrato-cards-page .card-registered-panel{padding:16px!important}
+ .xtrato-cards-page .bank-card-list{grid-template-columns:1fr!important}
+ .xtrato-cards-page .bank-card-entry{max-width:100%!important}
+ .xtrato-cards-page .preview-card-face.wallet-card-face{max-width:100%!important}
+}
