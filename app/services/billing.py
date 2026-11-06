@@ -28,17 +28,20 @@ def add_months(value: date, count: int) -> date:
     return date(year, month, 1)
 
 
-def month_from_purchase_date(purchase_date: date, closing_day: int, due_day: int) -> date:
-    """Suggest the month the invoice is paid, using both closing and due days.
+def month_from_purchase_date(purchase_date: date, closing_day: int, due_month_offset: int = 1) -> date:
+    """Suggest the month the invoice is paid using the card's explicit cycle setting.
 
-    Purchases after closing move to the next statement cycle. The payment month
-    is the closing month when the due day is after the closing day; otherwise
-    payment happens in the following calendar month.
+    due_month_offset is 0 when the invoice is paid in the closing month, or 1
+    when it is paid in the following month. The user can override the suggestion
+    on an individual purchase to match the issuer's actual statement.
     """
+    if not 1 <= closing_day <= 31:
+        raise ValueError("Dia de fechamento inválido.")
+    if due_month_offset not in (0, 1):
+        raise ValueError("O mês de vencimento deve ser o mesmo ou o seguinte ao fechamento.")
     base = date(purchase_date.year, purchase_date.month, 1)
     statement_offset = 1 if purchase_date.day > closing_day else 0
-    payment_offset = 1 if due_day <= closing_day else 0
-    return add_months(base, statement_offset + payment_offset)
+    return add_months(base, statement_offset + due_month_offset)
 
 
 def split_amount(total_cents: int, parts: int) -> list[int]:
@@ -105,7 +108,7 @@ def card_suggested_invoice_month(db: Session, card_id: int, purchase_date: date)
     card = db.get(Card, card_id)
     if card is None:
         return date(purchase_date.year, purchase_date.month, 1)
-    return month_from_purchase_date(purchase_date, card.closing_day, card.due_day)
+    return month_from_purchase_date(purchase_date, card.closing_day, card.due_month_offset)
 
 
 def query_month_entries(db: Session, user_id: int, month: date, card_id: int | None = None, search: str | None = None):
