@@ -408,8 +408,14 @@
   async function loadRecurrences() {
     const rows = await api('/api/recurrences');
     const target = $('#recurrencesList');
+    const activeRows = rows.filter(row => row.active);
+    const archivedRows = rows.filter(row => !row.active);
+    const monthlyTotal = activeRows.reduce((sum, row) => sum + (Number(row.amount_cents) || 0), 0);
+    $('#recurrencesActiveCount').textContent = String(activeRows.length);
+    $('#recurrencesArchivedCount').textContent = String(archivedRows.length);
+    $('#recurrencesMonthlyTotal').textContent = money(monthlyTotal);
     if (!rows.length) { target.innerHTML = '<div class="empty-inline">Nenhuma despesa fixa cadastrada. Use “Nova compra” e escolha “Fixo mensal”.</div>'; return; }
-    target.innerHTML = rows.map(row => `<div class="entry-row"><div class="merchant"><div class="merchant-symbol">${icon('repeat')}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${escapeHtml(row.category_name)} · Início ${formatMonth(row.first_invoice_month)}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>Fixo mensal</span></div><div class="entry-amount">${money(row.amount_cents)}<small>${row.active ? 'Ativa' : 'Arquivada'}</small></div><div class="entry-actions">${row.active ? `<button class="mini-action" data-edit-purchase="${row.id}" data-description="${escapeHtml(row.description)}" data-notes="${escapeHtml(row.notes || '')}">Editar</button><button class="mini-action" data-cancel="${row.id}">Encerrar</button>` : ''}</div></div>`).join('');
+    target.innerHTML = rows.map(row => `<article class="recurrence-entry ${row.active ? 'is-active' : 'is-archived'}"><div class="merchant"><div class="merchant-symbol">${icon('repeat')}</div><div class="merchant-copy"><b>${escapeHtml(row.description)}</b><small>${escapeHtml(row.category_name)} · Início ${formatMonth(row.first_invoice_month)}</small></div></div><div class="entry-card">${escapeHtml(row.card_name)}</div><div class="entry-type"><span>Fixo mensal</span></div><div class="entry-amount">${money(row.amount_cents)}<small>${row.active ? 'Ativa' : 'Arquivada'}</small></div><div class="entry-actions">${row.active ? `<button class="mini-action" data-edit-purchase="${row.id}" data-description="${escapeHtml(row.description)}" data-notes="${escapeHtml(row.notes || '')}">Editar</button><button class="mini-action" data-cancel="${row.id}">Encerrar</button>` : ''}</div></article>`).join('');
     target.querySelectorAll('[data-edit-purchase]').forEach(b => b.addEventListener('click', () => openPurchaseEdit(Number(b.dataset.editPurchase), b.dataset.description, b.dataset.notes)));
     target.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', () => cancelPurchase(Number(b.dataset.cancel))));
   }
