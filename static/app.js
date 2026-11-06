@@ -402,9 +402,19 @@
   function openPurchase(kind = 'avista') {
     resetPurchaseForm();
     if (kind === 'recorrente') setKind('recorrente');
-    if (!state.cards.length || !state.categories.length) {
-      toast('Antes de lançar, cadastre ao menos um cartão e uma categoria.');
-      if (!state.cards.length) setPage('cards'); else setPage('categories');
+    const hasActiveCards = state.cards.some(card => card.active !== false);
+    const hasActiveCategories = state.categories.some(category => category.active !== false);
+    if (!hasActiveCards || !hasActiveCategories) {
+      if (!hasActiveCards && !hasActiveCategories) {
+        toast('Cadastre ou reative um cartão e uma categoria antes de lançar.');
+        setPage('cards');
+      } else if (!hasActiveCards) {
+        toast('Cadastre ou reative um cartão antes de lançar.');
+        setPage('cards');
+      } else {
+        toast('Cadastre ou reative uma categoria antes de lançar.');
+        setPage('categories');
+      }
       return;
     }
     renderCardOptions();
@@ -605,12 +615,6 @@
     $('#statementSearch').addEventListener('input', () => { clearTimeout(loadStatement.timer); loadStatement.timer = setTimeout(loadStatement, 180); });
     $('#statementCardFilter').addEventListener('change', loadStatement);
     $('#logoutButton').addEventListener('click', logout);
-    $('#passwordChangeButton').addEventListener('click', () => {
-      $('#passwordChangeForm').reset();
-      $('#passwordChangeError').textContent = '';
-      openModal('passwordModal');
-    });
-    $('#passwordChangeForm').addEventListener('submit', submitPasswordChange);
     $('#mobileLogout').addEventListener('click', logout);
     $('#backupButton').addEventListener('click', () => window.location.assign('/api/backup'));
     $('#restoreButton').addEventListener('click', () => $('#backupRestoreFile').click());
@@ -669,41 +673,6 @@
       await loadInitialData();
     } catch (error) { $('#loginError').textContent = error.message; }
   }
-  async function submitPasswordChange(event) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const currentPassword = form.elements.current_password.value;
-    const newPassword = form.elements.new_password.value;
-    const confirmPassword = form.elements.confirm_password.value;
-    $('#passwordChangeError').textContent = '';
-
-    if (newPassword !== confirmPassword) {
-      $('#passwordChangeError').textContent = 'A confirmação não corresponde à nova senha.';
-      return;
-    }
-    if (newPassword.length < 12) {
-      $('#passwordChangeError').textContent = 'A nova senha precisa ter pelo menos 12 caracteres.';
-      return;
-    }
-
-    try {
-      await api('/api/auth/password', {
-        method: 'POST',
-        body: JSON.stringify({
-          current_password: currentPassword,
-          new_password: newPassword,
-        }),
-      });
-      closeModal('passwordModal');
-      form.reset();
-      state.user = null;
-      showLogin();
-      toast('Senha alterada. Entre novamente com a nova senha.');
-    } catch (error) {
-      $('#passwordChangeError').textContent = error.message;
-    }
-  }
-
   async function logout() {
     try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); } catch (_) { /* local logout anyway */ }
     state.user = null;
