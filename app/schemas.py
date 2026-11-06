@@ -216,11 +216,6 @@ class BackupPurchaseIn(BaseModel):
     notes: str = Field(default="", max_length=300)
     created_at: datetime | None = None
 
-    @field_validator("description", "notes")
-    @classmethod
-    def normalize_backup_purchase_text(cls, value: str) -> str:
-        return value.strip()
-
     @field_validator("description")
     @classmethod
     def require_backup_purchase_description(cls, value: str) -> str:
