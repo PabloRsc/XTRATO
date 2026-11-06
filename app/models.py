@@ -37,6 +37,7 @@ class Card(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(60), nullable=False)
+    limit_cents: Mapped[int] = mapped_column(BigInteger, default=0, server_default="0", nullable=False)
     issuer: Mapped[str] = mapped_column(String(60), default="", nullable=False)
     brand: Mapped[str] = mapped_column(String(30), default="", nullable=False)
     last_four: Mapped[str | None] = mapped_column(String(4), nullable=True)
