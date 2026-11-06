@@ -158,7 +158,7 @@ def test_account_cannot_edit_cancel_or_archive_another_accounts_records():
         assert cancel_error.value.status_code == 404
 
         with pytest.raises(HTTPException) as update_card_error:
-            resources.update_card(owner_card.id, CardIn(name="Cartão alterado"), request, db)
+            resources.update_card(owner_card.id, CardIn(name="Cartão alterado", issuer="Nubank"), request, db)
         assert update_card_error.value.status_code == 404
 
         with pytest.raises(HTTPException) as archive_card_error:
