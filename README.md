@@ -4,6 +4,8 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 ## O que esta base já implementa
 
+A auditoria técnica e os critérios de aceite para produção estão documentados em [`docs/AUDITORIA_TECNICA_2026-11-06.md`](docs/AUDITORIA_TECNICA_2026-11-06.md).
+
 - Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
 - Cadastro, edição e arquivamento de cartões, com banco, bandeira, últimos quatro dígitos, fechamento, vencimento e escolha do mês de pagamento (mesmo mês ou mês seguinte).
