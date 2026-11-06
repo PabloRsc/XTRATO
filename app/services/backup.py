@@ -9,7 +9,11 @@ from app.models import Budget, Card, Category, InvoiceEntry, Purchase, User
 
 
 def _iso(value: date | datetime | None) -> str | None:
-    return value.isoformat() if value is not None else None
+    if value is None:
+        return None
+    if isinstance(value, datetime) and value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.isoformat()
 
 
 def build_user_backup(db: Session, user: User) -> dict:
@@ -110,4 +114,109 @@ def build_user_backup(db: Session, user: User) -> dict:
             }
             for entry in entries
         ],
+    }
+
+
+def restore_user_backup(db: Session, user: User, payload) -> dict:
+    """Restore a validated backup into an account with no financial records.
+
+    New database IDs are allocated during restore and source IDs are mapped to
+    them. This preserves all relationships without colliding with IDs owned by
+    other accounts in the destination database.
+    """
+    from sqlalchemy import func
+
+    from app.models import Budget, Card, Category, InvoiceEntry, Purchase
+
+    has_financial_data = any([
+        db.scalar(select(func.count()).select_from(Card).where(Card.user_id == user.id)),
+        db.scalar(select(func.count()).select_from(Budget).where(Budget.user_id == user.id)),
+        db.scalar(select(func.count()).select_from(Purchase).where(Purchase.user_id == user.id)),
+    ])
+    if has_financial_data:
+        raise ValueError(
+            "A restauração só está disponível em uma conta sem cartões, compras ou limites cadastrados."
+        )
+
+    # Default/custom categories in this empty account can be replaced safely.
+    db.query(Category).filter(Category.user_id == user.id).delete(synchronize_session=False)
+
+    card_ids: dict[int, int] = {}
+    category_ids: dict[int, int] = {}
+    purchase_ids: dict[int, int] = {}
+
+    for item in payload.cards:
+        card = Card(
+            user_id=user.id,
+            name=item.name,
+            issuer=item.issuer,
+            brand=item.brand,
+            last_four=item.last_four,
+            closing_day=item.closing_day,
+            due_day=item.due_day,
+            due_month_offset=item.due_month_offset,
+            color=item.color,
+            active=item.active,
+        )
+        db.add(card)
+        db.flush()
+        card_ids[item.id] = card.id
+
+    for item in payload.categories:
+        category = Category(
+            user_id=user.id,
+            name=item.name,
+            color=item.color,
+            icon=item.icon,
+            active=item.active,
+        )
+        db.add(category)
+        db.flush()
+        category_ids[item.id] = category.id
+
+    for item in payload.budgets:
+        db.add(Budget(
+            user_id=user.id,
+            month=item.month,
+            limit_cents=item.limit_cents,
+        ))
+
+    for item in payload.purchases:
+        purchase = Purchase(
+            user_id=user.id,
+            description=item.description,
+            kind=item.kind,
+            direction=item.direction,
+            purchase_date=item.purchase_date,
+            card_id=card_ids[item.card_id],
+            category_id=category_ids[item.category_id],
+            total_cents=item.total_cents,
+            installment_count=item.installment_count,
+            first_invoice_month=item.first_invoice_month,
+            current_installment=item.current_installment,
+            end_invoice_month=item.end_invoice_month,
+            active=item.active,
+            notes=item.notes,
+            created_at=item.created_at,
+        )
+        db.add(purchase)
+        db.flush()
+        purchase_ids[item.id] = purchase.id
+
+    for item in payload.invoice_entries:
+        db.add(InvoiceEntry(
+            purchase_id=purchase_ids[item.purchase_id],
+            invoice_month=item.invoice_month,
+            installment_number=item.installment_number,
+            amount_cents=item.amount_cents,
+            status=item.status,
+        ))
+    db.flush()
+
+    return {
+        "cards": len(payload.cards),
+        "categories": len(payload.categories),
+        "budgets": len(payload.budgets),
+        "purchases": len(payload.purchases),
+        "invoice_entries": len(payload.invoice_entries),
     }
