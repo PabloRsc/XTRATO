@@ -19,15 +19,23 @@ _ATTEMPT_WINDOW_SECONDS = 15 * 60
 _MAX_FAILED_ATTEMPTS = 8
 
 
-def _check_login_rate(request: Request) -> str:
-    ip = request.client.host if request.client else "unknown"
+def _check_attempt_rate(key: str) -> None:
     now = monotonic()
     with _attempts_lock:
-        attempts = _attempts[ip]
+        attempts = _attempts[key]
         while attempts and now - attempts[0] > _ATTEMPT_WINDOW_SECONDS:
             attempts.popleft()
         if len(attempts) >= _MAX_FAILED_ATTEMPTS:
-            raise HTTPException(status_code=429, detail="Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.", headers={"Retry-After": str(_ATTEMPT_WINDOW_SECONDS)})
+            raise HTTPException(
+                status_code=429,
+                detail="Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
+                headers={"Retry-After": str(_ATTEMPT_WINDOW_SECONDS)},
+            )
+
+
+def _check_login_rate(request: Request) -> str:
+    ip = request.client.host if request.client else "unknown"
+    _check_attempt_rate(ip)
     return ip
 
 
@@ -64,7 +72,10 @@ def logout(request: Request):
 @router.post("/password")
 def change_password(payload: PasswordChangeIn, request: Request, db: Session = Depends(get_db)):
     user = authenticated_user(request, db)
+    rate_key = f"password-change-user:{user.id}"
+    _check_attempt_rate(rate_key)
     if not verify_password(payload.current_password, user.password_hash):
+        _record_failed_login(rate_key)
         raise HTTPException(status_code=400, detail="A senha atual está incorreta.")
     if verify_password(payload.new_password, user.password_hash):
         raise HTTPException(status_code=422, detail="Escolha uma senha diferente da atual.")
@@ -72,6 +83,8 @@ def change_password(payload: PasswordChangeIn, request: Request, db: Session = D
     user.password_hash = hash_password(payload.new_password)
     user.session_version += 1
     db.commit()
+    with _attempts_lock:
+        _attempts.pop(rate_key, None)
     request.session.clear()
     return {"ok": True, "reauthenticate": True}
 
