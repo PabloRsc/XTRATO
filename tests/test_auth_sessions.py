@@ -113,14 +113,15 @@ def test_login_rate_limiter_prunes_expired_keys_without_creating_empty_buckets(m
 
     monkeypatch.setattr(auth, "_CLEANUP_EVERY_OPERATIONS", 1)
     monkeypatch.setattr(auth, "_operations_since_cleanup", 0)
+    monkeypatch.setattr(auth, "monotonic", lambda: 20_000.0)
     auth._attempts.clear()
     auth._attempts["abandoned-ip"] = deque([0.0])
-    auth._attempts["active-ip"] = deque([10_000.0])
+    auth._attempts["active-ip"] = deque([19_500.0])
 
     auth._check_attempt_rate("new-ip")
 
     assert "abandoned-ip" not in auth._attempts
-    assert list(auth._attempts["active-ip"]) == [10_000.0]
+    assert list(auth._attempts["active-ip"]) == [19_500.0]
     assert "new-ip" not in auth._attempts
 
     auth._attempts.clear()
