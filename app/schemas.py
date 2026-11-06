@@ -18,6 +18,7 @@ class CardIn(BaseModel):
     last_four: str | None = Field(default=None, pattern=r"^\d{4}$")
     closing_day: int = Field(ge=1, le=31, default=25)
     due_day: int = Field(ge=1, le=31, default=5)
+    due_month_offset: int = Field(ge=0, le=1, default=1)
     color: str = Field(default="#247a57", pattern=r"^#[0-9A-Fa-f]{6}$")
 
     @field_validator("name", "issuer", "brand")
