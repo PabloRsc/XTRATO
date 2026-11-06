@@ -23,7 +23,7 @@ def list_cards(request: Request, db: Session = Depends(get_db)):
     user = user_or_401(request, db)
     cards = db.scalars(select(Card).where(Card.user_id == user.id, Card.active.is_(True)).order_by(Card.name)).all()
     return [{"id": c.id, "name": c.name, "issuer": c.issuer, "brand": c.brand, "last_four": c.last_four,
-             "closing_day": c.closing_day, "due_day": c.due_day, "color": c.color} for c in cards]
+             "closing_day": c.closing_day, "due_day": c.due_day, "due_month_offset": c.due_month_offset, "color": c.color} for c in cards]
 
 
 @router.post("/cards", status_code=201)

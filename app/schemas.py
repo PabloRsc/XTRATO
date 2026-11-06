@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class LoginIn(BaseModel):
@@ -18,13 +18,34 @@ class CardIn(BaseModel):
     last_four: str | None = Field(default=None, pattern=r"^\d{4}$")
     closing_day: int = Field(ge=1, le=31, default=25)
     due_day: int = Field(ge=1, le=31, default=5)
+    due_month_offset: int = Field(ge=0, le=1, default=1)
     color: str = Field(default="#247a57", pattern=r"^#[0-9A-Fa-f]{6}$")
+
+    @field_validator("name", "issuer", "brand")
+    @classmethod
+    def normalize_card_text(cls, value: str) -> str:
+        return value.strip()
+
+    @field_validator("name")
+    @classmethod
+    def require_card_name(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Informe um nome para o cartão.")
+        return value
 
 
 class CategoryIn(BaseModel):
     name: str = Field(min_length=1, max_length=50)
     color: str = Field(default="#78a88b", pattern=r"^#[0-9A-Fa-f]{6}$")
     icon: str = Field(default="tag", max_length=30)
+
+    @field_validator("name", "icon")
+    @classmethod
+    def normalize_category_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Informe um nome e um ícone válidos para a categoria.")
+        return value
 
 
 class BudgetIn(BaseModel):
@@ -48,6 +69,19 @@ class PurchaseIn(BaseModel):
     current_invoice_month: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
     end_invoice_month: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
     notes: str = Field(default="", max_length=300)
+
+    @field_validator("description")
+    @classmethod
+    def normalize_purchase_description(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Informe uma descrição para a compra.")
+        return value
+
+    @field_validator("notes")
+    @classmethod
+    def normalize_purchase_notes(cls, value: str) -> str:
+        return value.strip()
 
     @model_validator(mode="after")
     def validate_purchase(self):

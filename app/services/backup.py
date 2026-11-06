@@ -55,6 +55,7 @@ def build_user_backup(db: Session, user: User) -> dict:
                 "last_four": card.last_four,
                 "closing_day": card.closing_day,
                 "due_day": card.due_day,
+                "due_month_offset": card.due_month_offset,
                 "color": card.color,
                 "active": card.active,
             }
