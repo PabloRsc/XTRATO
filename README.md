@@ -41,6 +41,7 @@ docker compose up -d --build
 6. Abra `http://localhost:8000` e entre com o usuário e senha definidos no `.env`.
 
 O usuário inicial e as categorias padrão são criados automaticamente na primeira inicialização. Não existe rota de cadastro público.
+Depois que a primeira conta for criada e você confirmar o acesso, `INITIAL_ADMIN_USERNAME` e `INITIAL_ADMIN_PASSWORD` podem ser removidos das variáveis do servidor. Eles só são necessários quando o banco ainda não contém nenhum usuário; sem eles, uma instalação vazia não inicia, mas um banco já inicializado continua funcionando. A senha da conta deve ser administrada pela opção **Alterar senha** no próprio XTRATO.
 
 Para acompanhar a inicialização:
 
