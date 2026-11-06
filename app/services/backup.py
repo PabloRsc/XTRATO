@@ -9,7 +9,11 @@ from app.models import Budget, Card, Category, InvoiceEntry, Purchase, User
 
 
 def _iso(value: date | datetime | None) -> str | None:
-    return value.isoformat() if value is not None else None
+    if value is None:
+        return None
+    if isinstance(value, datetime) and value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.isoformat()
 
 
 def build_user_backup(db: Session, user: User) -> dict:
