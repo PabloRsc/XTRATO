@@ -56,32 +56,37 @@
         <div class="topbar-right"><button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Ativar tema escuro" title="Alternar tema"><span data-icon="moon"></span></button><label class="month-control"><span data-icon="calendar"></span><input type="month" id="monthPicker"></label><button class="icon-button mobile-logout" id="mobileLogout" title="Sair" data-icon="logout"></button></div>
       </header>
 
-      <section class="page-view dashboard-page" id="page-dashboard">
-  <div class="dashboard-welcome">
-    <div><span class="eyebrow">SEU DINHEIRO, SOB CONTROLE</span><h1>Visão geral</h1><p>Uma visão clara do seu mês, dos seus cartões e dos seus próximos passos.</p></div>
+      <section class="page-view dashboard-page xtrato-home" id="page-dashboard">
+  <div class="xtrato-welcome">
+    <div><span class="eyebrow">SEU DINHEIRO, SUA VISÃO</span><h1>Seu mês em perspectiva</h1><p>Acompanhe o que já comprometeu e planeje os próximos meses com clareza.</p></div>
     <button class="btn-primary dashboard-add-button" id="newPurchase"><span data-icon="plus"></span> Nova compra</button>
   </div>
-  <div class="dashboard-overview-grid">
-    <section class="budget-card panel-card dashboard-budget-card">
-      <div class="panel-top"><div class="label-with-icon"><span class="small-icon" data-icon="gauge"></span><span>Orçamento do mês</span></div><button class="link-button" id="editBudget">Ajustar limite <span>↗</span></button></div>
-      <div class="budget-numbers"><strong id="budgetSpent">R$ 0,00</strong><span id="budgetOf">de R$ 0,00</span></div>
-      <div class="budget-progress-meta"><span>Utilização do orçamento</span><b id="budgetPercent">—</b></div>
-      <div class="progress-track"><span id="budgetProgress"></span></div>
-      <div class="budget-foot"><div><small>Já comprometido</small><b id="budgetCommitted">R$ 0,00</b></div><div><small>Disponível no mês</small><b class="positive" id="budgetAvailable">—</b></div><div><small>Créditos e estornos</small><b id="budgetCredits">R$ 0,00</b></div></div>
-      <div class="budget-warning" id="budgetWarning"></div>
-    </section>
-    <section class="cards-overview panel-card dark-card dashboard-cards-card">
-      <div class="panel-top"><div class="label-with-icon"><span class="small-icon" data-icon="card"></span><span>Seus cartões</span></div><span class="dark-pill" id="cardCount">0 cartões</span></div>
-      <div class="dark-total" id="cardTotal">R$ 0,00</div><p class="dark-subtitle">Comprometido nas faturas do mês</p>
-      <div class="dark-divider"></div><div id="cardTotals" class="card-total-list"><div class="muted-dark">Cadastre seu primeiro cartão para começar.</div></div>
-      <button class="dark-link" data-go="cards">Ver meus cartões <span>→</span></button>
-    </section>
+  <section class="xtrato-hero-grid">
+    <div class="xtrato-balance panel-card">
+      <div class="xtrato-overline"><span data-icon="wallet"></span> DISPONÍVEL NO MÊS</div>
+      <div class="xtrato-balance-value" id="budgetAvailable">—</div>
+      <div class="xtrato-budget-line"><span id="budgetSpent">R$ 0,00</span><span id="budgetOf">sem orçamento</span></div>
+      <div class="xtrato-progress"><span id="budgetProgress"></span></div>
+      <div class="xtrato-balance-meta"><div><small>Comprometido</small><b id="budgetCommitted">R$ 0,00</b></div><div><small>Orçamento utilizado</small><b id="budgetPercent">—</b></div><div><small>Créditos e estornos</small><b id="budgetCredits">R$ 0,00</b></div></div>
+      <div id="budgetWarning" class="budget-warning"></div>
+      <button class="xtrato-budget-edit" id="editBudget" type="button">Ajustar orçamento <span>↗</span></button>
+    </div>
+    <div class="xtrato-wallet-panel">
+      <div class="xtrato-section-head"><div><span class="eyebrow">SUA CARTEIRA</span><h2>Cartões</h2></div><button class="link-button" data-go="cards">Gerenciar cartões ↗</button></div>
+      <div id="cardTotals" class="xtrato-wallet-list"><div class="empty-inline">Cadastre seu primeiro cartão para começar.</div></div>
+      <div class="xtrato-wallet-foot"><span id="cardCount">0 cartões</span><b id="cardTotal">R$ 0,00</b></div>
+    </div>
+  </section>
+  <section class="panel-card xtrato-forecast-panel">
+    <div class="xtrato-section-head"><div><span class="eyebrow">PLANEJAMENTO</span><h2>Gastos dos próximos meses</h2><p>Valores previstos a partir das parcelas e despesas recorrentes cadastradas.</p></div><span class="xtrato-chart-key"><i></i> Total previsto</span></div>
+    <div id="forecastSummary" class="xtrato-forecast-summary"></div>
+    <div id="forecastChart" class="xtrato-forecast-chart"><div class="empty-inline">Sua projeção aparecerá aqui.</div></div>
+  </section>
+  <div class="xtrato-insights-grid">
+    <section class="panel-card xtrato-category-panel"><div class="xtrato-section-head"><div><span class="eyebrow">DISTRIBUIÇÃO</span><h2>Para onde vai seu dinheiro</h2><p>Gastos por categoria no mês selecionado.</p></div><button class="link-button" data-go="statement">Ver extrato ↗</button></div><div id="categoryChart" class="category-chart"><div class="empty-inline">Seus gastos por categoria aparecerão aqui.</div></div></section>
+    <section class="panel-card xtrato-history-panel"><div class="xtrato-section-head"><div><span class="eyebrow">HISTÓRICO</span><h2>Últimos seis meses</h2><p>Como seus gastos vêm evoluindo.</p></div><span class="xtrato-chart-key"><i></i> Gastos</span></div><div id="trendChart" class="trend-chart"><div class="empty-inline">Sem histórico suficiente.</div></div></section>
   </div>
-  <div class="dashboard-insights-grid">
-    <section class="panel-card category-panel dashboard-category-panel"><div class="section-heading"><div><span class="dashboard-section-kicker">ONDE VOCÊ GASTA</span><h2>Gastos por categoria</h2><p>Distribuição das despesas no mês selecionado</p></div><button class="link-button" data-go="statement">Ver extrato ↗</button></div><div id="categoryChart" class="category-chart"><div class="empty-inline">Seus gastos por categoria aparecerão aqui.</div></div></section>
-    <section class="panel-card trend-panel dashboard-trend-panel"><div class="section-heading"><div><span class="dashboard-section-kicker">ACOMPANHAMENTO</span><h2>Evolução mensal</h2><p>Comparativo dos últimos seis meses</p></div><span class="chart-legend"><i></i> Gastos</span></div><div id="trendChart" class="trend-chart"><div class="empty-inline">Sem histórico suficiente.</div></div></section>
-  </div>
-  <section class="panel-card recent-panel dashboard-recent-panel"><div class="section-heading"><div><span class="dashboard-section-kicker">ATIVIDADE RECENTE</span><h2>Últimos lançamentos</h2><p>Compras agrupadas pela fatura em que serão cobradas</p></div><button class="link-button" data-go="statement">Ver extrato completo <span>→</span></button></div><div id="recentEntries" class="entry-list"><div class="empty-inline">Nenhuma compra cadastrada para este mês.</div></div></section>
+  <section class="panel-card recent-panel dashboard-recent-panel xtrato-recent-panel"><div class="xtrato-section-head"><div><span class="eyebrow">MOVIMENTAÇÕES</span><h2>Últimos lançamentos</h2><p>Compras organizadas pelo mês da fatura.</p></div><button class="link-button" data-go="statement">Ver extrato completo →</button></div><div id="recentEntries" class="entry-list"><div class="empty-inline">Nenhuma compra cadastrada para este mês.</div></div></section>
 </section>
 
 <section class="page-view hidden statement-page" id="page-statement">
