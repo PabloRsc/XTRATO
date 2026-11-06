@@ -1,0 +1,68 @@
+from collections import defaultdict, deque
+from threading import Lock
+from time import monotonic
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import User
+from app.schemas import LoginIn
+from app.security import verify_password
+
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+_attempts: dict[str, deque[float]] = defaultdict(deque)
+_attempts_lock = Lock()
+_ATTEMPT_WINDOW_SECONDS = 15 * 60
+_MAX_FAILED_ATTEMPTS = 8
+
+
+def _check_login_rate(request: Request) -> str:
+    ip = request.client.host if request.client else "unknown"
+    now = monotonic()
+    with _attempts_lock:
+        attempts = _attempts[ip]
+        while attempts and now - attempts[0] > _ATTEMPT_WINDOW_SECONDS:
+            attempts.popleft()
+        if len(attempts) >= _MAX_FAILED_ATTEMPTS:
+            raise HTTPException(status_code=429, detail="Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.", headers={"Retry-After": str(_ATTEMPT_WINDOW_SECONDS)})
+    return ip
+
+
+def _record_failed_login(ip: str) -> None:
+    with _attempts_lock:
+        attempts = _attempts[ip]
+        now = monotonic()
+        while attempts and now - attempts[0] > _ATTEMPT_WINDOW_SECONDS:
+            attempts.popleft()
+        attempts.append(now)
+
+
+@router.post("/login")
+def login(payload: LoginIn, request: Request, db: Session = Depends(get_db)):
+    ip = _check_login_rate(request)
+    user = db.scalar(select(User).where(User.username == payload.username.strip()))
+    if not user or not verify_password(payload.password, user.password_hash):
+        _record_failed_login(ip)
+        raise HTTPException(status_code=401, detail="Usuário ou senha incorretos.")
+    with _attempts_lock:
+        _attempts.pop(ip, None)
+    request.session.clear()
+    request.session["user_id"] = user.id
+    return {"id": user.id, "username": user.username}
+
+
+@router.post("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return {"ok": True}
+
+
+@router.get("/me")
+def me(request: Request, db: Session = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    user = db.get(User, user_id) if isinstance(user_id, int) else None
+    if not user:
+        raise HTTPException(status_code=401, detail="Não autenticado.")
+    return {"id": user.id, "username": user.username}

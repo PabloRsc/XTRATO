@@ -1,0 +1,1 @@
+Database schema migrations are managed by Alembic. Apply with: alembic upgrade head

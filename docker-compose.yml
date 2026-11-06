@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-xtrato}
+      POSTGRES_USER: ${POSTGRES_USER:-xtrato}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    volumes:
+      - xtrato_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xtrato} -d ${POSTGRES_DB:-xtrato}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      APP_SECRET_KEY: ${APP_SECRET_KEY:?Defina APP_SECRET_KEY no arquivo .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      APP_TIMEZONE: ${APP_TIMEZONE:-America/Sao_Paulo}
+      INITIAL_ADMIN_USERNAME: ${INITIAL_ADMIN_USERNAME:?Defina INITIAL_ADMIN_USERNAME no arquivo .env}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:?Defina INITIAL_ADMIN_PASSWORD no arquivo .env}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-xtrato}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-xtrato}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["proxy"]
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - xtrato_caddy_data:/data
+      - xtrato_caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  xtrato_pgdata:
+  xtrato_caddy_data:
+  xtrato_caddy_config:
