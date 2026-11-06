@@ -124,3 +124,46 @@ def test_password_change_rejects_wrong_current_password_without_mutating_account
         assert user.session_version == 0
 
     engine.dispose()
+
+
+
+def test_failed_password_change_attempts_are_rate_limited_per_account():
+    import pytest
+    from fastapi import HTTPException
+
+    from app.routers import auth
+
+    engine = make_db()
+    with Session(engine) as db:
+        user = User(username="owner", password_hash=hash_password("current-password-123"))
+        db.add(user)
+        db.commit()
+        session = {"user_id": user.id, "auth_version": user.session_version}
+        rate_key = f"password-change-user:{user.id}"
+        auth._attempts.pop(rate_key, None)
+
+        for _ in range(auth._MAX_FAILED_ATTEMPTS):
+            with pytest.raises(HTTPException) as exc:
+                change_password(
+                    PasswordChangeIn(
+                        current_password="wrong-password",
+                        new_password="a-brand-new-strong-password",
+                    ),
+                    make_request(session),
+                    db,
+                )
+            assert exc.value.status_code == 400
+
+        with pytest.raises(HTTPException) as limited:
+            change_password(
+                PasswordChangeIn(
+                    current_password="wrong-password",
+                    new_password="a-brand-new-strong-password",
+                ),
+                make_request(session),
+                db,
+            )
+        assert limited.value.status_code == 429
+        auth._attempts.pop(rate_key, None)
+
+    engine.dispose()
