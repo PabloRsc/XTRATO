@@ -200,6 +200,7 @@
     $('#cardTotals').innerHTML = d.cards.length ? d.cards.map(c => `<div class="card-total-line"><span>${escapeHtml(c.name)}${c.active ? '' : ' · arquivado'}</span><b>${money(c.total_cents)}</b></div>`).join('') : '<div class="muted-dark">Cadastre seu primeiro cartão para começar.</div>';
     renderCategoryChart(d.categories || []);
     renderTrend(d.trend || []);
+    renderForecast(d.forecast || []);
     renderEntries($('#recentEntries'), d.recent_entries || [], true);
     $('#monthPicker').value = state.month;
   }
@@ -224,8 +225,25 @@
     target.innerHTML = trend.map(row => {
       const height = Math.max(3, Math.max(0, row.total_cents) / max * 100);
       const current = row.month === state.month ? 'current' : '';
-      const label = row.label.slice(0, 3);
-      return `<div class="trend-column ${current}"><span class="trend-value">${row.total_cents > 0 ? money(row.total_cents).replace(',00', '') : ''}</span><div class="trend-bar-area"><div class="trend-bar" style="height:${height}%"></div></div><small>${escapeHtml(label)}</small></div>`;
+      return '<div class="trend-column ' + current + '"><span class="trend-value">' + (row.total_cents > 0 ? money(row.total_cents).replace(',00', '') : '') + '</span><div class="trend-bar-area"><div class="trend-bar" style="height:' + height + '%"></div></div><small>' + escapeHtml(row.label.slice(0,3)) + '</small></div>';
+    }).join('');
+  }
+
+  function renderForecast(rows) {
+    const target = $('#forecastChart');
+    const summary = $('#forecastSummary');
+    if (!rows || !rows.length || rows.every(row => row.total_cents <= 0)) {
+      summary.innerHTML = '';
+      target.innerHTML = '<div class="empty-inline">Ainda não há parcelas ou despesas recorrentes suficientes para projetar os próximos meses.</div>';
+      return;
+    }
+    const max = Math.max(1, ...rows.map(row => Math.max(0, row.total_cents)));
+    const next = rows.slice(0, 3).reduce((sum, row) => sum + Math.max(0, row.total_cents), 0);
+    summary.innerHTML = '<div><small>Compromissos nos próximos 3 meses</small><b>' + money(next) + '</b></div><div><small>Maior previsão mensal</small><b>' + money(Math.max(...rows.map(row => row.total_cents))) + '</b></div>';
+    target.innerHTML = rows.map((row, index) => {
+      const height = Math.max(row.total_cents > 0 ? 5 : 0, Math.max(0, row.total_cents) / max * 100);
+      const current = index === 0 ? 'is-current' : '';
+      return '<div class="forecast-column ' + current + '" title="' + escapeHtml(row.label) + ': ' + money(row.total_cents) + '"><div class="forecast-bar-wrap"><span class="forecast-value">' + (row.total_cents > 0 ? money(row.total_cents) : '—') + '</span><div class="forecast-bar" style="height:' + height + '%"></div></div><small>' + escapeHtml(row.label) + '</small></div>';
     }).join('');
   }
 
