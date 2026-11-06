@@ -10,17 +10,18 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column(
-        "cards",
-        sa.Column("due_month_offset", sa.Integer(), server_default="1", nullable=False),
-    )
-    op.create_check_constraint(
-        "ck_card_due_month_offset",
-        "cards",
-        "due_month_offset IN (0, 1)",
-    )
+    # Batch mode keeps this migration compatible with SQLite development databases.
+    with op.batch_alter_table("cards") as batch_op:
+        batch_op.add_column(
+            sa.Column("due_month_offset", sa.Integer(), server_default="1", nullable=False),
+        )
+        batch_op.create_check_constraint(
+            "ck_card_due_month_offset",
+            "due_month_offset IN (0, 1)",
+        )
 
 
 def downgrade():
-    op.drop_constraint("ck_card_due_month_offset", "cards", type_="check")
-    op.drop_column("cards", "due_month_offset")
+    with op.batch_alter_table("cards") as batch_op:
+        batch_op.drop_constraint("ck_card_due_month_offset", type_="check")
+        batch_op.drop_column("due_month_offset")
