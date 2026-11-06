@@ -13,7 +13,7 @@ from app.deps import authenticated_user
 from app.models import Budget, Card, Category, InvoiceEntry, Purchase
 from app.schemas import BudgetIn, PurchaseIn, PurchaseUpdateIn
 from app.services.billing import (
-    add_months, card_suggested_invoice_month, create_invoice_entries,
+    add_months, card_suggested_invoice_month, cancel_purchase_entries, create_invoice_entries,
     ensure_recurring_entries, parse_month, query_month_entries,
 )
 
@@ -215,10 +215,7 @@ def cancel_purchase(purchase_id: int, request: Request, db: Session = Depends(ge
     if not purchase:
         raise HTTPException(status_code=404, detail="Compra não encontrada ou já cancelada.")
     current_month = local_today().replace(day=1)
-    for entry in purchase.entries:
-        if entry.invoice_month >= current_month and entry.status != "cancelled":
-            entry.status = "cancelled"
-    purchase.active = False
+    cancel_purchase_entries(purchase, current_month)
     db.commit()
     return {"ok": True, "message": "Lançamentos atuais e futuros cancelados. Histórico anterior preservado."}
 
