@@ -56,32 +56,35 @@
         <div class="topbar-right"><button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Ativar tema escuro" title="Alternar tema"><span data-icon="moon"></span></button><label class="month-control"><span data-icon="calendar"></span><input type="month" id="monthPicker"></label><button class="icon-button mobile-logout" id="mobileLogout" title="Sair" data-icon="logout"></button></div>
       </header>
 
-      <section class="page-view" id="page-dashboard">
-        <div class="page-heading"><div><span class="eyebrow">RESUMO FINANCEIRO</span><h1>Visão geral</h1><p>Acompanhe seus gastos e o que já está comprometido nas faturas.</p></div><button class="btn-primary" id="newPurchase"><span data-icon="plus"></span> Nova compra</button></div>
-        <div class="overview-grid">
-          <section class="budget-card panel-card">
-            <div class="panel-top"><div class="label-with-icon"><span class="small-icon" data-icon="gauge"></span><span>Limite mensal de gastos</span></div><button class="link-button" id="editBudget">Definir limite <span>↗</span></button></div>
-            <div class="budget-numbers"><strong id="budgetSpent">R$ 0,00</strong><span id="budgetOf">de R$ 0,00</span></div>
-            <div class="budget-progress-meta"><span>Utilização do orçamento</span><b id="budgetPercent">—</b></div>
-            <div class="progress-track"><span id="budgetProgress"></span></div>
-            <div class="budget-foot"><div><small>Já comprometido</small><b id="budgetCommitted">R$ 0,00</b></div><div><small>Disponível no mês</small><b class="positive" id="budgetAvailable">—</b></div><div><small>Créditos / estornos</small><b id="budgetCredits">R$ 0,00</b></div></div>
-            <div class="budget-warning" id="budgetWarning"></div>
-          </section>
-          <section class="cards-overview panel-card dark-card">
-            <div class="panel-top"><div class="label-with-icon"><span class="small-icon" data-icon="card"></span><span>Seus cartões</span></div><span class="dark-pill" id="cardCount">0 cartões</span></div>
-            <div class="dark-total" id="cardTotal">R$ 0,00</div><p class="dark-subtitle">Comprometido nas faturas do mês</p>
-            <div class="dark-divider"></div><div id="cardTotals" class="card-total-list"><div class="muted-dark">Cadastre seu primeiro cartão para começar.</div></div>
-            <button class="dark-link" data-go="cards">Gerenciar cartões <span>→</span></button>
-          </section>
-        </div>
-        <div class="analytics-grid">
-          <section class="panel-card category-panel"><div class="section-heading"><div><h2>Gastos por categoria</h2><p>Distribuição do mês selecionado</p></div><button class="link-button" data-go="statement">Ver extrato ↗</button></div><div id="categoryChart" class="category-chart"><div class="empty-inline">Seus gastos por categoria aparecerão aqui.</div></div></section>
-          <section class="panel-card trend-panel"><div class="section-heading"><div><h2>Evolução mensal</h2><p>Últimos seis meses</p></div><span class="chart-legend"><i></i> Gastos</span></div><div id="trendChart" class="trend-chart"><div class="empty-inline">Sem histórico suficiente.</div></div></section>
-        </div>
-        <section class="panel-card recent-panel"><div class="section-heading"><div><h2>Últimos lançamentos</h2><p>Compras agrupadas pela fatura em que serão cobradas</p></div><button class="link-button" data-go="statement">Ver extrato completo <span>→</span></button></div><div id="recentEntries" class="entry-list"><div class="empty-inline">Nenhuma compra cadastrada para este mês.</div></div></section>
-      </section>
+      <section class="page-view dashboard-page" id="page-dashboard">
+  <div class="dashboard-welcome">
+    <div><span class="eyebrow">SEU DINHEIRO, SOB CONTROLE</span><h1>Visão geral</h1><p>Uma visão clara do seu mês, dos seus cartões e dos seus próximos passos.</p></div>
+    <button class="btn-primary dashboard-add-button" id="newPurchase"><span data-icon="plus"></span> Nova compra</button>
+  </div>
+  <div class="dashboard-overview-grid">
+    <section class="budget-card panel-card dashboard-budget-card">
+      <div class="panel-top"><div class="label-with-icon"><span class="small-icon" data-icon="gauge"></span><span>Orçamento do mês</span></div><button class="link-button" id="editBudget">Ajustar limite <span>↗</span></button></div>
+      <div class="budget-numbers"><strong id="budgetSpent">R$ 0,00</strong><span id="budgetOf">de R$ 0,00</span></div>
+      <div class="budget-progress-meta"><span>Utilização do orçamento</span><b id="budgetPercent">—</b></div>
+      <div class="progress-track"><span id="budgetProgress"></span></div>
+      <div class="budget-foot"><div><small>Já comprometido</small><b id="budgetCommitted">R$ 0,00</b></div><div><small>Disponível no mês</small><b class="positive" id="budgetAvailable">—</b></div><div><small>Créditos e estornos</small><b id="budgetCredits">R$ 0,00</b></div></div>
+      <div class="budget-warning" id="budgetWarning"></div>
+    </section>
+    <section class="cards-overview panel-card dark-card dashboard-cards-card">
+      <div class="panel-top"><div class="label-with-icon"><span class="small-icon" data-icon="card"></span><span>Seus cartões</span></div><span class="dark-pill" id="cardCount">0 cartões</span></div>
+      <div class="dark-total" id="cardTotal">R$ 0,00</div><p class="dark-subtitle">Comprometido nas faturas do mês</p>
+      <div class="dark-divider"></div><div id="cardTotals" class="card-total-list"><div class="muted-dark">Cadastre seu primeiro cartão para começar.</div></div>
+      <button class="dark-link" data-go="cards">Ver meus cartões <span>→</span></button>
+    </section>
+  </div>
+  <div class="dashboard-insights-grid">
+    <section class="panel-card category-panel dashboard-category-panel"><div class="section-heading"><div><span class="dashboard-section-kicker">ONDE VOCÊ GASTA</span><h2>Gastos por categoria</h2><p>Distribuição das despesas no mês selecionado</p></div><button class="link-button" data-go="statement">Ver extrato ↗</button></div><div id="categoryChart" class="category-chart"><div class="empty-inline">Seus gastos por categoria aparecerão aqui.</div></div></section>
+    <section class="panel-card trend-panel dashboard-trend-panel"><div class="section-heading"><div><span class="dashboard-section-kicker">ACOMPANHAMENTO</span><h2>Evolução mensal</h2><p>Comparativo dos últimos seis meses</p></div><span class="chart-legend"><i></i> Gastos</span></div><div id="trendChart" class="trend-chart"><div class="empty-inline">Sem histórico suficiente.</div></div></section>
+  </div>
+  <section class="panel-card recent-panel dashboard-recent-panel"><div class="section-heading"><div><span class="dashboard-section-kicker">ATIVIDADE RECENTE</span><h2>Últimos lançamentos</h2><p>Compras agrupadas pela fatura em que serão cobradas</p></div><button class="link-button" data-go="statement">Ver extrato completo <span>→</span></button></div><div id="recentEntries" class="entry-list"><div class="empty-inline">Nenhuma compra cadastrada para este mês.</div></div></section>
+</section>
 
-      <section class="page-view hidden" id="page-statement">
+<section class="page-view hidden" id="page-statement">
         <div class="page-heading"><div><span class="eyebrow">MOVIMENTAÇÕES</span><h1>Extrato unificado</h1><p>Todas as compras de todos os cartões, organizadas por mês de fatura.</p></div><button class="btn-primary" id="newPurchaseStatement"><span data-icon="plus"></span> Nova compra</button></div>
         <section class="panel-card statement-panel"><div class="statement-toolbar"><div class="search-box"><span data-icon="search"></span><input id="statementSearch" type="search" placeholder="Buscar compra ou estabelecimento"></div><select id="statementCardFilter"><option value="">Todos os cartões</option></select></div><div class="statement-summary"><span id="statementCount">0 lançamentos</span><strong id="statementTotal">R$ 0,00</strong></div><div id="statementEntries" class="entry-list"><div class="empty-inline">Nenhum lançamento encontrado neste mês.</div></div></section>
       </section>
