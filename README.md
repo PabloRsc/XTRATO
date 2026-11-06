@@ -106,7 +106,7 @@ Guarde os backups fora do servidor e teste a restauração periodicamente. O vol
 - O limite mensal acompanha o mês em que a fatura será paga, e não apenas o mês em que a compra foi feita.
 - O fechamento e o vencimento do cartão são usados juntos para sugerir o mês de pagamento: compras após o fechamento entram no ciclo seguinte; o dia de vencimento define se o ciclo é pago no mesmo mês do fechamento ou no mês seguinte.
 - A sugestão pode ser alterada manualmente para refletir a fatura real da instituição, inclusive quando a administradora usa regras específicas.
-- Uma compra parcelada gera uma linha por parcela. O valor total é dividido em centavos e a soma das parcelas sempre fecha com o total informado.
+- Uma compra parcelada gera uma linha por parcela. O valor total é dividido em centavos e a soma das parcelas sempre fecha com o total informado; eventuais centavos restantes ficam na última parcela e são exibidos no formulário.
 - Para compra antiga em andamento, o mês informado é o da parcela atual. O sistema deduz o mês inicial conforme o número da parcela e marca as anteriores como históricas.
 - Despesas fixas geram lançamentos mensais de forma idempotente, sem duplicar a mesma recorrência no mesmo mês.
 - O limite mede o comprometimento líquido na fatura. Um pagamento da fatura não deve ser lançado como compra.
