@@ -93,7 +93,7 @@ def card_suggested_invoice_month(db: Session, card_id: int, purchase_date: date)
     card = db.get(Card, card_id)
     if card is None:
         return date(purchase_date.year, purchase_date.month, 1)
-    return month_from_purchase_date(purchase_date, card.closing_day)
+    return month_from_purchase_date(purchase_date, card.closing_day, card.due_day)
 
 
 def query_month_entries(db: Session, user_id: int, month: date, card_id: int | None = None, search: str | None = None):
