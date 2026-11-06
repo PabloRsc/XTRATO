@@ -285,3 +285,93 @@ def test_backup_restore_requires_confirmation_and_rejects_dangling_entries():
     }
     with pytest.raises(ValidationError):
         BackupRestoreIn.model_validate(invalid)
+
+
+
+def test_backup_restore_rejects_duplicate_names_and_duplicate_budget_months():
+    import pytest
+    from pydantic import ValidationError
+
+    from app.schemas import BackupRestoreIn
+
+    base = {
+        "confirmation": "RESTAURAR",
+        "format": "xtrato-backup",
+        "version": 1,
+        "exported_at": "2026-11-06T12:00:00+00:00",
+        "account": {"username": "source"},
+        "cards": [],
+        "categories": [],
+        "budgets": [],
+        "purchases": [],
+        "invoice_entries": [],
+    }
+    card = {
+        "id": 1,
+        "name": "Nubank",
+        "issuer": "Nubank",
+        "brand": "Visa",
+        "last_four": "1234",
+        "closing_day": 25,
+        "due_day": 5,
+        "due_month_offset": 1,
+        "color": "#247a57",
+        "active": True,
+    }
+    with pytest.raises(ValidationError):
+        BackupRestoreIn.model_validate({**base, "cards": [card, {**card, "id": 2}]})
+
+    with pytest.raises(ValidationError):
+        BackupRestoreIn.model_validate({
+            **base,
+            "budgets": [
+                {"id": 1, "month": "2026-11-01", "limit_cents": 100_000},
+                {"id": 2, "month": "2026-11-01", "limit_cents": 90_000},
+            ],
+        })
+
+
+def test_backup_restore_rejects_incomplete_or_mismatched_installment_history():
+    import pytest
+    from pydantic import ValidationError
+
+    from app.schemas import BackupRestoreIn
+
+    payload = {
+        "confirmation": "RESTAURAR",
+        "format": "xtrato-backup",
+        "version": 1,
+        "exported_at": "2026-11-06T12:00:00+00:00",
+        "account": {"username": "source"},
+        "cards": [{
+            "id": 1, "name": "Nubank", "issuer": "", "brand": "",
+            "last_four": None, "closing_day": 25, "due_day": 5,
+            "due_month_offset": 1, "color": "#247a57", "active": True,
+        }],
+        "categories": [{
+            "id": 1, "name": "Compras", "color": "#78a88b",
+            "icon": "shopping-bag", "active": True,
+        }],
+        "budgets": [],
+        "purchases": [{
+            "id": 1, "description": "Notebook", "kind": "parcelado",
+            "direction": "expense", "purchase_date": "2026-09-05",
+            "card_id": 1, "category_id": 1, "total_cents": 10_000,
+            "installment_count": 2, "first_invoice_month": "2026-10-01",
+            "current_installment": 2, "end_invoice_month": None,
+            "active": True, "notes": "", "created_at": "2026-09-05T12:00:00+00:00",
+        }],
+        "invoice_entries": [{
+            "id": 1, "purchase_id": 1, "invoice_month": "2026-10-01",
+            "installment_number": 1, "amount_cents": 5_000, "status": "historical",
+        }],
+    }
+    with pytest.raises(ValidationError, match="todas as parcelas"):
+        BackupRestoreIn.model_validate(payload)
+
+    payload["invoice_entries"].append({
+        "id": 2, "purchase_id": 1, "invoice_month": "2026-11-01",
+        "installment_number": 2, "amount_cents": 4_999, "status": "open",
+    })
+    with pytest.raises(ValidationError, match="soma das parcelas"):
+        BackupRestoreIn.model_validate(payload)
