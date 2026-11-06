@@ -67,6 +67,8 @@
     book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M4 4.5v17.5M8 6h8"/>',
     download: '<path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
     upload: '<path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
+    moon: '<path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>'
   };
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
@@ -110,6 +112,34 @@
   }
   function openModal(id) { $(`#${id}`).classList.remove('hidden'); }
   function closeModal(id) { $(`#${id}`).classList.add('hidden'); }
+  function applyTheme(theme) {
+    const selected = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = selected;
+    document.documentElement.style.colorScheme = selected;
+    const button = $('#themeToggle');
+    if (button) {
+      const next = selected === 'dark' ? 'light' : 'dark';
+      button.innerHTML = icon(next === 'dark' ? 'moon' : 'sun');
+      button.setAttribute('aria-label', next === 'dark' ? 'Ativar tema escuro' : 'Ativar tema claro');
+      button.title = next === 'dark' ? 'Ativar tema escuro' : 'Ativar tema claro';
+    }
+    const meta = $('meta[name="theme-color"]');
+    if (meta) meta.content = selected === 'dark' ? '#0b1110' : '#f5f7f4';
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.dataset.theme || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('xtrato-theme', next); } catch (_) { /* storage may be unavailable */ }
+    applyTheme(next);
+  }
+
+  function initializeTheme() {
+    let saved = 'light';
+    try { saved = localStorage.getItem('xtrato-theme') || 'light'; } catch (_) { /* use default */ }
+    applyTheme(saved);
+  }
+
   function refreshStaticIcons() {
     $$('[data-icon]').forEach(node => {
       const name = node.dataset.icon;
@@ -715,6 +745,7 @@
   }
 
   function wireEvents() {
+    $('#themeToggle').addEventListener('click', toggleTheme);
     $$('.nav-item').forEach(button => button.addEventListener('click', () => setPage(button.dataset.page)));
     $$('[data-go]').forEach(button => button.addEventListener('click', () => setPage(button.dataset.go)));
     $('#monthPicker').addEventListener('change', async event => {
@@ -866,6 +897,7 @@
   }
 
   async function init() {
+    initializeTheme();
     refreshStaticIcons();
     state.month = monthNow();
     $('#monthPicker').value = state.month;
