@@ -171,7 +171,7 @@
       <form id="purchaseForm"><div class="form-grid modal-form-grid">
         <label class="span-2">Descrição da compra<input name="description" required maxlength="100" placeholder="Ex.: Compra no supermercado"></label>
         <div class="span-2"><span class="field-label">Tipo de lançamento</span><div class="type-switch"><button type="button" class="selected" data-kind="avista">À vista</button><button type="button" data-kind="parcelado">Parcelado</button><button type="button" data-kind="recorrente">Fixo mensal</button></div><input type="hidden" name="kind" value="avista"></div>
-        <label id="amountLabel"><span>Valor da compra (R$)</span><input name="amount" type="text" inputmode="numeric" autocomplete="off" required placeholder="0,00" aria-describedby="amountHelp"><small id="amountHelp" class="field-help">Digite apenas os números; os centavos são preenchidos automaticamente.</small></label></label>
+        <label id="amountLabel"><span>Valor da compra (R$)</span><input name="amount" type="text" inputmode="numeric" autocomplete="off" required placeholder="0,00" aria-describedby="amountHelp"><small id="amountHelp" class="field-help">Digite apenas os números; os centavos são preenchidos automaticamente.</small></label>
         <label>Movimentação<select name="direction"><option value="expense">Compra</option><option value="credit">Estorno / crédito</option></select><small class="field-help">Créditos são lançamentos eventuais na fatura.</small></label>
         <label>Cartão<select name="card_id" id="purchaseCard" required><option value="">Cadastre um cartão</option></select></label>
         <label>Categoria<select name="category_id" id="purchaseCategory" required><option value="">Selecione</option></select></label>
