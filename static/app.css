@@ -1239,3 +1239,35 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
 .xtrato-account-popover button{border:0;border-radius:8px;padding:9px 10px;background:transparent;color:var(--ink);text-align:left;font-size:11px}
 .xtrato-account-popover button:hover{background:var(--surface-2)}
 @media(max-width:620px){.xtrato-account-menu summary{font-size:0;padding:4px}.xtrato-account-menu summary>span:last-child{display:none}.xtrato-account-popover{right:0}}
+
+
+.xtrato-top-band{width:100vw;margin: -18px calc((100% - 100vw)/2) 32px;padding:18px max(16px,calc((100vw - 1240px)/2)) 27px;background:linear-gradient(140deg,#0b2b1f 0%,#0f4a33 100%);color:#fff;border-radius:0 0 28px 28px;position:relative;overflow:visible}
+.xtrato-top-band:before{content:"";position:absolute;right:2%;top:5%;width:300px;height:300px;border:1px solid #ffffff12;border-radius:50%;box-shadow:0 0 0 30px #ffffff05,0 0 0 65px #ffffff04;pointer-events:none}
+.xtrato-top-band>*{position:relative;z-index:1}
+.xtrato-topbar{border-color:#ffffff24}
+.xtrato-brand{color:#fff}
+.xtrato-brand img{filter:brightness(0) invert(1)}
+.xtrato-topbar .month-control{background:#ffffff12;border-color:#ffffff30;color:#fff}
+.xtrato-topbar .month-control button,.xtrato-topbar .month-control input{color:#fff}
+.xtrato-topbar .month-control button:hover{background:#ffffff20}
+.xtrato-topbar .icon-button{background:#ffffff12;border-color:#ffffff30;color:#fff}
+.xtrato-topbar .icon-button:hover{background:#ffffff20}
+.xtrato-topbar .dashboard-add-button{background:var(--lime,#b9f04c);color:#123321;border:0}
+.xtrato-balance{background:transparent;box-shadow:none;border:0;padding:14px 8px;color:#fff}
+.xtrato-balance:after{display:none}
+.xtrato-overline,.xtrato-balance-meta small{color:#ffffffa8}
+.xtrato-balance-value{color:#fff}
+.xtrato-budget-line,.xtrato-balance-meta b{color:#fff}
+.xtrato-progress{background:#ffffff25}
+.xtrato-progress span{background:var(--lime,#b9f04c)}
+.xtrato-budget-edit{color:#d5f4ad}
+.xtrato-budget-edit:hover{color:#fff}
+.xtrato-wallet-panel{padding:9px 0 0}
+.xtrato-wallet-panel .eyebrow,.xtrato-wallet-panel .xtrato-section-head h2{color:#fff}
+.xtrato-wallet-panel .xtrato-section-head .link-button{color:#d5f4ad}
+.xtrato-wallet-foot{color:#ffffffb8;border-color:#ffffff2a}
+.xtrato-wallet-foot b{color:#fff}
+.xtrato-wallet-list{padding-top:10px}
+.xtrato-account-menu summary{background:#ffffff12;border-color:#ffffff30;color:#fff}
+.xtrato-account-avatar{background:var(--lime,#b9f04c);color:#123321}
+@media(max-width:620px){.xtrato-top-band{margin-top:-12px;margin-bottom:24px;padding:13px 14px 20px;border-radius:0 0 22px 22px}.xtrato-balance{padding:8px 3px}}
