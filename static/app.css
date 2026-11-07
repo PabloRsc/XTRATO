@@ -1071,7 +1071,7 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
   .main-area{max-width:1320px;padding:24px clamp(16px,4vw,48px) 40px}
   .topbar{margin-bottom:24px}
 }
-@media(min-width:861px) and (max-width:1120px){
+@media(min-width:861px) and (max-width:1240px){
   .sidebar{gap:12px;padding-inline:14px}
   .nav-item{padding:9px 8px;font-size:10px}
   .backup-link{font-size:0;padding:8px}
