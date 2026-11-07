@@ -1131,3 +1131,143 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
   .recurrence-entry .entry-actions{grid-column:1/-1;grid-row:4;margin-left:48px;justify-content:flex-start}
   .recurrence-entry .mini-action{padding:7px 9px}
 }
+
+
+/* XTRATO single-dashboard rebuild: layout based on the supplied HTML reference */
+.app-shell{display:block!important;min-height:100vh;background:var(--bg)}
+.main-area{width:min(100%,1320px);max-width:1320px;margin:0 auto;padding:18px clamp(16px,3.2vw,42px) 44px}
+.xtrato-topbar{height:auto;min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 34px;padding:0 0 16px;border-bottom:1px solid var(--line)}
+.xtrato-brand{display:inline-flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none;font:800 21px var(--heading-font,system-ui);letter-spacing:.02em}
+.xtrato-brand img{width:29px;height:29px;object-fit:contain}
+.xtrato-topbar-actions{display:flex;align-items:center;gap:9px}
+.xtrato-topbar .month-control{display:flex;align-items:center;gap:5px;padding:3px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.xtrato-topbar .month-control button{width:29px;height:29px;border:0;border-radius:50%;background:transparent;color:var(--ink);font-size:20px;line-height:1}
+.xtrato-topbar .month-control button:hover{background:var(--surface-2)}
+.xtrato-topbar .month-control input{width:112px;min-width:0;border:0;background:transparent;color:var(--ink);font-size:12px;font-weight:600;text-align:center}
+.xtrato-topbar .icon-button{min-height:38px;padding:0 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:12px}
+.xtrato-topbar .theme-toggle{width:39px;padding:0}
+.xtrato-topbar .dashboard-add-button{min-height:39px;border-radius:999px;padding:0 17px}
+.xtrato-home{display:block!important}
+.xtrato-hero-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:30px;align-items:center;margin-bottom:34px}
+.xtrato-balance{min-height:100%;padding:27px 30px;border-radius:22px}
+.xtrato-balance-value{font-size:clamp(43px,5vw,67px);letter-spacing:-.055em}
+.xtrato-wallet-panel{min-width:0;padding:4px 0}
+.xtrato-wallet-panel .xtrato-section-head{margin-bottom:12px}
+.xtrato-wallet-list{display:flex;gap:12px;overflow-x:auto;padding:7px 3px 14px;scroll-snap-type:x proximity}
+.xtrato-wallet-card{position:relative;flex:0 0 215px;min-width:0;min-height:137px;padding:15px 16px;border:0;border-radius:16px;text-align:left;color:var(--wallet-ink,#fff);background:linear-gradient(135deg,var(--wallet-bank,#294d3d),color-mix(in srgb,var(--wallet-bank,#294d3d),#fff 22%));box-shadow:0 10px 25px -16px var(--wallet-bank);display:flex;flex-direction:column;justify-content:space-between;scroll-snap-align:start;overflow:hidden}
+.xtrato-wallet-card:after{content:"";position:absolute;width:140px;height:140px;right:-50px;bottom:-75px;border:1px solid #ffffff45;border-radius:50%;box-shadow:0 0 0 15px #ffffff0c,0 0 0 31px #ffffff08;pointer-events:none}
+.xtrato-wallet-card-top,.xtrato-wallet-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:1}
+.xtrato-wallet-bank-mark{display:flex;align-items:center;justify-content:flex-start;width:85px;height:28px;color:inherit}
+.xtrato-wallet-bank-mark svg{max-width:100%;max-height:27px;fill:currentColor}
+.xtrato-wallet-chevron{font-size:15px;opacity:.8}
+.xtrato-wallet-card-name{font-size:12px;font-weight:600;position:relative;z-index:1}
+.xtrato-wallet-card-bottom{align-items:flex-end}
+.xtrato-wallet-card-bottom b{font:700 20px var(--heading-font,system-ui);letter-spacing:-.03em}
+.xtrato-wallet-card-bottom small{font-size:9px;opacity:.8;text-align:right}
+.xtrato-dashboard-columns{display:grid;grid-template-columns:minmax(0,7fr) minmax(280px,4fr);gap:34px;align-items:start}
+.xtrato-dashboard-main,.xtrato-dashboard-aside{min-width:0}
+.xtrato-dashboard-aside{display:grid;gap:22px}
+.xtrato-statement-panel{padding:0;border:0;background:transparent;box-shadow:none}
+.xtrato-statement-panel .statement-workspace-heading{padding:0 0 13px;border-bottom:1px solid var(--line)}
+.xtrato-statement-panel .statement-toolbar{margin:14px 0}
+.xtrato-statement-panel .statement-summary{margin-bottom:14px}
+.xtrato-statement-panel .statement-results-heading{margin-top:15px}
+.xtrato-statement-panel .statement-results{background:transparent}
+.xtrato-dashboard-aside>.panel-card{padding:18px 19px;border-radius:17px}
+.xtrato-dashboard-aside .xtrato-section-head{margin-bottom:12px}
+.xtrato-dashboard-aside .xtrato-section-head h2{font-size:17px}
+.xtrato-dashboard-aside .xtrato-section-head p{font-size:11px}
+.xtrato-dashboard-aside .trend-chart{min-height:120px}
+.xtrato-dashboard-aside .xtrato-forecast-chart{min-height:145px}
+.xtrato-recurrences-overview{margin:0 0 12px}
+.xtrato-management-modal{width:min(920px,calc(100vw - 30px));max-height:min(88vh,900px);overflow:auto}
+.xtrato-management-tabs{display:flex;gap:7px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:17px}
+.xtrato-management-tabs button{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 16px;font-size:12px}
+.xtrato-management-tabs button.active{background:var(--green-dark);border-color:var(--green-dark);color:#fff}
+.xtrato-management-section{display:block}
+.xtrato-management-section .page-heading{display:none}
+.xtrato-management-section .card-registration-layout,.xtrato-management-section .management-grid{margin-top:0}
+.xtrato-management-section .cards-overview-strip,.xtrato-management-section .categories-overview-strip{margin-bottom:15px}
+.xtrato-management-section .card-registration-layout{grid-template-columns:minmax(0,1fr)}
+.xtrato-management-section .management-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}
+.xtrato-management-section .card-registration-form{display:none}
+.xtrato-management-section .management-form{display:block}
+.xtrato-management-section .card-list-panel{width:100%}
+#managementCards .card-registration-layout{display:block}
+#managementCards .card-list-panel{width:100%}
+#managementCards .card-registration-form{display:block}
+#managementCards .card-registration-fields{display:grid;grid-template-columns:1fr}
+#managementCards .card-registration-fields .bank-picker{max-height:180px;overflow:auto}
+.xtrato-management-modal .bank-card-list{max-height:280px;overflow:auto}
+#managementCategories .management-grid{display:grid}
+#managementCategories .management-form{display:block}
+#managementCategories .management-list{display:block}
+.xtrato-fixed-panel{margin-top:22px}
+@media(max-width:900px){
+ .main-area{padding:15px 18px 35px}
+ .xtrato-hero-grid{grid-template-columns:1fr;gap:18px}
+ .xtrato-dashboard-columns{grid-template-columns:minmax(0,1fr);gap:22px}
+ .xtrato-dashboard-aside{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .xtrato-dashboard-aside>.xtrato-forecast-panel{grid-column:1/-1}
+}
+@media(max-width:620px){
+ .main-area{padding:12px 14px 28px}
+ .xtrato-topbar{align-items:flex-start;flex-wrap:wrap;margin-bottom:23px;padding-bottom:13px}
+ .xtrato-brand{font-size:19px}
+ .xtrato-topbar-actions{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px}
+ .xtrato-topbar .month-control{grid-column:1/-1;justify-content:center}
+ .xtrato-topbar .month-control input{width:130px}
+ .xtrato-topbar .icon-button:not(.theme-toggle){font-size:10px;padding:0 8px}
+ .xtrato-topbar .dashboard-add-button{grid-column:2/4;grid-row:2}
+ .xtrato-topbar .theme-toggle{grid-column:1;grid-row:2;width:39px}
+ .xtrato-topbar .mobile-logout{display:none}
+ .xtrato-balance{padding:22px 20px}
+ .xtrato-balance-meta{gap:13px}
+ .xtrato-wallet-card{flex-basis:205px}
+ .xtrato-dashboard-aside{grid-template-columns:1fr}
+ .xtrato-dashboard-aside>.xtrato-forecast-panel{grid-column:auto}
+ .xtrato-management-modal{padding:18px 14px}
+ .xtrato-management-section .management-grid{grid-template-columns:1fr}
+}
+
+
+.xtrato-account-menu{position:relative}
+.xtrato-account-menu summary{list-style:none;display:flex;align-items:center;gap:7px;padding:4px 9px 4px 5px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:11px;font-weight:600;cursor:pointer}
+.xtrato-account-menu summary::-webkit-details-marker{display:none}
+.xtrato-account-avatar{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--green-dark);color:#fff;font-weight:700}
+.xtrato-account-popover{position:absolute;z-index:30;right:0;top:calc(100% + 8px);width:180px;padding:7px;border:1px solid var(--line);border-radius:13px;background:var(--surface);box-shadow:0 12px 30px #0002;display:grid;gap:3px}
+.xtrato-account-popover button{border:0;border-radius:8px;padding:9px 10px;background:transparent;color:var(--ink);text-align:left;font-size:11px}
+.xtrato-account-popover button:hover{background:var(--surface-2)}
+@media(max-width:620px){.xtrato-account-menu summary{font-size:0;padding:4px}.xtrato-account-menu summary>span:last-child{display:none}.xtrato-account-popover{right:0}}
+
+
+.xtrato-top-band{width:100vw;margin: -18px calc((100% - 100vw)/2) 32px;padding:18px max(16px,calc((100vw - 1240px)/2)) 27px;background:linear-gradient(140deg,#0b2b1f 0%,#0f4a33 100%);color:#fff;border-radius:0 0 28px 28px;position:relative;overflow:visible}
+.xtrato-top-band:before{content:"";position:absolute;right:2%;top:5%;width:300px;height:300px;border:1px solid #ffffff12;border-radius:50%;box-shadow:0 0 0 30px #ffffff05,0 0 0 65px #ffffff04;pointer-events:none}
+.xtrato-top-band>*{position:relative;z-index:1}
+.xtrato-topbar{border-color:#ffffff24}
+.xtrato-brand{color:#fff}
+.xtrato-brand img{filter:brightness(0) invert(1)}
+.xtrato-topbar .month-control{background:#ffffff12;border-color:#ffffff30;color:#fff}
+.xtrato-topbar .month-control button,.xtrato-topbar .month-control input{color:#fff}
+.xtrato-topbar .month-control button:hover{background:#ffffff20}
+.xtrato-topbar .icon-button{background:#ffffff12;border-color:#ffffff30;color:#fff}
+.xtrato-topbar .icon-button:hover{background:#ffffff20}
+.xtrato-topbar .dashboard-add-button{background:var(--lime,#b9f04c);color:#123321;border:0}
+.xtrato-balance{background:transparent;box-shadow:none;border:0;padding:14px 8px;color:#fff}
+.xtrato-balance:after{display:none}
+.xtrato-overline,.xtrato-balance-meta small{color:#ffffffa8}
+.xtrato-balance-value{color:#fff}
+.xtrato-budget-line,.xtrato-balance-meta b{color:#fff}
+.xtrato-progress{background:#ffffff25}
+.xtrato-progress span{background:var(--lime,#b9f04c)}
+.xtrato-budget-edit{color:#d5f4ad}
+.xtrato-budget-edit:hover{color:#fff}
+.xtrato-wallet-panel{padding:9px 0 0}
+.xtrato-wallet-panel .eyebrow,.xtrato-wallet-panel .xtrato-section-head h2{color:#fff}
+.xtrato-wallet-panel .xtrato-section-head .link-button{color:#d5f4ad}
+.xtrato-wallet-foot{color:#ffffffb8;border-color:#ffffff2a}
+.xtrato-wallet-foot b{color:#fff}
+.xtrato-wallet-list{padding-top:10px}
+.xtrato-account-menu summary{background:#ffffff12;border-color:#ffffff30;color:#fff}
+.xtrato-account-avatar{background:var(--lime,#b9f04c);color:#123321}
+@media(max-width:620px){.xtrato-top-band{margin-top:-12px;margin-bottom:24px;padding:13px 14px 20px;border-radius:0 0 22px 22px}.xtrato-balance{padding:8px 3px}}

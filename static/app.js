@@ -167,13 +167,21 @@
     renderCategories();
     refreshStaticIcons();
   }
+  async function changeSelectedMonth(offset) {
+    const [year, month] = state.month.split('-').map(Number);
+    const date = new Date(year, month - 1 + offset, 1);
+    state.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    $('#monthPicker').value = state.month;
+    await refreshDashboard();
+  }
+
   async function refreshDashboard() {
     const dashboard = await api(`/api/dashboard?month=${encodeURIComponent(state.month)}`);
     state.dashboard = dashboard;
     state.entries = dashboard.recent_entries || [];
     renderDashboard();
-    if (state.activePage === 'statement') await loadStatement();
-    if (state.activePage === 'recurrences') await loadRecurrences();
+    await loadStatement();
+    await loadRecurrences();
   }
 
   function renderDashboard() {
@@ -198,12 +206,37 @@
     $('#budgetWarning').textContent = warning;
     $('#cardCount').textContent = `${d.cards.length} ${d.cards.length === 1 ? 'cartão' : 'cartões'}`;
     $('#cardTotal').textContent = money(d.spent_cents);
-    $('#cardTotals').innerHTML = d.cards.length ? d.cards.map(c => `<div class="card-total-line"><span>${escapeHtml(c.name)}${c.active ? '' : ' · arquivado'}</span><b>${money(c.total_cents)}</b></div>`).join('') : '<div class="muted-dark">Cadastre seu primeiro cartão para começar.</div>';
+    renderWalletCards(d.cards || []);
     renderCategoryChart(d.categories || []);
     renderTrend(d.trend || []);
     renderForecast(d.forecast || []);
-    renderEntries($('#recentEntries'), d.recent_entries || [], true);
     $('#monthPicker').value = state.month;
+  }
+
+  function renderWalletCards(totals) {
+    const target = $('#walletCards');
+    if (!target) return;
+    const active = state.cards.filter(card => card.active !== false);
+    $('#cardCount').textContent = `${active.length} ${active.length === 1 ? 'cartão' : 'cartões'}`;
+    $('#cardTotal').textContent = money((totals || []).reduce((sum, card) => sum + (Number(card.total_cents) || 0), 0));
+    if (!active.length) {
+      target.innerHTML = '<div class="empty-inline">Adicione seu primeiro cartão para começar.</div>';
+      return;
+    }
+    target.innerHTML = active.map(card => {
+      const theme = bankTheme(card.issuer);
+      const total = (totals || []).find(row => Number(row.id) === Number(card.id));
+      return `<button type="button" class="xtrato-wallet-card" data-wallet-card="${card.id}" style="--wallet-bank:${theme.color};--wallet-ink:${theme.ink}">
+        <span class="xtrato-wallet-card-top"><span class="xtrato-wallet-bank-mark">${brandLogoMarkup(card.issuer)}</span><span class="xtrato-wallet-chevron">↗</span></span>
+        <span class="xtrato-wallet-card-name">${escapeHtml(card.name || card.issuer)}</span>
+        <span class="xtrato-wallet-card-bottom"><b>${money(total?.total_cents || 0)}</b><small>Fecha dia ${card.closing_day} · vence dia ${card.due_day}</small></span>
+      </button>`;
+    }).join('');
+    target.querySelectorAll('[data-wallet-card]').forEach(button => button.addEventListener('click', () => {
+      $('#statementCardFilter').value = button.dataset.walletCard;
+      loadStatement();
+      $('#statementSearch').focus();
+    }));
   }
 
   function renderCategoryChart(categories) {
@@ -540,9 +573,19 @@
   function openPurchase(kind = 'avista') {
     resetPurchaseForm();
     if (kind === 'recorrente') setKind('recorrente');
-    if (!state.cards.length || !state.categories.length) {
-      toast('Antes de lançar, cadastre ao menos um cartão e uma categoria.');
-      if (!state.cards.length) setPage('cards'); else setPage('categories');
+    const hasActiveCards = state.cards.some(card => card.active !== false);
+    const hasActiveCategories = state.categories.some(category => category.active !== false);
+    if (!hasActiveCards || !hasActiveCategories) {
+      const showCards = !hasActiveCards;
+      document.querySelectorAll('[data-management-tab]').forEach(button => {
+        button.classList.toggle('active', button.dataset.managementTab === (showCards ? 'cards' : 'categories'));
+      });
+      $('#managementCards').classList.toggle('hidden', !showCards);
+      $('#managementCategories').classList.toggle('hidden', showCards);
+      openModal('managementModal');
+      toast(showCards
+        ? 'Cadastre ou reative um cartão para registrar compras.'
+        : 'Cadastre ou reative uma categoria para registrar compras.');
       return;
     }
     renderCardOptions();
@@ -795,8 +838,16 @@
       await refreshDashboard();
     });
     $('#newPurchase').addEventListener('click', () => openPurchase());
-    $('#newPurchaseStatement').addEventListener('click', () => openPurchase());
-    $('#newRecurring').addEventListener('click', () => openPurchase('recorrente'));
+    $('#manageResources').addEventListener('click', () => openModal('managementModal'));
+    $('#manageCardsShortcut').addEventListener('click', () => openModal('managementModal'));
+    document.querySelectorAll('[data-management-tab]').forEach(button => button.addEventListener('click', () => {
+      const cards = button.dataset.managementTab === 'cards';
+      document.querySelectorAll('[data-management-tab]').forEach(item => item.classList.toggle('active', item === button));
+      $('#managementCards').classList.toggle('hidden', !cards);
+      $('#managementCategories').classList.toggle('hidden', cards);
+    }));
+    $('#monthPrevious').addEventListener('click', async () => changeSelectedMonth(-1));
+    $('#monthNext').addEventListener('click', async () => changeSelectedMonth(1));
     $('#editBudget').addEventListener('click', () => {
       $('#budgetMonthLabel').textContent = formatMonth(state.month);
       $('#budgetForm').elements.amount.value = state.dashboard?.limit_cents != null ? (state.dashboard.limit_cents / 100).toFixed(2) : '';
