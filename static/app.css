@@ -1086,3 +1086,47 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 
+
+
+/* XTRATO phase 4 — category and recurring screens: responsive finishing */
+.categories-page-heading,
+.recurrences-page-heading{min-width:0}
+.categories-overview-strip>div,
+.recurrences-overview-strip>div{min-width:0}
+.categories-overview-strip strong,
+.recurrences-overview-strip strong{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.management-form .section-heading,
+.management-list .section-heading{min-width:0}
+.management-form .form-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.management-form .form-grid label:first-child{grid-column:1/-1}
+.management-form .form-grid .color-input{min-width:0}
+.managed-item{min-width:0}
+.managed-copy b{line-height:1.4}
+.managed-copy .status-pill{vertical-align:middle;margin:0 0 0 5px}
+.managed-actions button{min-height:30px}
+.recurrence-entry{min-width:0}
+.recurrence-entry .merchant-copy b{overflow-wrap:anywhere}
+.recurrence-entry .entry-card{overflow-wrap:anywhere}
+.recurrence-entry .entry-amount{font-variant-numeric:tabular-nums}
+.recurrence-entry .entry-amount small{display:block;color:var(--muted);font-weight:600}
+.recurrence-entry.is-active .entry-amount small{color:var(--green-dark)}
+.recurrence-entry.is-archived .entry-amount small{color:var(--muted)}
+.recurrences-panel>.recurrences-list>.empty-inline{padding:42px 16px;border:1px dashed var(--line);border-radius:14px;background:var(--surface-2)}
+@media(max-width:620px){
+  .management-form .form-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .managed-item{align-items:flex-start}
+  .managed-copy{padding-top:2px}
+  .managed-actions{flex:0 0 100%;margin-left:45px;justify-content:flex-start}
+  .managed-actions button{min-height:32px;padding-inline:10px;font-size:9px}
+  .recurrence-entry{grid-template-columns:minmax(0,1fr) auto;align-items:start}
+  .recurrence-entry .entry-actions{align-self:center}
+}
+@media(max-width:380px){
+  .categories-overview-strip>div,
+  .recurrences-overview-strip>div{padding-inline:8px}
+  .categories-overview-strip>div strong{font-size:14px}
+  .recurrences-overview-strip>div strong{font-size:14px}
+  .recurrences-overview-strip>div:nth-child(2) strong{font-size:12px}
+  .recurrence-entry .entry-actions{grid-column:1/-1;grid-row:4;margin-left:48px;justify-content:flex-start}
+  .recurrence-entry .mini-action{padding:7px 9px}
+}
