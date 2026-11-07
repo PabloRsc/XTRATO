@@ -1114,9 +1114,9 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
 .recurrences-panel>.recurrences-list>.empty-inline{padding:42px 16px;border:1px dashed var(--line);border-radius:14px;background:var(--surface-2)}
 @media(max-width:620px){
   .management-form .form-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .managed-item{align-items:flex-start}
+  .managed-item{align-items:flex-start;flex-wrap:wrap}
   .managed-copy{padding-top:2px}
-  .managed-actions{flex:0 0 100%;margin-left:45px;justify-content:flex-start}
+  .managed-actions{flex:1 1 calc(100% - 45px);min-width:0;margin-left:45px;justify-content:flex-start}
   .managed-actions button{min-height:32px;padding-inline:10px;font-size:9px}
   .recurrence-entry{grid-template-columns:minmax(0,1fr) auto;align-items:start}
   .recurrence-entry .entry-actions{align-self:center}
