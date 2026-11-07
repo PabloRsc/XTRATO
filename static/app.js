@@ -830,9 +830,9 @@
     $('#newPurchase').addEventListener('click', () => openPurchase());
     $('#manageResources').addEventListener('click', () => openModal('managementModal'));
     $('#manageCardsShortcut').addEventListener('click', () => openModal('managementModal'));
-    $('[data-management-tab]').forEach(button => button.addEventListener('click', () => {
+    document.querySelectorAll('[data-management-tab]').forEach(button => button.addEventListener('click', () => {
       const cards = button.dataset.managementTab === 'cards';
-      $('[data-management-tab]').forEach(item => item.classList.toggle('active', item === button));
+      document.querySelectorAll('[data-management-tab]').forEach(item => item.classList.toggle('active', item === button));
       $('#managementCards').classList.toggle('hidden', !cards);
       $('#managementCategories').classList.toggle('hidden', cards);
     }));
