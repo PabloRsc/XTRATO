@@ -573,9 +573,19 @@
   function openPurchase(kind = 'avista') {
     resetPurchaseForm();
     if (kind === 'recorrente') setKind('recorrente');
-    if (!state.cards.length || !state.categories.length) {
-      toast('Antes de lançar, cadastre ao menos um cartão e uma categoria.');
-      if (!state.cards.length) setPage('cards'); else setPage('categories');
+    const hasActiveCards = state.cards.some(card => card.active !== false);
+    const hasActiveCategories = state.categories.some(category => category.active !== false);
+    if (!hasActiveCards || !hasActiveCategories) {
+      const showCards = !hasActiveCards;
+      document.querySelectorAll('[data-management-tab]').forEach(button => {
+        button.classList.toggle('active', button.dataset.managementTab === (showCards ? 'cards' : 'categories'));
+      });
+      $('#managementCards').classList.toggle('hidden', !showCards);
+      $('#managementCategories').classList.toggle('hidden', showCards);
+      openModal('managementModal');
+      toast(showCards
+        ? 'Cadastre ou reative um cartão para registrar compras.'
+        : 'Cadastre ou reative uma categoria para registrar compras.');
       return;
     }
     renderCardOptions();
