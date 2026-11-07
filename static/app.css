@@ -914,6 +914,7 @@ h1,h2,h3,.xtrato-balance-value,.dark-total,.budget-numbers strong{font-family:"B
 .xtrato-cards-page .bank-choice{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:10px!important}
 .xtrato-cards-page .bank-choice[aria-pressed="true"]{border-color:var(--green)!important;background:var(--green-soft)!important}
 .xtrato-cards-page .card-live-preview{padding:4px 0 0}
+.xtrato-cards-page .preview-card-face.wallet-card-face{--bank-color:var(--preview-color)!important}
 .xtrato-cards-page .preview-card-face.wallet-card-face,.xtrato-cards-page .bank-card-face.wallet-card-face{
  aspect-ratio:1.586/1!important;width:100%!important;max-width:320px!important;min-height:0!important;height:auto!important;
  border-radius:17px!important;padding:18px!important;overflow:hidden!important;position:relative!important;
