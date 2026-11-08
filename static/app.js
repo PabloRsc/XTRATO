@@ -753,7 +753,12 @@
     $('#cardFormSubmit').textContent = 'Salvar alterações';
     $('#cancelCardEdit').classList.remove('hidden');
     $('#cardFormMessage').textContent = 'Alterar fechamento ou vencimento afeta apenas sugestões de novas compras.';
-    setPage('cards');
+    document.querySelectorAll('[data-management-tab]').forEach(button => {
+      button.classList.toggle('active', button.dataset.managementTab === 'cards');
+    });
+    $('#managementCards').classList.remove('hidden');
+    $('#managementCategories').classList.add('hidden');
+    openModal('managementModal');
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   function resetCardEditor() {
@@ -799,7 +804,12 @@
     $('#categoryFormSubmit').textContent = 'Salvar alterações';
     $('#cancelCategoryEdit').classList.remove('hidden');
     $('#categoryFormMessage').textContent = 'Os lançamentos existentes manterão os valores financeiros originais.';
-    setPage('categories');
+    document.querySelectorAll('[data-management-tab]').forEach(button => {
+      button.classList.toggle('active', button.dataset.managementTab === 'categories');
+    });
+    $('#managementCards').classList.add('hidden');
+    $('#managementCategories').classList.remove('hidden');
+    openModal('managementModal');
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   function resetCategoryEditor() {
