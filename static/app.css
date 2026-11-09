@@ -1214,12 +1214,13 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
  .main-area{padding:12px 14px 28px}
  .xtrato-topbar{align-items:flex-start;flex-wrap:wrap;margin-bottom:23px;padding-bottom:13px}
  .xtrato-brand{font-size:19px}
- .xtrato-topbar-actions{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px}
+ .xtrato-topbar-actions{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:7px}
  .xtrato-topbar .month-control{grid-column:1/-1;justify-content:center}
  .xtrato-topbar .month-control input{width:130px}
- .xtrato-topbar .icon-button:not(.theme-toggle){font-size:10px;padding:0 8px}
- .xtrato-topbar .dashboard-add-button{grid-column:2/4;grid-row:2}
- .xtrato-topbar .theme-toggle{grid-column:1;grid-row:2;width:39px}
+ .xtrato-topbar #manageResources{grid-column:1;grid-row:2;justify-self:start;font-size:10px;padding:0 10px}
+ .xtrato-topbar .theme-toggle{grid-column:2;grid-row:2;width:39px}
+ .xtrato-topbar .dashboard-add-button{grid-column:3;grid-row:2;padding:0 11px;font-size:10px;white-space:nowrap}
+ .xtrato-topbar .xtrato-account-menu{grid-column:4;grid-row:2;justify-self:end}
  .xtrato-topbar .mobile-logout{display:none}
  .xtrato-balance{padding:22px 20px}
  .xtrato-balance-meta{gap:13px}
