@@ -74,7 +74,7 @@
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
 
-  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0, submittingPurchase: false };
+  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0, recurrenceRequest: 0, submittingPurchase: false };
 
   async function api(path, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
@@ -482,7 +482,9 @@
   }
 
   async function loadRecurrences() {
+    const request = ++state.recurrenceRequest;
     const rows = await api('/api/recurrences');
+    if (request !== state.recurrenceRequest) return;
     const target = $('#recurrencesList');
     const activeRows = rows.filter(row => row.active);
     const archivedRows = rows.filter(row => !row.active);
