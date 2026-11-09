@@ -226,10 +226,18 @@
     target.innerHTML = active.map(card => {
       const theme = bankTheme(card.issuer);
       const total = (totals || []).find(row => Number(row.id) === Number(card.id));
+      const committed = Number(total?.total_cents) || 0;
+      const limit = Number(card.limit_cents) || 0;
+      const available = limit - committed;
       return `<button type="button" class="xtrato-wallet-card" data-wallet-card="${card.id}" style="--wallet-bank:${theme.color};--wallet-ink:${theme.ink}">
         <span class="xtrato-wallet-card-top"><span class="xtrato-wallet-bank-mark">${brandLogoMarkup(card.issuer)}</span><span class="xtrato-wallet-chevron">↗</span></span>
         <span class="xtrato-wallet-card-name">${escapeHtml(card.name || card.issuer)}</span>
-        <span class="xtrato-wallet-card-bottom"><b>${money(total?.total_cents || 0)}</b><small>Fecha dia ${card.closing_day} · vence dia ${card.due_day}</small></span>
+        <span class="xtrato-wallet-card-bottom">
+          <b>${money(committed)}</b>
+          <small>Comprometido neste mês</small>
+          <small>Limite: ${money(limit)} · Disponível: ${money(available)}</small>
+          <small>Fecha dia ${card.closing_day} · vence dia ${card.due_day}</small>
+        </span>
       </button>`;
     }).join('');
     target.querySelectorAll('[data-wallet-card]').forEach(button => button.addEventListener('click', () => {
