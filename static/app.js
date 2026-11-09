@@ -632,8 +632,9 @@
       await api('/api/purchases', { method: 'POST', body: JSON.stringify(payload) });
       closeModal('purchaseModal');
       // Open the invoice month where the new purchase was recorded so it is immediately visible.
-      if (payload.first_invoice_month) {
-        state.month = payload.first_invoice_month;
+      const recordedInvoiceMonth = payload.current_invoice_month || payload.first_invoice_month;
+      if (recordedInvoiceMonth) {
+        state.month = recordedInvoiceMonth;
         $('#monthPicker').value = state.month;
       }
       await refreshDashboard();
