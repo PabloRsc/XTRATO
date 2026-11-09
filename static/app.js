@@ -111,8 +111,38 @@
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => node.classList.remove('show'), 2700);
   }
-  function openModal(id) { $(`#${id}`).classList.remove('hidden'); }
-  function closeModal(id) { $(`#${id}`).classList.add('hidden'); }
+  const modalReturnFocus = new Map();
+  const modalFocusableSelector = 'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  function openModal(id) {
+    const modal = $(`#${id}`);
+    if (!modal) return;
+    modalReturnFocus.set(id, document.activeElement);
+    modal.classList.remove('hidden');
+    const firstFocusable = modal.querySelector(modalFocusableSelector);
+    if (firstFocusable) firstFocusable.focus();
+    else { modal.setAttribute('tabindex', '-1'); modal.focus(); }
+  }
+  function closeModal(id) {
+    const modal = $(`#${id}`);
+    if (!modal) return;
+    modal.classList.add('hidden');
+    const previous = modalReturnFocus.get(id);
+    modalReturnFocus.delete(id);
+    if (previous && typeof previous.focus === 'function' && document.contains(previous)) previous.focus();
+  }
+  function trapModalFocus(event) {
+    if (event.key !== 'Tab') return;
+    const modal = $('.modal-backdrop:not(.hidden)');
+    if (!modal) return;
+    const focusable = [...modal.querySelectorAll(modalFocusableSelector)].filter(node => node.getClientRects().length > 0);
+    if (!focusable.length) { event.preventDefault(); modal.focus(); return; }
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+      event.preventDefault(); first.focus();
+    }
+  }
   function selectManagementTab(tab) {
     const cards = tab === 'cards';
     document.querySelectorAll('[data-management-tab]').forEach(button => {
@@ -901,7 +931,7 @@
     });
     $$('[data-close]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.close)));
     // Preserve form data: backdrop clicks do not dismiss open modals.
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') $$('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id)); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') $('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id)); else trapModalFocus(event); });
     $$('.type-switch button').forEach(button => button.addEventListener('click', () => setKind(button.dataset.kind)));
     $('#ongoingCheck').addEventListener('change', updateOngoingFields);
     $('#valueMode').addEventListener('change', updateOngoingFields);
