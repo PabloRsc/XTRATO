@@ -931,7 +931,7 @@
     });
     $$('[data-close]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.close)));
     // Preserve form data: backdrop clicks do not dismiss open modals.
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') $('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id)); else trapModalFocus(event); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)')).forEach(m => closeModal(m.id)); else trapModalFocus(event); });
     $$('.type-switch button').forEach(button => button.addEventListener('click', () => setKind(button.dataset.kind)));
     $('#ongoingCheck').addEventListener('change', updateOngoingFields);
     $('#valueMode').addEventListener('change', updateOngoingFields);
