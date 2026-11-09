@@ -661,8 +661,6 @@
         $('#monthPicker').value = state.month;
       }
       await refreshDashboard();
-      if (state.activePage === 'statement') await loadStatement();
-      if (state.activePage === 'recurrences') await loadRecurrences();
       toast(kind === 'recorrente' ? 'Despesa fixa cadastrada.' : 'Compra registrada com sucesso.');
     } catch (error) { $('#purchaseError').textContent = error.message; }
     finally {
