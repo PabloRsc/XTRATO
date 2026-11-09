@@ -417,7 +417,7 @@
           (archived ? '<span class="status-pill historical">Arquivado</span><button type="button" data-reactivate-card="' + card.id + '">Reativar</button>' : '<button type="button" data-edit-card="' + card.id + '">Editar</button><button type="button" data-archive-card="' + card.id + '">Arquivar</button>') +
         '</div></div></article>';
     }).join('');
-    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(button.dataset.editCard)));
+    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(Number(button.dataset.editCard))));
     target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveResource('cards', Number(button.dataset.archiveCard), 'cartão')));
     target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateResource('cards', Number(button.dataset.reactivateCard), 'cartão')));
   }
