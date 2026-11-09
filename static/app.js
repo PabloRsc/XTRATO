@@ -74,7 +74,7 @@
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
 
-  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0 };
+  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0, submittingPurchase: false };
 
   async function api(path, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
@@ -618,7 +618,15 @@
 
   async function submitPurchase(event) {
     event.preventDefault();
+    if (state.submittingPurchase) return;
     const form = $('#purchaseForm');
+    const submitButton = form.querySelector('[type="submit"]');
+    state.submittingPurchase = true;
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.dataset.originalLabel = submitButton.textContent;
+      submitButton.textContent = 'Salvando…';
+    }
     const data = new FormData(form);
     const kind = data.get('kind');
     const amountCents = purchaseInputToCents(data.get('amount'));
@@ -655,6 +663,14 @@
       if (state.activePage === 'recurrences') await loadRecurrences();
       toast(kind === 'recorrente' ? 'Despesa fixa cadastrada.' : 'Compra registrada com sucesso.');
     } catch (error) { $('#purchaseError').textContent = error.message; }
+    finally {
+      state.submittingPurchase = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = submitButton.dataset.originalLabel || 'Registrar compra';
+        delete submitButton.dataset.originalLabel;
+      }
+    }
   }
 
   function openPurchaseEdit(id, description, notes) {
