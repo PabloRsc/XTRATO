@@ -679,7 +679,16 @@
       end_invoice_month: kind === 'recorrente' ? (data.get('end_invoice_month') || null) : null,
       notes: data.get('notes') || '',
     };
-    if (!payload.amount_cents || payload.amount_cents < 1) { $('#purchaseError').textContent = 'Informe um valor válido.'; return; }
+    if (!payload.amount_cents || payload.amount_cents < 1) {
+      $('#purchaseError').textContent = 'Informe um valor válido.';
+      state.submittingPurchase = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = submitButton.dataset.originalLabel || 'Registrar compra';
+        delete submitButton.dataset.originalLabel;
+      }
+      return;
+    }
     $('#purchaseError').textContent = '';
     try {
       await api('/api/purchases', { method: 'POST', body: JSON.stringify(payload) });
