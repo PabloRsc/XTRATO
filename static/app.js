@@ -74,7 +74,7 @@
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
 
-  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null };
+  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0 };
 
   async function api(path, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
@@ -113,6 +113,14 @@
   }
   function openModal(id) { $(`#${id}`).classList.remove('hidden'); }
   function closeModal(id) { $(`#${id}`).classList.add('hidden'); }
+  function selectManagementTab(tab) {
+    const cards = tab === 'cards';
+    document.querySelectorAll('[data-management-tab]').forEach(button => {
+      button.classList.toggle('active', button.dataset.managementTab === tab);
+    });
+    $('#managementCards').classList.toggle('hidden', !cards);
+    $('#managementCategories').classList.toggle('hidden', cards);
+  }
   function applyTheme(theme) {
     const selected = theme === 'dark' ? 'dark' : 'light';
     document.documentElement.dataset.theme = selected;
@@ -176,7 +184,10 @@
   }
 
   async function refreshDashboard() {
-    const dashboard = await api(`/api/dashboard?month=${encodeURIComponent(state.month)}`);
+    const request = ++state.dashboardRequest;
+    const requestedMonth = state.month;
+    const dashboard = await api(`/api/dashboard?month=${encodeURIComponent(requestedMonth)}`);
+    if (request !== state.dashboardRequest || requestedMonth !== state.month) return;
     state.dashboard = dashboard;
     state.entries = dashboard.recent_entries || [];
     renderDashboard();
@@ -316,7 +327,9 @@
     const params = new URLSearchParams({ month: state.month });
     if (q) params.set('q', q);
     if (card) params.set('card_id', card);
+    const request = ++state.statementRequest;
     const rows = await api(`/api/entries?${params.toString()}`);
+    if (request !== state.statementRequest) return;
     state.entries = rows;
     $('#statementCount').textContent = `${rows.length} ${rows.length === 1 ? 'lançamento' : 'lançamentos'}`;
     const total = rows.reduce((sum, r) => sum + (r.direction === 'credit' ? -r.amount_cents : r.amount_cents), 0);
@@ -859,14 +872,9 @@
       await refreshDashboard();
     });
     $('#newPurchase').addEventListener('click', () => openPurchase());
-    $('#manageResources').addEventListener('click', () => openModal('managementModal'));
-    $('#manageCardsShortcut').addEventListener('click', () => openModal('managementModal'));
-    document.querySelectorAll('[data-management-tab]').forEach(button => button.addEventListener('click', () => {
-      const cards = button.dataset.managementTab === 'cards';
-      document.querySelectorAll('[data-management-tab]').forEach(item => item.classList.toggle('active', item === button));
-      $('#managementCards').classList.toggle('hidden', !cards);
-      $('#managementCategories').classList.toggle('hidden', cards);
-    }));
+    $('#manageResources').addEventListener('click', () => { selectManagementTab('cards'); openModal('managementModal'); });
+    $('#manageCardsShortcut').addEventListener('click', () => { selectManagementTab('cards'); openModal('managementModal'); });
+    document.querySelectorAll('[data-management-tab]').forEach(button => button.addEventListener('click', () => selectManagementTab(button.dataset.managementTab)));
     $('#monthPrevious').addEventListener('click', async () => changeSelectedMonth(-1));
     $('#monthNext').addEventListener('click', async () => changeSelectedMonth(1));
     $('#editBudget').addEventListener('click', () => {
