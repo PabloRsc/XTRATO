@@ -659,11 +659,7 @@
     const hasActiveCategories = state.categories.some(category => category.active !== false);
     if (!hasActiveCards || !hasActiveCategories) {
       const showCards = !hasActiveCards;
-      document.querySelectorAll('[data-management-tab]').forEach(button => {
-        button.classList.toggle('active', button.dataset.managementTab === (showCards ? 'cards' : 'categories'));
-      });
-      $('#managementCards').classList.toggle('hidden', !showCards);
-      $('#managementCategories').classList.toggle('hidden', showCards);
+      selectManagementTab(showCards ? 'cards' : 'categories');
       openModal('managementModal');
       toast(showCards
         ? 'Cadastre ou reative um cartão para registrar compras.'
