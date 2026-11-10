@@ -605,7 +605,7 @@
   }
   function updateCalculation() {
     const kind = $('#purchaseForm').elements.kind.value;
-    const amount = moneyInputToCents($('#purchaseForm').elements.amount.value || '0');
+    const amount = purchaseInputToCents($('#purchaseForm').elements.amount.value || '0');
     const count = Math.max(1, Number($('#purchaseForm').elements.installment_count.value || 1));
     const ongoing = $('#ongoingCheck').checked && kind === 'parcelado';
     const mode = $('#valueMode').value;
