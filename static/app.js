@@ -122,7 +122,7 @@
   const modalFocusableSelector = 'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
   function openModal(id) {
     const modal = $(`#${id}`);
-    if (!modal) return;
+    if (!modal || !modal.classList.contains('hidden')) return;
     modalReturnFocus.set(id, document.activeElement);
     modal.classList.remove('hidden');
     const firstFocusable = modal.querySelector(modalFocusableSelector);
