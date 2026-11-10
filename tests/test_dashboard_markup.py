@@ -33,6 +33,7 @@ class DashboardMarkupAudit(HTMLParser):
                 "tag": tag,
                 "id": element_id,
                 "type": attributes.get("type", "text").lower(),
+                "hidden": "hidden" in attributes,
                 "inside_label": self.label_depth > 0,
                 "aria_label": attributes.get("aria-label"),
                 "aria_labelledby": attributes.get("aria-labelledby"),
@@ -80,6 +81,7 @@ def test_dashboard_form_controls_have_accessible_labels():
         control
         for control in parser.controls
         if control["type"] != "hidden"
+        and not control["hidden"]
         and not (
             control["inside_label"]
             or control["aria_label"]
