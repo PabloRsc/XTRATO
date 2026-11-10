@@ -48,3 +48,26 @@ A auditoria não equivale a pentest externo nem a uma validação de produção 
 ## Conclusão
 
 A revisão de código e os testes automatizados cobrem os fluxos centrais da aplicação e não indicam bloqueador funcional conhecido além das correções listadas nesta PR e das configurações operacionais ainda pendentes. O projeto pode avançar para a preparação de publicação após a integração e validação desta PR, mas não deve ser declarado pronto para produção antes de concluir os critérios de aceite acima.
+
+
+## Atualização de revisão — 10/11/2026
+
+**Branch revisada:** `feat/xtrato-dashboard-mockup-rebuild`  
+**Pull Request:** #51  
+**Última correção financeira verificada:** compromissos de cartão filtrados por compras ativas, parcelas abertas e mês de fatura igual ou posterior ao mês selecionado.
+
+### Validações adicionais
+
+- Testes específicos de dashboard para previsão de 12 meses, parcelas futuras e isolamento entre contas.
+- Teste de regressão para impedir que faturas antigas ainda marcadas como abertas reduzam o limite disponível atual.
+- CI do commit `cdd26cba8e14e9671eb8e2345c6cf4163c02faf7` concluído com sucesso, incluindo testes Python, migrações SQLite, sintaxe JavaScript, build Docker e smoke test PostgreSQL.
+- Verificação estática dos identificadores HTML sem duplicações e confirmação de breakpoints responsivos no CSS.
+
+### Pendências que continuam bloqueando o aceite de produção
+
+- Inspeção visual real em navegador desktop e celular, incluindo modais, estados vazios, telas estreitas e contraste nos temas.
+- Integração do PR após revisão visual e CI verde no commit final.
+- Configuração e validação do provedor de hospedagem, PostgreSQL persistente, backups, HTTPS, variáveis de ambiente e política de retenção.
+- Teste de fumaça autenticado no ambiente hospedado, sem utilizar dados financeiros reais antes de confirmar backup e restauração.
+
+**Status:** aprovado em CI; ainda não aprovado para produção. Não afirmar que a aplicação foi publicada ou que a hospedagem foi validada até concluir os itens acima.
