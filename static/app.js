@@ -876,16 +876,16 @@
     event.preventDefault();
     if (state.submittingCard) return;
     const form = event.currentTarget;
+    const fd = new FormData(form);
+    const issuer = String(fd.get('issuer') || '').trim();
+    const limit = parseMoneyInput(fd.get('limit'));
+    if (!issuer) { $('#cardFormMessage').textContent = 'Escolha o banco do cartão.'; return; }
+    if (!Number.isFinite(limit) || limit < 0) { $('#cardFormMessage').textContent = 'Informe um limite válido.'; return; }
     const submitButton = $('#cardFormSubmit');
     state.submittingCard = true;
     submitButton.disabled = true;
     const originalLabel = submitButton.textContent;
     submitButton.textContent = 'Salvando…';
-    const fd = new FormData(form);
-    const issuer = String(fd.get('issuer') || '').trim();
-    const limit = parseMoneyInput(fd.get('limit'));
-    if (!issuer) { $('#cardFormMessage').textContent = 'Escolha o banco do cartão.'; return; }
-    if (!Number.isFinite(limit)) { $('#cardFormMessage').textContent = 'Informe um limite válido.'; return; }
     const theme = bankTheme(issuer);
     const payload = { name: String(fd.get('name') || '').trim(), issuer, limit_cents: Math.round(limit * 100), brand: '', last_four: null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), color: theme.color };
     try {
