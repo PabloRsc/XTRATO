@@ -81,7 +81,14 @@
     const headers = { ...(options.headers || {}) };
     if (options.body !== undefined) headers['Content-Type'] = 'application/json';
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) headers['X-Xtrato-Request'] = '1';
-    const response = await fetch(path, { ...options, method, headers, credentials: 'same-origin' });
+    let response;
+    try {
+      response = await fetch(path, { ...options, method, headers, credentials: 'same-origin' });
+    } catch (_) {
+      const error = new Error('Não foi possível conectar ao XTRATO. Verifique sua conexão e tente novamente.');
+      error.code = 'NETWORK_ERROR';
+      throw error;
+    }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       const error = new Error(payload.detail || 'Não foi possível concluir a operação.');
@@ -1032,11 +1039,19 @@
     event.preventDefault();
     const fd = new FormData(event.currentTarget);
     $('#loginError').textContent = '';
+    const submit = event.currentTarget.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
     try {
       const user = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }) });
-      showApp(user);
       await loadInitialData();
-    } catch (error) { $('#loginError').textContent = error.message; }
+      showApp(user);
+    } catch (error) {
+      state.user = null;
+      showLogin();
+      $('#loginError').textContent = error.message || 'Não foi possível entrar. Tente novamente.';
+    } finally {
+      if (submit) submit.disabled = false;
+    }
   }
   async function submitPasswordChange(event) {
     event.preventDefault();
