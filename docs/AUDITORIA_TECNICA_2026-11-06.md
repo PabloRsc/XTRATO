@@ -88,3 +88,17 @@ Execução: [GitHub Actions #42898386403](https://github.com/PabloRsc/XTRATO/act
 - CSS contém breakpoints para larguras de 1100, 1050, 1000, 900, 860, 850, 760, 680, 620, 390 e 380 px, além de preferências de movimento/transparência reduzidos.
 
 **Limite da evidência:** os testes de CI são automatizados em container e não substituem renderização visual real em navegadores desktop/mobile. A hospedagem pública também não foi conectada nem validada nesta etapa.
+
+### CI final após testes adicionais — 10/11/2026
+
+**Commit:** `66d05468c72f9fada4e85b131e40e2b77436709e`  
+**Execução:** [GitHub Actions #42922960517](https://github.com/PabloRsc/XTRATO/actions/runs/42922960517) — conclusão `success`.
+
+- **78 testes Python aprovados** em 2,51 segundos.
+- A nova auditoria automatizada do HTML verifica IDs duplicados, nomes acessíveis de controles de formulário e nomes acessíveis de botões.
+- O teste de limite dos cartões cobre compras arquivadas e parcelas históricas ainda abertas, garantindo que não sejam indevidamente consideradas no limite disponível do mês selecionado.
+- O job completou o build Docker e o smoke test PostgreSQL via Docker Compose; os containers do banco e da aplicação ficaram saudáveis, a aplicação foi recriada e encerrada sem falha.
+- Os passos do smoke test incluem prontidão, autenticação, exportação/restauração de backup e verificações de persistência.
+
+**Conclusão atualizada:** CI verde no commit acima. Isso não substitui a inspeção visual manual em navegador nem a validação de uma implantação real com armazenamento persistente, HTTPS e política de backup do provedor.
+
