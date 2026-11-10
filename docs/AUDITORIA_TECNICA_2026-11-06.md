@@ -71,3 +71,20 @@ A revisão de código e os testes automatizados cobrem os fluxos centrais da apl
 - Teste de fumaça autenticado no ambiente hospedado, sem utilizar dados financeiros reais antes de confirmar backup e restauração.
 
 **Status:** aprovado em CI; ainda não aprovado para produção. Não afirmar que a aplicação foi publicada ou que a hospedagem foi validada até concluir os itens acima.
+
+
+### Resultado final do CI de documentação — 10/11/2026
+
+Commit validado: `55e9f6a25cd599d0f1d7473a35055520cb64d619`  
+Execução: [GitHub Actions #42898386403](https://github.com/PabloRsc/XTRATO/actions/runs/42898386403)
+
+- **74 testes Python aprovados**.
+- Compilação dos fontes Python aprovada.
+- Migração Alembic em SQLite aprovada.
+- Sintaxe de `static/app.js` aprovada com Node.js 22.
+- Build da imagem Docker aprovado.
+- Smoke test PostgreSQL via Docker Compose aprovado, incluindo prontidão, login, backup/restauração, ciclo de cartão (arquivar/reativar), troca de senha, invalidação de sessão antiga e persistência após reinicialização.
+- Verificação estática: 119 IDs HTML, sem duplicações; 213 referências diretas a IDs no JavaScript, sem seletores ausentes.
+- CSS contém breakpoints para larguras de 1100, 1050, 1000, 900, 860, 850, 760, 680, 620, 390 e 380 px, além de preferências de movimento/transparência reduzidos.
+
+**Limite da evidência:** os testes de CI são automatizados em container e não substituem renderização visual real em navegadores desktop/mobile. A hospedagem pública também não foi conectada nem validada nesta etapa.
