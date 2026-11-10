@@ -123,6 +123,8 @@ def dashboard(month: str, request: Request, db: Session = Depends(get_db)):
         .join(Purchase, Purchase.id == InvoiceEntry.purchase_id)
         .where(
             Purchase.user_id == user.id,
+            Purchase.active.is_(True),
+            InvoiceEntry.invoice_month >= selected,
             InvoiceEntry.status == "open",
         )
     ).all()
