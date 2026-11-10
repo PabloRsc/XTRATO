@@ -74,7 +74,7 @@
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
 
-  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0, recurrenceRequest: 0, submittingPurchase: false };
+  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0, recurrenceRequest: 0, submittingPurchase: false, submittingCard: false, submittingCategory: false };
 
   async function api(path, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
@@ -874,7 +874,13 @@
   }
   async function submitCard(event) {
     event.preventDefault();
+    if (state.submittingCard) return;
     const form = event.currentTarget;
+    const submitButton = $('#cardFormSubmit');
+    state.submittingCard = true;
+    submitButton.disabled = true;
+    const originalLabel = submitButton.textContent;
+    submitButton.textContent = 'Salvando…';
     const fd = new FormData(form);
     const issuer = String(fd.get('issuer') || '').trim();
     const limit = parseMoneyInput(fd.get('limit'));
@@ -891,6 +897,11 @@
       await refreshDashboard();
       toast(editing ? 'Cartão atualizado.' : 'Cartão cadastrado.');
     } catch (error) { $('#cardFormMessage').textContent = error.message; }
+    finally {
+      state.submittingCard = false;
+      submitButton.disabled = false;
+      submitButton.textContent = originalLabel;
+    }
   }
   function startEditCategory(id) {
     const category = state.categories.find(item => item.id === id);
@@ -918,7 +929,13 @@
   }
   async function submitCategory(event) {
     event.preventDefault();
+    if (state.submittingCategory) return;
     const form = event.currentTarget;
+    const submitButton = $('#categoryFormSubmit');
+    state.submittingCategory = true;
+    submitButton.disabled = true;
+    const originalLabel = submitButton.textContent;
+    submitButton.textContent = 'Salvando…';
     const fd = new FormData(form);
     const payload = { name: fd.get('name').trim(), color: fd.get('color'), icon: fd.get('icon') };
     try {
@@ -930,6 +947,11 @@
       await refreshDashboard();
       toast(editing ? 'Categoria atualizada.' : 'Categoria cadastrada.');
     } catch (error) { $('#categoryFormMessage').textContent = error.message; }
+    finally {
+      state.submittingCategory = false;
+      submitButton.disabled = false;
+      submitButton.textContent = originalLabel;
+    }
   }
 
   function wireEvents() {
