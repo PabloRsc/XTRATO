@@ -88,7 +88,7 @@ def test_dashboard_forecast_and_card_available_limit_include_future_open_install
                 invoice_month=month,
                 installment_number=installment,
                 amount_cents=20_000,
-                status="historical" if month < date(2026, 11, 1) else "open",
+                status="open",
             ))
         db.commit()
 
