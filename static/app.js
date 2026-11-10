@@ -153,7 +153,10 @@
   function selectManagementTab(tab) {
     const cards = tab === 'cards';
     document.querySelectorAll('[data-management-tab]').forEach(button => {
-      button.classList.toggle('active', button.dataset.managementTab === tab);
+      const selected = button.dataset.managementTab === tab;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-selected', selected ? 'true' : 'false');
+      button.tabIndex = selected ? 0 : -1;
     });
     $('#managementCards').classList.toggle('hidden', !cards);
     $('#managementCategories').classList.toggle('hidden', cards);
@@ -953,7 +956,19 @@
     $('#newPurchase').addEventListener('click', () => openPurchase());
     $('#manageResources').addEventListener('click', () => { selectManagementTab('cards'); openModal('managementModal'); });
     $('#manageCardsShortcut').addEventListener('click', () => { selectManagementTab('cards'); openModal('managementModal'); });
-    document.querySelectorAll('[data-management-tab]').forEach(button => button.addEventListener('click', () => selectManagementTab(button.dataset.managementTab)));
+    document.querySelectorAll('[data-management-tab]').forEach(button => {
+      button.addEventListener('click', () => selectManagementTab(button.dataset.managementTab));
+      button.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const tabs = [...document.querySelectorAll('[data-management-tab]')];
+        const current = tabs.indexOf(event.currentTarget);
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+          : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        selectManagementTab(tabs[next].dataset.managementTab);
+        tabs[next].focus();
+      });
+    });
     $('#monthPrevious').addEventListener('click', async () => changeSelectedMonth(-1));
     $('#monthNext').addEventListener('click', async () => changeSelectedMonth(1));
     $('#editBudget').addEventListener('click', () => {
