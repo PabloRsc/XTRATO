@@ -365,13 +365,20 @@
     if (q) params.set('q', q);
     if (card) params.set('card_id', card);
     const request = ++state.statementRequest;
-    const rows = await api(`/api/entries?${params.toString()}`);
-    if (request !== state.statementRequest) return;
-    state.entries = rows;
-    $('#statementCount').textContent = `${rows.length} ${rows.length === 1 ? 'lançamento' : 'lançamentos'}`;
-    const total = rows.reduce((sum, r) => sum + (r.direction === 'credit' ? -r.amount_cents : r.amount_cents), 0);
-    $('#statementTotal').textContent = money(total);
-    renderEntries($('#statementEntries'), rows, true);
+    try {
+      const rows = await api(`/api/entries?${params.toString()}`);
+      if (request !== state.statementRequest) return;
+      state.entries = rows;
+      $('#statementCount').textContent = `${rows.length} ${rows.length === 1 ? 'lançamento' : 'lançamentos'}`;
+      const total = rows.reduce((sum, r) => sum + (r.direction === 'credit' ? -r.amount_cents : r.amount_cents), 0);
+      $('#statementTotal').textContent = money(total);
+      renderEntries($('#statementEntries'), rows, true);
+    } catch (error) {
+      if (request !== state.statementRequest) return;
+      $('#statementCount').textContent = 'Indisponível';
+      $('#statementTotal').textContent = '—';
+      $('#statementEntries').innerHTML = `<div class="empty-inline" role="status">Não foi possível carregar o extrato. ${escapeHtml(error.message)} Tente novamente ao atualizar a seção.</div>`;
+    }
   }
 
   async function cancelPurchase(id) {
@@ -520,7 +527,17 @@
 
   async function loadRecurrences() {
     const request = ++state.recurrenceRequest;
-    const rows = await api('/api/recurrences');
+    let rows;
+    try {
+      rows = await api('/api/recurrences');
+    } catch (error) {
+      if (request !== state.recurrenceRequest) return;
+      $('#recurrencesActiveCount').textContent = '—';
+      $('#recurrencesArchivedCount').textContent = '—';
+      $('#recurrencesMonthlyTotal').textContent = '—';
+      $('#recurrencesList').innerHTML = `<div class="empty-inline" role="status">Não foi possível carregar as despesas fixas. ${escapeHtml(error.message)} Tente novamente ao atualizar a seção.</div>`;
+      return;
+    }
     if (request !== state.recurrenceRequest) return;
     const target = $('#recurrencesList');
     const activeRows = rows.filter(row => row.active);
