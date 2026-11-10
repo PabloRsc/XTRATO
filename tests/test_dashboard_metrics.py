@@ -173,3 +173,66 @@ def test_dashboard_card_commitment_is_scoped_to_authenticated_user():
         assert result["cards"][0]["available_cents"] == 70_000
 
     engine.dispose()
+
+def test_dashboard_card_limit_ignores_historical_and_inactive_open_entries():
+    engine = make_db()
+    with Session(engine) as db:
+        user = User(username="limit-owner", password_hash="test")
+        db.add(user)
+        db.flush()
+        card = Card(
+            user_id=user.id, name="Cartão", limit_cents=100_000,
+            closing_day=25, due_day=5, color="#247a57",
+        )
+        category = Category(
+            user_id=user.id, name="Compras", color="#78a88b", icon="tag",
+        )
+        db.add_all([card, category])
+        db.flush()
+
+        active_purchase = Purchase(
+            user_id=user.id, description="Compra ativa", kind="parcelado",
+            direction="expense", purchase_date=date(2026, 10, 1),
+            card_id=card.id, category_id=category.id, total_cents=40_000,
+            installment_count=4, first_invoice_month=date(2026, 10, 1),
+            current_installment=1, active=True, notes="",
+        )
+        inactive_purchase = Purchase(
+            user_id=user.id, description="Compra arquivada", kind="avista",
+            direction="expense", purchase_date=date(2026, 11, 2),
+            card_id=card.id, category_id=category.id, total_cents=50_000,
+            installment_count=1, first_invoice_month=date(2026, 11, 1),
+            current_installment=1, active=False, notes="",
+        )
+        db.add_all([active_purchase, inactive_purchase])
+        db.flush()
+
+        db.add_all([
+            InvoiceEntry(
+                purchase_id=active_purchase.id, invoice_month=date(2026, 10, 1),
+                installment_number=1, amount_cents=10_000, status="open",
+            ),
+            InvoiceEntry(
+                purchase_id=active_purchase.id, invoice_month=date(2026, 11, 1),
+                installment_number=2, amount_cents=10_000, status="open",
+            ),
+            InvoiceEntry(
+                purchase_id=active_purchase.id, invoice_month=date(2026, 12, 1),
+                installment_number=3, amount_cents=10_000, status="open",
+            ),
+            InvoiceEntry(
+                purchase_id=inactive_purchase.id, invoice_month=date(2026, 11, 1),
+                installment_number=None, amount_cents=50_000, status="open",
+            ),
+        ])
+        db.commit()
+
+        result = dashboard("2026-11", make_request(user.id), db=db)
+        summary = next(item for item in result["cards"] if item["id"] == card.id)
+
+        # Only November and later installments from active purchases consume limit.
+        assert summary["committed_cents"] == 20_000
+        assert summary["available_cents"] == 80_000
+
+    engine.dispose()
+
