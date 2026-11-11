@@ -29,6 +29,6 @@ As imagens `dashboard-desktop.png` e `dashboard-mobile.png` são gravadas na pas
 ## Observações
 
 - O script apenas faz login e lê o painel; não cria compras, cartões, categorias ou despesas.
-- A checagem de overflow horizontal é aplicada à viewport mobile.
+- A checagem de overflow horizontal é aplicada às viewports desktop e mobile. O teste também registra erros de console do navegador, exceções JavaScript e respostas HTTP 5xx.
 - O teste não substitui a revisão manual de contraste, legibilidade, foco por teclado e comportamento em navegadores diferentes.
 - A integração do script ao workflow hospedado ainda depende de autorização para alterar o arquivo de GitHub Actions. Até lá, a execução é local e não deve ser descrita como CI aprovado.
