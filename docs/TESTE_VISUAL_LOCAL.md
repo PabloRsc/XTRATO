@@ -31,4 +31,4 @@ As imagens `dashboard-desktop.png` e `dashboard-mobile.png` são gravadas na pas
 - O script apenas faz login e lê o painel; não cria compras, cartões, categorias ou despesas.
 - A checagem de overflow horizontal é aplicada às viewports desktop e mobile. O teste usa as views reais `#loginView` e `#appView` da aplicação. O teste também registra erros de console do navegador, exceções JavaScript e respostas HTTP 5xx.
 - O teste não substitui a revisão manual de contraste, legibilidade, foco por teclado e comportamento em navegadores diferentes.
-- A integração do script ao workflow hospedado ainda depende de autorização para alterar o arquivo de GitHub Actions. Até lá, a execução é local e não deve ser descrita como CI aprovado.
+- Este teste de navegador ainda não está integrado ao workflow do GitHub Actions. Execute-o manualmente em ambiente local; os testes Python e o smoke test Docker/PostgreSQL do CI não substituem a inspeção visual em navegador.
