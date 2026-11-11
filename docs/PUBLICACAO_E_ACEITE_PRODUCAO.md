@@ -6,8 +6,9 @@ Atualizado em 10/11/2026. Este guia complementa o README; não representa uma pu
 
 - Código e documentação estão na branch `feat/xtrato-dashboard-mockup-rebuild`.
 - Pull Request #51: https://github.com/PabloRsc/XTRATO/pull/51
-- A execução de CI do commit `9ffb024527920f67adcc92309873f1bb4b79eee6` concluiu com sucesso: https://github.com/PabloRsc/XTRATO/actions/runs/42920731437
-- A execução validou a suíte automatizada e o build do container. A execução anterior também validou o smoke test com PostgreSQL, backup/restauração e persistência após reinício.
+- A execução de CI mais recente do commit `66cdf5dadff05c01ebc0a124d6746566d919725d` concluiu com sucesso: https://github.com/PabloRsc/XTRATO/actions/runs/42930718601
+- **78 testes Python aprovados**; compilação, migração SQLite, sintaxe JavaScript, build Docker e smoke test PostgreSQL via Docker Compose aprovados.
+- O smoke test validou autenticação, backup/restauração, arquivamento/reativação de cartão, troca de senha, invalidação de sessão e persistência de sessão após reinício.
 - A inspeção visual em navegador e a implantação em provedor ainda não foram realizadas.
 
 ## Requisitos mínimos do ambiente
