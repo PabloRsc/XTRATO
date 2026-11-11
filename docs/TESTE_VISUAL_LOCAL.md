@@ -16,8 +16,8 @@ Na raiz do repositório, com o ambiente virtual ativado:
 python -m pip install playwright==1.56.0
 python -m playwright install chromium
 
-$env:XTRATO_E2E_USERNAME = "usuario-de-teste"
-$env:XTRATO_E2E_PASSWORD = "senha-da-conta-de-teste"
+$env:XTRATO_TEST_USERNAME = "usuario-de-teste"
+$env:XTRATO_TEST_PASSWORD = "senha-da-conta-de-teste"
 $env:XTRATO_BASE_URL = "http://127.0.0.1:8000"
 $env:XTRATO_ARTIFACTS_DIR = "artifacts"
 
@@ -29,6 +29,6 @@ As imagens `dashboard-desktop.png` e `dashboard-mobile.png` são gravadas na pas
 ## Observações
 
 - O script apenas faz login e lê o painel; não cria compras, cartões, categorias ou despesas.
-- A checagem de overflow horizontal é aplicada às viewports desktop e mobile. O teste também registra erros de console do navegador, exceções JavaScript e respostas HTTP 5xx.
+- A checagem de overflow horizontal é aplicada às viewports desktop e mobile. O teste usa as views reais `#loginView` e `#appView` da aplicação. O teste também registra erros de console do navegador, exceções JavaScript e respostas HTTP 5xx.
 - O teste não substitui a revisão manual de contraste, legibilidade, foco por teclado e comportamento em navegadores diferentes.
 - A integração do script ao workflow hospedado ainda depende de autorização para alterar o arquivo de GitHub Actions. Até lá, a execução é local e não deve ser descrita como CI aprovado.
