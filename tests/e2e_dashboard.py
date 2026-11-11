@@ -101,7 +101,7 @@ def main():
 
         browser.close()
         if errors:
-            raise AssertionError("\\n".join(errors))
+            raise AssertionError("\n".join(errors))
         print("Playwright smoke test passed: login and dashboard rendered on desktop and mobile.")
         print(f"Desktop layout dimensions: {desktop_dimensions}")
         print(f"Mobile layout dimensions: {dimensions}")
