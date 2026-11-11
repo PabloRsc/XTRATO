@@ -13,7 +13,7 @@ O teste de navegador está em `tests/e2e_dashboard.py`. Ele autentica uma conta 
 Na raiz do repositório, com o ambiente virtual ativado:
 
 ```powershell
-python -m pip install playwright==1.56.0
+python -m pip install -r requirements-dev.txt
 python -m playwright install chromium
 
 $env:XTRATO_TEST_USERNAME = "usuario-de-teste"
