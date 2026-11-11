@@ -11,6 +11,14 @@ ARTIFACTS = Path(os.getenv("XTRATO_ARTIFACTS_DIR", "artifacts"))
 ARTIFACTS.mkdir(parents=True, exist_ok=True)
 
 
+def record_console_error(message, viewport, errors):
+    location = message.location or {}
+    url = location.get("url", "")
+    if "favicon.ico" in url or "fonts.googleapis.com" in url or "fonts.gstatic.com" in url:
+        return
+    errors.append(f"{viewport} console: {message.text}")
+
+
 def main():
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
@@ -20,7 +28,7 @@ def main():
         desktop.on("pageerror", lambda error: errors.append(f"Desktop JavaScript: {error}"))
         desktop.on(
             "console",
-            lambda message: errors.append(f"Desktop console: {message.text}")
+            lambda message: record_console_error(message, "Desktop", errors)
             if message.type == "error" else None,
         )
         desktop.on(
@@ -64,7 +72,7 @@ def main():
         mobile.on("pageerror", lambda error: errors.append(f"Mobile JavaScript: {error}"))
         mobile.on(
             "console",
-            lambda message: errors.append(f"Mobile console: {message.text}")
+            lambda message: record_console_error(message, "Mobile", errors)
             if message.type == "error" else None,
         )
         mobile.on(
