@@ -24,7 +24,7 @@ $env:XTRATO_ARTIFACTS_DIR = "artifacts"
 python tests/e2e_dashboard.py
 ```
 
-As imagens `dashboard-desktop.png` e `dashboard-mobile.png` são gravadas na pasta `artifacts`.
+As imagens `dashboard-desktop.png` e `dashboard-mobile.png` são gravadas na pasta `artifacts` (o diretório pode ser alterado por `XTRATO_ARTIFACTS_DIR`).
 
 ## Observações
 
