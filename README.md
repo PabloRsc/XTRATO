@@ -10,7 +10,7 @@ A experiência principal foi reorganizada em um dashboard único, com seletor de
 
 A previsão considera parcelas e despesas recorrentes. O limite disponível dos cartões considera somente compras ativas e parcelas abertas a partir do mês selecionado, sem somar faturas anteriores. O orçamento global continua sendo independente dos limites individuais dos cartões.
 
-A auditoria técnica e os critérios de aceite para produção estão documentados em [`docs/AUDITORIA_TECNICA_2026-11-06.md`](docs/AUDITORIA_TECNICA_2026-11-06.md). O roteiro de publicação, configuração de hospedagem e validação final está em [`docs/PUBLICACAO_E_ACEITE_PRODUCAO.md`](docs/PUBLICACAO_E_ACEITE_PRODUCAO.md).
+A auditoria técnica e os critérios de aceite para produção estão documentados em [`docs/AUDITORIA_TECNICA_2026-11-06.md`](docs/AUDITORIA_TECNICA_2026-11-06.md). O roteiro de publicação, configuração de hospedagem e validação final está em [`docs/PUBLICACAO_E_ACEITE_PRODUCAO.md`](docs/PUBLICACAO_E_ACEITE_PRODUCAO.md). O roteiro do teste visual automatizado em desktop e mobile está em [`docs/TESTE_VISUAL_LOCAL.md`](docs/TESTE_VISUAL_LOCAL.md).
 
 - Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
