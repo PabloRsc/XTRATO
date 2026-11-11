@@ -106,7 +106,11 @@ def reactivate_card(card_id: int, request: Request, db: Session = Depends(get_db
     if not card:
         raise HTTPException(status_code=404, detail="Cartão não encontrado.")
     card.active = True
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Já existe outro cartão com esse nome. Renomeie o cartão antes de reativá-lo.")
     return {"ok": True}
 
 
@@ -169,7 +173,11 @@ def reactivate_category(category_id: int, request: Request, db: Session = Depend
     if not category:
         raise HTTPException(status_code=404, detail="Categoria não encontrada.")
     category.active = True
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Já existe outra categoria com esse nome. Renomeie a categoria antes de reativá-la.")
     return {"ok": True}
 
 

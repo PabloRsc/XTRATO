@@ -4,7 +4,13 @@ Aplicação web pessoal para centralizar compras de vários cartões, organizar 
 
 ## O que esta base já implementa
 
-A auditoria técnica e os critérios de aceite para produção estão documentados em [`docs/AUDITORIA_TECNICA_2026-11-06.md`](docs/AUDITORIA_TECNICA_2026-11-06.md).
+## Dashboard atualizado — 10/11/2026
+
+A experiência principal foi reorganizada em um dashboard único, com seletor de mês, orçamento global, carteira de cartões, extrato, distribuição por categorias, histórico de seis meses e previsão de faturas dos próximos 12 meses. O gerenciamento de cartões e categorias fica em uma janela de configurações; senha, backup e sessão ficam no menu da conta.
+
+A previsão considera parcelas e despesas recorrentes. O limite disponível dos cartões considera somente compras ativas e parcelas abertas a partir do mês selecionado, sem somar faturas anteriores. O orçamento global continua sendo independente dos limites individuais dos cartões.
+
+A auditoria técnica e os critérios de aceite para produção estão documentados em [`docs/AUDITORIA_TECNICA_2026-11-06.md`](docs/AUDITORIA_TECNICA_2026-11-06.md). O roteiro de publicação, configuração de hospedagem e validação final está em [`docs/PUBLICACAO_E_ACEITE_PRODUCAO.md`](docs/PUBLICACAO_E_ACEITE_PRODUCAO.md). O roteiro do teste visual automatizado em desktop e mobile está em [`docs/TESTE_VISUAL_LOCAL.md`](docs/TESTE_VISUAL_LOCAL.md).
 
 - Login privado, sem cadastro público.
 - PostgreSQL para persistência em servidor; SQLite pode ser usado nos testes locais.
@@ -112,7 +118,7 @@ Guarde os backups fora do servidor e teste a restauração periodicamente. O vol
 
 ## Segurança da conta
 
-Na barra lateral, a opção **Alterar senha** solicita a senha atual e uma nova senha de pelo menos 12 caracteres. As tentativas incorretas são limitadas por conta. Após a troca, o sistema incrementa a versão de sessão do usuário, encerra o acesso atual e rejeita cookies assinados anteriormente em qualquer navegador. É necessário entrar novamente com a nova senha.
+No menu da conta, no cabeçalho do dashboard, a opção **Alterar senha** solicita a senha atual e uma nova senha de pelo menos 12 caracteres. As tentativas incorretas são limitadas por conta. Após a troca, o sistema incrementa a versão de sessão do usuário, encerra o acesso atual e rejeita cookies assinados anteriormente em qualquer navegador. É necessário entrar novamente com a nova senha.
 
 ## Regras importantes do produto
 

@@ -74,14 +74,21 @@
   const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.tag}</svg>`;
   const categoryIcon = name => ({ 'Alimentação':'utensils', 'Mercado':'shopping-basket', 'Transporte':'car-front', 'Saúde':'heart-pulse', 'Assinaturas':'repeat', 'Lazer':'ticket', 'Compras':'shopping-bag', 'Outros':'tag' }[name] || 'tag');
 
-  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null };
+  const state = { user: null, month: monthNow(), dashboard: null, cards: [], categories: [], entries: [], activePage: 'dashboard', invoiceMonthTouched: false, editingCardId: null, editingCategoryId: null, editingPurchaseId: null, dashboardRequest: 0, statementRequest: 0, recurrenceRequest: 0, submittingPurchase: false, submittingCard: false, submittingCategory: false };
 
   async function api(path, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
     const headers = { ...(options.headers || {}) };
     if (options.body !== undefined) headers['Content-Type'] = 'application/json';
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) headers['X-Xtrato-Request'] = '1';
-    const response = await fetch(path, { ...options, method, headers, credentials: 'same-origin' });
+    let response;
+    try {
+      response = await fetch(path, { ...options, method, headers, credentials: 'same-origin' });
+    } catch (_) {
+      const error = new Error('Não foi possível conectar ao XTRATO. Verifique sua conexão e tente novamente.');
+      error.code = 'NETWORK_ERROR';
+      throw error;
+    }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
       const error = new Error(payload.detail || 'Não foi possível concluir a operação.');
@@ -111,8 +118,49 @@
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => node.classList.remove('show'), 2700);
   }
-  function openModal(id) { $(`#${id}`).classList.remove('hidden'); }
-  function closeModal(id) { $(`#${id}`).classList.add('hidden'); }
+  const modalReturnFocus = new Map();
+  const modalFocusableSelector = 'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  function openModal(id) {
+    const modal = $(`#${id}`);
+    if (!modal || !modal.classList.contains('hidden')) return;
+    modalReturnFocus.set(id, document.activeElement);
+    modal.classList.remove('hidden');
+    const firstFocusable = modal.querySelector(modalFocusableSelector);
+    if (firstFocusable) firstFocusable.focus();
+    else { modal.setAttribute('tabindex', '-1'); modal.focus(); }
+  }
+  function closeModal(id) {
+    const modal = $(`#${id}`);
+    if (!modal) return;
+    modal.classList.add('hidden');
+    const previous = modalReturnFocus.get(id);
+    modalReturnFocus.delete(id);
+    if (previous && typeof previous.focus === 'function' && document.contains(previous)) previous.focus();
+  }
+  function trapModalFocus(event) {
+    if (event.key !== 'Tab') return;
+    const modal = $('.modal-backdrop:not(.hidden)');
+    if (!modal) return;
+    const focusable = [...modal.querySelectorAll(modalFocusableSelector)].filter(node => node.getClientRects().length > 0);
+    if (!focusable.length) { event.preventDefault(); modal.focus(); return; }
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+      event.preventDefault(); first.focus();
+    }
+  }
+  function selectManagementTab(tab) {
+    const cards = tab === 'cards';
+    document.querySelectorAll('[data-management-tab]').forEach(button => {
+      const selected = button.dataset.managementTab === tab;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-selected', selected ? 'true' : 'false');
+      button.tabIndex = selected ? 0 : -1;
+    });
+    $('#managementCards').classList.toggle('hidden', !cards);
+    $('#managementCategories').classList.toggle('hidden', cards);
+  }
   function applyTheme(theme) {
     const selected = theme === 'dark' ? 'dark' : 'light';
     document.documentElement.dataset.theme = selected;
@@ -167,13 +215,24 @@
     renderCategories();
     refreshStaticIcons();
   }
+  async function changeSelectedMonth(offset) {
+    const [year, month] = state.month.split('-').map(Number);
+    const date = new Date(year, month - 1 + offset, 1);
+    state.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    $('#monthPicker').value = state.month;
+    await refreshDashboard();
+  }
+
   async function refreshDashboard() {
-    const dashboard = await api(`/api/dashboard?month=${encodeURIComponent(state.month)}`);
+    const request = ++state.dashboardRequest;
+    const requestedMonth = state.month;
+    const dashboard = await api(`/api/dashboard?month=${encodeURIComponent(requestedMonth)}`);
+    if (request !== state.dashboardRequest || requestedMonth !== state.month) return;
     state.dashboard = dashboard;
     state.entries = dashboard.recent_entries || [];
     renderDashboard();
-    if (state.activePage === 'statement') await loadStatement();
-    if (state.activePage === 'recurrences') await loadRecurrences();
+    await loadStatement();
+    await loadRecurrences();
   }
 
   function renderDashboard() {
@@ -198,12 +257,47 @@
     $('#budgetWarning').textContent = warning;
     $('#cardCount').textContent = `${d.cards.length} ${d.cards.length === 1 ? 'cartão' : 'cartões'}`;
     $('#cardTotal').textContent = money(d.spent_cents);
-    $('#cardTotals').innerHTML = d.cards.length ? d.cards.map(c => `<div class="card-total-line"><span>${escapeHtml(c.name)}${c.active ? '' : ' · arquivado'}</span><b>${money(c.total_cents)}</b></div>`).join('') : '<div class="muted-dark">Cadastre seu primeiro cartão para começar.</div>';
+    renderWalletCards(d.cards || []);
     renderCategoryChart(d.categories || []);
     renderTrend(d.trend || []);
     renderForecast(d.forecast || []);
-    renderEntries($('#recentEntries'), d.recent_entries || [], true);
     $('#monthPicker').value = state.month;
+  }
+
+  function renderWalletCards(totals) {
+    const target = $('#walletCards');
+    if (!target) return;
+    const active = state.cards.filter(card => card.active !== false);
+    $('#cardCount').textContent = `${active.length} ${active.length === 1 ? 'cartão' : 'cartões'}`;
+    $('#cardTotal').textContent = money((totals || []).reduce((sum, card) => sum + (Number(card.total_cents) || 0), 0));
+    if (!active.length) {
+      target.innerHTML = '<div class="empty-inline">Adicione seu primeiro cartão para começar.</div>';
+      return;
+    }
+    target.innerHTML = active.map(card => {
+      const theme = bankTheme(card.issuer);
+      const total = (totals || []).find(row => Number(row.id) === Number(card.id));
+      const committedThisMonth = Number(total?.total_cents) || 0;
+      const committed = Number(total?.committed_cents) || 0;
+      const limit = Number(card.limit_cents) || 0;
+      const available = Number(total?.available_cents ?? (limit - committed));
+      return `<button type="button" class="xtrato-wallet-card" data-wallet-card="${card.id}" style="--wallet-bank:${theme.color};--wallet-ink:${theme.ink}">
+        <span class="xtrato-wallet-card-top"><span class="xtrato-wallet-bank-mark">${brandLogoMarkup(card.issuer)}</span><span class="xtrato-wallet-chevron">↗</span></span>
+        <span class="xtrato-wallet-card-name">${escapeHtml(card.name || card.issuer)}</span>
+        <span class="xtrato-wallet-card-bottom">
+          <b>${money(committedThisMonth)}</b>
+          <small>Fatura deste mês</small>
+          <small>Comprometido em aberto: ${money(committed)}</small>
+          <small>Limite: ${money(limit)} · Disponível: ${money(available)}</small>
+          <small>Fecha dia ${card.closing_day} · vence dia ${card.due_day}</small>
+        </span>
+      </button>`;
+    }).join('');
+    target.querySelectorAll('[data-wallet-card]').forEach(button => button.addEventListener('click', () => {
+      $('#statementCardFilter').value = button.dataset.walletCard;
+      loadStatement();
+      $('#statementSearch').focus();
+    }));
   }
 
   function renderCategoryChart(categories) {
@@ -273,12 +367,21 @@
     const params = new URLSearchParams({ month: state.month });
     if (q) params.set('q', q);
     if (card) params.set('card_id', card);
-    const rows = await api(`/api/entries?${params.toString()}`);
-    state.entries = rows;
-    $('#statementCount').textContent = `${rows.length} ${rows.length === 1 ? 'lançamento' : 'lançamentos'}`;
-    const total = rows.reduce((sum, r) => sum + (r.direction === 'credit' ? -r.amount_cents : r.amount_cents), 0);
-    $('#statementTotal').textContent = money(total);
-    renderEntries($('#statementEntries'), rows, true);
+    const request = ++state.statementRequest;
+    try {
+      const rows = await api(`/api/entries?${params.toString()}`);
+      if (request !== state.statementRequest) return;
+      state.entries = rows;
+      $('#statementCount').textContent = `${rows.length} ${rows.length === 1 ? 'lançamento' : 'lançamentos'}`;
+      const total = rows.reduce((sum, r) => sum + (r.direction === 'credit' ? -r.amount_cents : r.amount_cents), 0);
+      $('#statementTotal').textContent = money(total);
+      renderEntries($('#statementEntries'), rows, true);
+    } catch (error) {
+      if (request !== state.statementRequest) return;
+      $('#statementCount').textContent = 'Indisponível';
+      $('#statementTotal').textContent = '—';
+      $('#statementEntries').innerHTML = `<div class="empty-inline" role="status">Não foi possível carregar o extrato. ${escapeHtml(error.message)} Tente novamente ao atualizar a seção.</div>`;
+    }
   }
 
   async function cancelPurchase(id) {
@@ -384,7 +487,7 @@
           (archived ? '<span class="status-pill historical">Arquivado</span><button type="button" data-reactivate-card="' + card.id + '">Reativar</button>' : '<button type="button" data-edit-card="' + card.id + '">Editar</button><button type="button" data-archive-card="' + card.id + '">Arquivar</button>') +
         '</div></div></article>';
     }).join('');
-    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(button.dataset.editCard)));
+    target.querySelectorAll('[data-edit-card]').forEach(button => button.addEventListener('click', () => startEditCard(Number(button.dataset.editCard))));
     target.querySelectorAll('[data-archive-card]').forEach(button => button.addEventListener('click', () => archiveResource('cards', Number(button.dataset.archiveCard), 'cartão')));
     target.querySelectorAll('[data-reactivate-card]').forEach(button => button.addEventListener('click', () => reactivateResource('cards', Number(button.dataset.reactivateCard), 'cartão')));
   }
@@ -426,7 +529,19 @@
   }
 
   async function loadRecurrences() {
-    const rows = await api('/api/recurrences');
+    const request = ++state.recurrenceRequest;
+    let rows;
+    try {
+      rows = await api('/api/recurrences');
+    } catch (error) {
+      if (request !== state.recurrenceRequest) return;
+      $('#recurrencesActiveCount').textContent = '—';
+      $('#recurrencesArchivedCount').textContent = '—';
+      $('#recurrencesMonthlyTotal').textContent = '—';
+      $('#recurrencesList').innerHTML = `<div class="empty-inline" role="status">Não foi possível carregar as despesas fixas. ${escapeHtml(error.message)} Tente novamente ao atualizar a seção.</div>`;
+      return;
+    }
+    if (request !== state.recurrenceRequest) return;
     const target = $('#recurrencesList');
     const activeRows = rows.filter(row => row.active);
     const archivedRows = rows.filter(row => !row.active);
@@ -490,7 +605,7 @@
   }
   function updateCalculation() {
     const kind = $('#purchaseForm').elements.kind.value;
-    const amount = moneyInputToCents($('#purchaseForm').elements.amount.value || '0');
+    const amount = purchaseInputToCents($('#purchaseForm').elements.amount.value || '0');
     const count = Math.max(1, Number($('#purchaseForm').elements.installment_count.value || 1));
     const ongoing = $('#ongoingCheck').checked && kind === 'parcelado';
     const mode = $('#valueMode').value;
@@ -540,9 +655,15 @@
   function openPurchase(kind = 'avista') {
     resetPurchaseForm();
     if (kind === 'recorrente') setKind('recorrente');
-    if (!state.cards.length || !state.categories.length) {
-      toast('Antes de lançar, cadastre ao menos um cartão e uma categoria.');
-      if (!state.cards.length) setPage('cards'); else setPage('categories');
+    const hasActiveCards = state.cards.some(card => card.active !== false);
+    const hasActiveCategories = state.categories.some(category => category.active !== false);
+    if (!hasActiveCards || !hasActiveCategories) {
+      const showCards = !hasActiveCards;
+      selectManagementTab(showCards ? 'cards' : 'categories');
+      openModal('managementModal');
+      toast(showCards
+        ? 'Cadastre ou reative um cartão para registrar compras.'
+        : 'Cadastre ou reative uma categoria para registrar compras.');
       return;
     }
     renderCardOptions();
@@ -552,7 +673,15 @@
 
   async function submitPurchase(event) {
     event.preventDefault();
+    if (state.submittingPurchase) return;
     const form = $('#purchaseForm');
+    const submitButton = form.querySelector('[type="submit"]');
+    state.submittingPurchase = true;
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.dataset.originalLabel = submitButton.textContent;
+      submitButton.textContent = 'Salvando…';
+    }
     const data = new FormData(form);
     const kind = data.get('kind');
     const amountCents = purchaseInputToCents(data.get('amount'));
@@ -573,21 +702,37 @@
       end_invoice_month: kind === 'recorrente' ? (data.get('end_invoice_month') || null) : null,
       notes: data.get('notes') || '',
     };
-    if (!payload.amount_cents || payload.amount_cents < 1) { $('#purchaseError').textContent = 'Informe um valor válido.'; return; }
+    if (!payload.amount_cents || payload.amount_cents < 1) {
+      $('#purchaseError').textContent = 'Informe um valor válido.';
+      state.submittingPurchase = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = submitButton.dataset.originalLabel || 'Registrar compra';
+        delete submitButton.dataset.originalLabel;
+      }
+      return;
+    }
     $('#purchaseError').textContent = '';
     try {
       await api('/api/purchases', { method: 'POST', body: JSON.stringify(payload) });
       closeModal('purchaseModal');
       // Open the invoice month where the new purchase was recorded so it is immediately visible.
-      if (payload.first_invoice_month) {
-        state.month = payload.first_invoice_month;
+      const recordedInvoiceMonth = payload.current_invoice_month || payload.first_invoice_month;
+      if (recordedInvoiceMonth) {
+        state.month = recordedInvoiceMonth;
         $('#monthPicker').value = state.month;
       }
       await refreshDashboard();
-      if (state.activePage === 'statement') await loadStatement();
-      if (state.activePage === 'recurrences') await loadRecurrences();
       toast(kind === 'recorrente' ? 'Despesa fixa cadastrada.' : 'Compra registrada com sucesso.');
     } catch (error) { $('#purchaseError').textContent = error.message; }
+    finally {
+      state.submittingPurchase = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = submitButton.dataset.originalLabel || 'Registrar compra';
+        delete submitButton.dataset.originalLabel;
+      }
+    }
   }
 
   function openPurchaseEdit(id, description, notes) {
@@ -710,7 +855,8 @@
     $('#cardFormSubmit').textContent = 'Salvar alterações';
     $('#cancelCardEdit').classList.remove('hidden');
     $('#cardFormMessage').textContent = 'Alterar fechamento ou vencimento afeta apenas sugestões de novas compras.';
-    setPage('cards');
+    selectManagementTab('cards');
+    openModal('managementModal');
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   function resetCardEditor() {
@@ -728,12 +874,18 @@
   }
   async function submitCard(event) {
     event.preventDefault();
+    if (state.submittingCard) return;
     const form = event.currentTarget;
     const fd = new FormData(form);
     const issuer = String(fd.get('issuer') || '').trim();
     const limit = parseMoneyInput(fd.get('limit'));
     if (!issuer) { $('#cardFormMessage').textContent = 'Escolha o banco do cartão.'; return; }
-    if (!Number.isFinite(limit)) { $('#cardFormMessage').textContent = 'Informe um limite válido.'; return; }
+    if (!Number.isFinite(limit) || limit < 0) { $('#cardFormMessage').textContent = 'Informe um limite válido.'; return; }
+    const submitButton = $('#cardFormSubmit');
+    state.submittingCard = true;
+    submitButton.disabled = true;
+    const originalLabel = submitButton.textContent;
+    submitButton.textContent = 'Salvando…';
     const theme = bankTheme(issuer);
     const payload = { name: String(fd.get('name') || '').trim(), issuer, limit_cents: Math.round(limit * 100), brand: '', last_four: null, closing_day: Number(fd.get('closing_day')), due_day: Number(fd.get('due_day')), color: theme.color };
     try {
@@ -745,6 +897,11 @@
       await refreshDashboard();
       toast(editing ? 'Cartão atualizado.' : 'Cartão cadastrado.');
     } catch (error) { $('#cardFormMessage').textContent = error.message; }
+    finally {
+      state.submittingCard = false;
+      submitButton.disabled = false;
+      submitButton.textContent = originalLabel;
+    }
   }
   function startEditCategory(id) {
     const category = state.categories.find(item => item.id === id);
@@ -756,7 +913,8 @@
     $('#categoryFormSubmit').textContent = 'Salvar alterações';
     $('#cancelCategoryEdit').classList.remove('hidden');
     $('#categoryFormMessage').textContent = 'Os lançamentos existentes manterão os valores financeiros originais.';
-    setPage('categories');
+    selectManagementTab('categories');
+    openModal('managementModal');
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   function resetCategoryEditor() {
@@ -771,7 +929,13 @@
   }
   async function submitCategory(event) {
     event.preventDefault();
+    if (state.submittingCategory) return;
     const form = event.currentTarget;
+    const submitButton = $('#categoryFormSubmit');
+    state.submittingCategory = true;
+    submitButton.disabled = true;
+    const originalLabel = submitButton.textContent;
+    submitButton.textContent = 'Salvando…';
     const fd = new FormData(form);
     const payload = { name: fd.get('name').trim(), color: fd.get('color'), icon: fd.get('icon') };
     try {
@@ -783,6 +947,11 @@
       await refreshDashboard();
       toast(editing ? 'Categoria atualizada.' : 'Categoria cadastrada.');
     } catch (error) { $('#categoryFormMessage').textContent = error.message; }
+    finally {
+      state.submittingCategory = false;
+      submitButton.disabled = false;
+      submitButton.textContent = originalLabel;
+    }
   }
 
   function wireEvents() {
@@ -795,8 +964,23 @@
       await refreshDashboard();
     });
     $('#newPurchase').addEventListener('click', () => openPurchase());
-    $('#newPurchaseStatement').addEventListener('click', () => openPurchase());
-    $('#newRecurring').addEventListener('click', () => openPurchase('recorrente'));
+    $('#manageResources').addEventListener('click', () => { selectManagementTab('cards'); openModal('managementModal'); });
+    $('#manageCardsShortcut').addEventListener('click', () => { selectManagementTab('cards'); openModal('managementModal'); });
+    document.querySelectorAll('[data-management-tab]').forEach(button => {
+      button.addEventListener('click', () => selectManagementTab(button.dataset.managementTab));
+      button.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const tabs = [...document.querySelectorAll('[data-management-tab]')];
+        const current = tabs.indexOf(event.currentTarget);
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+          : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        selectManagementTab(tabs[next].dataset.managementTab);
+        tabs[next].focus();
+      });
+    });
+    $('#monthPrevious').addEventListener('click', async () => changeSelectedMonth(-1));
+    $('#monthNext').addEventListener('click', async () => changeSelectedMonth(1));
     $('#editBudget').addEventListener('click', () => {
       $('#budgetMonthLabel').textContent = formatMonth(state.month);
       $('#budgetForm').elements.amount.value = state.dashboard?.limit_cents != null ? (state.dashboard.limit_cents / 100).toFixed(2) : '';
@@ -805,7 +989,7 @@
     });
     $$('[data-close]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.close)));
     // Preserve form data: backdrop clicks do not dismiss open modals.
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') $$('.modal-backdrop:not(.hidden)').forEach(m => closeModal(m.id)); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)')).forEach(m => closeModal(m.id)); else trapModalFocus(event); });
     $$('.type-switch button').forEach(button => button.addEventListener('click', () => setKind(button.dataset.kind)));
     $('#ongoingCheck').addEventListener('change', updateOngoingFields);
     $('#valueMode').addEventListener('change', updateOngoingFields);
@@ -897,11 +1081,19 @@
     event.preventDefault();
     const fd = new FormData(event.currentTarget);
     $('#loginError').textContent = '';
+    const submit = event.currentTarget.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
     try {
       const user = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }) });
-      showApp(user);
       await loadInitialData();
-    } catch (error) { $('#loginError').textContent = error.message; }
+      showApp(user);
+    } catch (error) {
+      state.user = null;
+      showLogin();
+      $('#loginError').textContent = error.message || 'Não foi possível entrar. Tente novamente.';
+    } finally {
+      if (submit) submit.disabled = false;
+    }
   }
   async function submitPasswordChange(event) {
     event.preventDefault();

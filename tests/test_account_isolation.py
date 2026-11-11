@@ -129,7 +129,9 @@ def test_authenticated_account_cannot_read_another_accounts_statement_dashboard_
         assert dashboard["card_totals"] == []
         assert dashboard["recent_entries"] == []
         assert dashboard["cards"] == [{"id": stranger_card.id, "name": stranger_card.name,
-                                       "color": stranger_card.color, "active": True, "total_cents": 0}]
+                                       "color": stranger_card.color, "active": True, "total_cents": 0,
+                                       "committed_cents": 0,
+                                       "available_cents": stranger_card.limit_cents}]
         assert recurrences == []
         assert [card["id"] for card in backup["cards"]] == [stranger_card.id]
         assert all(card["name"] != owner_card.name for card in backup["cards"])

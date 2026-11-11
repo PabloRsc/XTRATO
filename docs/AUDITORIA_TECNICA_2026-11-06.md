@@ -48,3 +48,70 @@ A auditoria não equivale a pentest externo nem a uma validação de produção 
 ## Conclusão
 
 A revisão de código e os testes automatizados cobrem os fluxos centrais da aplicação e não indicam bloqueador funcional conhecido além das correções listadas nesta PR e das configurações operacionais ainda pendentes. O projeto pode avançar para a preparação de publicação após a integração e validação desta PR, mas não deve ser declarado pronto para produção antes de concluir os critérios de aceite acima.
+
+
+## Atualização de revisão — 10/11/2026
+
+**Branch revisada:** `feat/xtrato-dashboard-mockup-rebuild`  
+**Pull Request:** #51  
+**Última correção financeira verificada:** compromissos de cartão filtrados por compras ativas, parcelas abertas e mês de fatura igual ou posterior ao mês selecionado.
+
+### Validações adicionais
+
+- Testes específicos de dashboard para previsão de 12 meses, parcelas futuras e isolamento entre contas.
+- Teste de regressão para impedir que faturas antigas ainda marcadas como abertas reduzam o limite disponível atual.
+- CI do commit `cdd26cba8e14e9671eb8e2345c6cf4163c02faf7` concluído com sucesso, incluindo testes Python, migrações SQLite, sintaxe JavaScript, build Docker e smoke test PostgreSQL.
+- Verificação estática dos identificadores HTML sem duplicações e confirmação de breakpoints responsivos no CSS.
+
+### Pendências que continuam bloqueando o aceite de produção
+
+- Inspeção visual real em navegador desktop e celular, incluindo modais, estados vazios, telas estreitas e contraste nos temas.
+- Integração do PR após revisão visual e CI verde no commit final.
+- Configuração e validação do provedor de hospedagem, PostgreSQL persistente, backups, HTTPS, variáveis de ambiente e política de retenção.
+- Teste de fumaça autenticado no ambiente hospedado, sem utilizar dados financeiros reais antes de confirmar backup e restauração.
+
+**Status:** aprovado em CI; ainda não aprovado para produção. Não afirmar que a aplicação foi publicada ou que a hospedagem foi validada até concluir os itens acima.
+
+
+### Resultado final do CI de documentação — 10/11/2026
+
+Commit validado: `55e9f6a25cd599d0f1d7473a35055520cb64d619`  
+Execução: [GitHub Actions #42898386403](https://github.com/PabloRsc/XTRATO/actions/runs/42898386403)
+
+- **74 testes Python aprovados**.
+- Compilação dos fontes Python aprovada.
+- Migração Alembic em SQLite aprovada.
+- Sintaxe de `static/app.js` aprovada com Node.js 22.
+- Build da imagem Docker aprovado.
+- Smoke test PostgreSQL via Docker Compose aprovado, incluindo prontidão, login, backup/restauração, ciclo de cartão (arquivar/reativar), troca de senha, invalidação de sessão antiga e persistência após reinicialização.
+- Verificação estática: 119 IDs HTML, sem duplicações; 213 referências diretas a IDs no JavaScript, sem seletores ausentes.
+- CSS contém breakpoints para larguras de 1100, 1050, 1000, 900, 860, 850, 760, 680, 620, 390 e 380 px, além de preferências de movimento/transparência reduzidos.
+
+**Limite da evidência:** os testes de CI são automatizados em container e não substituem renderização visual real em navegadores desktop/mobile. A hospedagem pública também não foi conectada nem validada nesta etapa.
+
+### CI final após testes adicionais — 10/11/2026
+
+**Commit:** `66d05468c72f9fada4e85b131e40e2b77436709e`  
+**Execução:** [GitHub Actions #42922960517](https://github.com/PabloRsc/XTRATO/actions/runs/42922960517) — conclusão `success`.
+
+- **78 testes Python aprovados** em 2,51 segundos.
+- A nova auditoria automatizada do HTML verifica IDs duplicados, nomes acessíveis de controles de formulário e nomes acessíveis de botões.
+- O teste de limite dos cartões cobre compras arquivadas e parcelas históricas ainda abertas, garantindo que não sejam indevidamente consideradas no limite disponível do mês selecionado.
+- O job completou o build Docker e o smoke test PostgreSQL via Docker Compose; os containers do banco e da aplicação ficaram saudáveis, a aplicação foi recriada e encerrada sem falha.
+- Os passos do smoke test incluem prontidão, autenticação, exportação/restauração de backup e verificações de persistência.
+
+**Conclusão atualizada:** CI verde no commit acima. Isso não substitui a inspeção visual manual em navegador nem a validação de uma implantação real com armazenamento persistente, HTTPS e política de backup do provedor.
+
+### Confirmação final de CI — 11/11/2026
+
+**Commit:** `66cdf5dadff05c01ebc0a124d6746566d919725d`  
+**Execução:** [GitHub Actions #42930718601](https://github.com/PabloRsc/XTRATO/actions/runs/42930718601) — conclusão `success`.
+
+- **78 testes Python aprovados** em 2,38 segundos.
+- Compilação Python, migração Alembic em SQLite e verificação de sintaxe JavaScript aprovadas.
+- Build da imagem Docker aprovado.
+- Smoke test completo com PostgreSQL via Docker Compose aprovado.
+- O smoke test autenticou a conta de CI, exportou e restaurou backup, arquivou e reativou cartão, alterou a senha, confirmou invalidação da sessão antiga e autenticou novamente após reiniciar a aplicação sem credenciais de bootstrap.
+
+**Conclusão:** a validação automatizada do commit atual está verde, inclusive no fluxo PostgreSQL. Permanecem fora do alcance desse CI a inspeção visual manual em navegador, o teste com conta real de staging e a confirmação de hospedagem/armazenamento persistente no provedor.
+

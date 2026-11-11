@@ -31,36 +31,9 @@
   </section>
 
   <div id="appView" class="app-shell hidden">
-    <aside class="sidebar">
-      <div class="brand-lockup"><span class="brand-mark brand-mark-image" aria-label="XTRATO"><img src="/static/xtrato-logo.svg" alt="XTRATO"></span><div><b>XTRATO</b><small>CONTROLE DE CARTÕES</small></div></div>
-      <div class="nav-caption">MENU PRINCIPAL</div>
-      <nav class="nav-list">
-        <button class="nav-item active" data-page="dashboard"><span class="nav-icon" data-icon="grid"></span><span>Visão geral</span></button>
-        <button class="nav-item" data-page="statement"><span class="nav-icon" data-icon="receipt"></span><span>Extrato</span></button>
-        <button class="nav-item" data-page="cards"><span class="nav-icon" data-icon="card"></span><span>Cartões</span></button>
-        <button class="nav-item" data-page="categories"><span class="nav-icon" data-icon="tag"></span><span>Categorias</span></button>
-        <button class="nav-item" data-page="recurrences"><span class="nav-icon" data-icon="repeat"></span><span>Despesas fixas</span></button>
-      </nav>
-      <div class="sidebar-bottom">
-        <div class="sidebar-tip"><div class="tip-icon" data-icon="shield"></div><b>Um mês de cada vez</b><p>Seu limite acompanha o valor previsto nas faturas, não o limite de crédito do banco.</p></div>
-        <button class="backup-link" id="backupButton" type="button"><span data-icon="download"></span> Baixar backup dos dados</button>
-        <button class="backup-link" id="restoreButton" type="button"><span data-icon="upload"></span> Restaurar backup</button>
-        <input id="backupRestoreFile" type="file" accept=".json,application/json" hidden>
-        <div class="profile-row"><div class="avatar" id="avatarInitial">U</div><div class="profile-info"><b id="profileName">Usuário</b><button class="profile-password" id="passwordChangeButton" type="button">Alterar senha</button></div><button class="icon-button logout-button" id="logoutButton" title="Sair" aria-label="Sair" data-icon="logout"></button></div>
-      </div>
-    </aside>
-
     <main class="main-area">
-      <header class="topbar">
-        <div class="breadcrumb"><span>XTRATO</span><i>/</i><b id="breadcrumbPage">Visão geral</b></div>
-        <div class="topbar-right"><button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Ativar tema escuro" title="Alternar tema"><span data-icon="moon"></span></button><label class="month-control"><span data-icon="calendar"></span><input type="month" id="monthPicker"></label><button class="icon-button mobile-logout" id="mobileLogout" title="Sair" data-icon="logout"></button></div>
-      </header>
-
-      <section class="page-view dashboard-page xtrato-home" id="page-dashboard">
-  <div class="xtrato-welcome">
-    <div><span class="eyebrow">SEU DINHEIRO, SUA VISÃO</span><h1>Seu mês em perspectiva</h1><p>Acompanhe o que já comprometeu e planeje os próximos meses com clareza.</p></div>
-    <button class="btn-primary dashboard-add-button" id="newPurchase"><span data-icon="plus"></span> Nova compra</button>
-  </div>
+      <div class="xtrato-top-band">
+      <header class="topbar xtrato-topbar"><a class="xtrato-brand" href="#" aria-label="XTRATO início"><img src="/static/xtrato-logo.svg" alt=""><span>XTRATO</span></a><div class="xtrato-topbar-actions"><div class="month-control" role="group" aria-label="Navegação entre meses"><button type="button" id="monthPrevious" aria-label="Mês anterior">‹</button><input type="month" id="monthPicker" aria-label="Mês exibido"><button type="button" id="monthNext" aria-label="Próximo mês">›</button></div><button class="icon-button" id="manageResources" type="button">Cartões e categorias</button><button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema"><span data-icon="moon"></span></button><button class="btn-primary dashboard-add-button" id="newPurchase" type="button"><span data-icon="plus"></span> Nova compra</button><details class="xtrato-account-menu"><summary><span class="xtrato-account-avatar" id="avatarInitial">U</span><span id="profileName">Usuário</span><span aria-hidden="true">⌄</span></summary><div class="xtrato-account-popover"><button type="button" id="passwordChangeButton">Alterar senha</button><button type="button" id="backupButton">Baixar backup</button><button type="button" id="restoreButton">Restaurar backup</button><button type="button" id="logoutButton">Sair da conta</button></div></details><input id="backupRestoreFile" type="file" accept=".json,application/json" hidden><span id="breadcrumbPage" class="hidden">Visão geral</span><button class="icon-button mobile-logout" id="mobileLogout" title="Sair" data-icon="logout"></button></div></header>      <section class="page-view dashboard-page xtrato-home" id="page-dashboard">
   <section class="xtrato-hero-grid">
     <div class="xtrato-balance panel-card">
       <div class="xtrato-overline"><span data-icon="wallet"></span> DISPONÍVEL NO MÊS</div>
@@ -72,29 +45,15 @@
       <button class="xtrato-budget-edit" id="editBudget" type="button">Ajustar orçamento <span>↗</span></button>
     </div>
     <div class="xtrato-wallet-panel">
-      <div class="xtrato-section-head"><div><span class="eyebrow">SUA CARTEIRA</span><h2>Cartões</h2></div><button class="link-button" data-go="cards">Gerenciar cartões ↗</button></div>
-      <div id="cardTotals" class="xtrato-wallet-list"><div class="empty-inline">Cadastre seu primeiro cartão para começar.</div></div>
+      <div class="xtrato-section-head"><div><span class="eyebrow">SUA CARTEIRA</span><h2>Cartões</h2></div><button class="link-button" type="button" id="manageCardsShortcut">Gerenciar cartões ↗</button></div>
+      <div id="walletCards" class="xtrato-wallet-list"><div class="empty-inline">Cadastre seu primeiro cartão para começar.</div></div>
       <div class="xtrato-wallet-foot"><span id="cardCount">0 cartões</span><b id="cardTotal">R$ 0,00</b></div>
     </div>
   </section>
-  <section class="panel-card xtrato-forecast-panel">
-    <div class="xtrato-section-head"><div><span class="eyebrow">PLANEJAMENTO</span><h2>Gastos dos próximos meses</h2><p>Valores previstos a partir das parcelas e despesas recorrentes cadastradas.</p></div><span class="xtrato-chart-key"><i></i> Total previsto</span></div>
-    <div id="forecastSummary" class="xtrato-forecast-summary"></div>
-    <div id="forecastChart" class="xtrato-forecast-chart"><div class="empty-inline">Sua projeção aparecerá aqui.</div></div>
-  </section>
-  <div class="xtrato-insights-grid">
-    <section class="panel-card xtrato-category-panel"><div class="xtrato-section-head"><div><span class="eyebrow">DISTRIBUIÇÃO</span><h2>Para onde vai seu dinheiro</h2><p>Gastos por categoria no mês selecionado.</p></div><button class="link-button" data-go="statement">Ver extrato ↗</button></div><div id="categoryChart" class="category-chart"><div class="empty-inline">Seus gastos por categoria aparecerão aqui.</div></div></section>
-    <section class="panel-card xtrato-history-panel"><div class="xtrato-section-head"><div><span class="eyebrow">HISTÓRICO</span><h2>Últimos seis meses</h2><p>Como seus gastos vêm evoluindo.</p></div><span class="xtrato-chart-key"><i></i> Gastos</span></div><div id="trendChart" class="trend-chart"><div class="empty-inline">Sem histórico suficiente.</div></div></section>
-  </div>
-  <section class="panel-card recent-panel dashboard-recent-panel xtrato-recent-panel"><div class="xtrato-section-head"><div><span class="eyebrow">MOVIMENTAÇÕES</span><h2>Últimos lançamentos</h2><p>Compras organizadas pelo mês da fatura.</p></div><button class="link-button" data-go="statement">Ver extrato completo →</button></div><div id="recentEntries" class="entry-list"><div class="empty-inline">Nenhuma compra cadastrada para este mês.</div></div></section>
-</section>
+      </div>
 
-<section class="page-view hidden statement-page" id="page-statement">
-        <div class="statement-welcome">
-          <div><span class="eyebrow">MOVIMENTAÇÕES</span><h1>Seu extrato</h1><p>Encontre compras, acompanhe os valores e entenda para onde seu dinheiro está indo.</p></div>
-          <button class="btn-primary statement-add-button" id="newPurchaseStatement"><span data-icon="plus"></span> Nova compra</button>
-        </div>
-        <section class="panel-card statement-panel statement-workspace">
+
+<div class="xtrato-dashboard-columns"><div class="xtrato-dashboard-main"><section class="panel-card statement-panel statement-workspace xtrato-statement-panel">
           <div class="statement-workspace-heading"><div><span class="statement-section-icon" data-icon="list"></span><div><h2>Todos os lançamentos</h2><p>Movimentações organizadas pelo mês de pagamento da fatura.</p></div></div><span class="statement-live-indicator"><i></i> Atualizado</span></div>
           <div class="statement-toolbar">
             <label class="search-box statement-search-box" for="statementSearch"><span data-icon="search"></span><input id="statementSearch" type="search" placeholder="Buscar compra ou estabelecimento" autocomplete="off" aria-label="Buscar compra ou estabelecimento"></label>
@@ -103,10 +62,7 @@
           <div class="statement-summary statement-summary-card"><div><span class="statement-summary-label">Lançamentos encontrados</span><span id="statementCount">0 lançamentos</span></div><div class="statement-summary-total"><span class="statement-summary-label">Total líquido no período</span><strong id="statementTotal">R$ 0,00</strong></div></div>
           <div class="statement-results-heading"><h3>Movimentações do período</h3><span>Compras e créditos</span></div>
           <div id="statementEntries" class="entry-list statement-results"><div class="empty-inline">Nenhum lançamento encontrado neste mês.</div></div>
-        </section>
-      </section>
-
-      <section class="page-view hidden xtrato-cards-page" id="page-cards">
+        </section></div><aside class="xtrato-dashboard-aside"><section class="panel-card xtrato-category-panel"><div class="xtrato-section-head"><div><span class="eyebrow">DISTRIBUIÇÃO</span><h2>Para onde foi</h2></div></div><div id="categoryChart" class="category-chart"></div></section><section class="panel-card xtrato-history-panel"><div class="xtrato-section-head"><div><span class="eyebrow">HISTÓRICO</span><h2>Últimos seis meses</h2></div><span class="xtrato-chart-key"><i></i> Gastos</span></div><div id="trendChart" class="trend-chart"></div></section><section class="panel-card xtrato-forecast-panel"><div class="xtrato-section-head"><div><span class="eyebrow">PREVISÃO</span><h2>Faturas dos próximos meses</h2><p>Parcelas e despesas recorrentes já previstas.</p></div></div><div id="forecastSummary" class="xtrato-forecast-summary"></div><div id="forecastChart" class="xtrato-forecast-chart"></div></section></aside></div><div class="recurrences-overview-strip xtrato-recurrences-overview"><div><span>Despesas ativas</span><strong id="recurrencesActiveCount">0</strong></div><div><span>Total mensal previsto</span><strong id="recurrencesMonthlyTotal">R$ 0,00</strong></div><div><span>Encerradas</span><strong id="recurrencesArchivedCount">0</strong></div></div><section class="panel-card recurrences-panel"><div class="section-heading recurrences-list-heading"><div><span class="dashboard-section-kicker">COMPROMISSOS RECORRENTES</span><h2>Suas despesas fixas</h2><p>O sistema projeta os lançamentos nos meses seguintes sem duplicá-los. Encerrar uma recorrência preserva o histórico.</p></div><span class="recurrences-list-caption">Gestão de recorrências</span></div><div id="recurrencesList" class="recurrences-list"><div class="empty-inline">Nenhuma despesa fixa cadastrada.</div></div></section></section><div class="modal-backdrop hidden" id="managementModal" role="dialog" aria-modal="true" aria-labelledby="managementTitle"><div class="modal-card xtrato-management-modal"><div class="modal-heading"><div><span class="eyebrow">PERSONALIZAÇÃO</span><h2 id="managementTitle">Cartões e categorias</h2><p>Gerencie sua carteira e suas classificações.</p></div><button class="modal-close" type="button" data-close="managementModal" aria-label="Fechar">×</button></div><div class="xtrato-management-tabs" role="tablist" aria-label="Gerenciar recursos"><button type="button" class="active" id="managementTabCards" role="tab" aria-selected="true" aria-controls="managementCards" tabindex="0" data-management-tab="cards">Cartões</button><button type="button" id="managementTabCategories" role="tab" aria-selected="false" aria-controls="managementCategories" tabindex="-1" data-management-tab="categories">Categorias</button></div><div id="managementCards" role="tabpanel" aria-labelledby="managementTabCards"><section class="xtrato-management-section" id="page-cards">
         <div class="page-heading cards-page-heading"><div><span class="eyebrow">SUA CARTEIRA</span><h1>Cartões</h1><p>Organize seus cartões, acompanhe limites e mantenha as datas das faturas sempre à mão.</p></div><span class="cards-page-note"><span data-icon="shield-check"></span> Seus dados ficam sob seu controle</span></div>
         <div class="cards-overview-strip" aria-label="Resumo dos cartões"><div><span>Cartões ativos</span><strong id="cardsActiveCount">0</strong></div><div><span>Limite total cadastrado</span><strong id="cardsTotalLimit">R$ 0,00</strong></div><div><span>Arquivados</span><strong id="cardsArchivedCount">0</strong></div></div>
         <div class="card-registration-layout">
@@ -150,19 +106,13 @@
         </div>
       </section>
 
-      <section class="page-view hidden" id="page-categories">
+      </div><div id="managementCategories" class="hidden" role="tabpanel" aria-labelledby="managementTabCategories"><section class="xtrato-management-section" id="page-categories">
         <div class="page-heading categories-page-heading"><div><span class="eyebrow">ORGANIZAÇÃO FINANCEIRA</span><h1>Categorias</h1><p>Crie uma estrutura que faça sentido para sua rotina e entenda melhor para onde seu dinheiro está indo.</p></div><span class="categories-page-note">Classificação dos seus lançamentos</span></div>
         <div class="categories-overview-strip"><div><span>Categorias ativas</span><strong id="categoriesActiveCount">0</strong></div><div><span>Categorias arquivadas</span><strong id="categoriesArchivedCount">0</strong></div><div><span>Personalização</span><strong>Cores e ícones</strong></div></div>
         <div class="management-grid categories-management-grid"><section class="panel-card management-form"><div class="section-heading"><div><h2 id="categoryFormTitle">Nova categoria</h2><p>Use nomes simples para facilitar a leitura dos gráficos.</p></div></div><form id="categoryForm" class="form-grid"><label>Nome<input name="name" required maxlength="50" placeholder="Ex.: Pets"></label><label>Cor<input name="color" type="color" value="#78a88b" class="color-input"></label><label>Ícone<select name="icon"><option value="tag">Etiqueta</option><option value="shopping-basket">Mercado</option><option value="shopping-bag">Compras</option><option value="utensils">Alimentação</option><option value="car-front">Transporte</option><option value="heart-pulse">Saúde</option><option value="repeat">Recorrente</option><option value="ticket">Lazer</option></select></label><button class="btn-primary form-submit" id="categoryFormSubmit" type="submit">Salvar categoria</button><button class="btn-quiet form-submit hidden" id="cancelCategoryEdit" type="button">Cancelar edição</button><div class="form-message" id="categoryFormMessage"></div></form></section><section class="panel-card management-list"><div class="section-heading"><div><h2>Suas categorias</h2><p>Renomear uma categoria também atualiza sua identificação nos lançamentos anteriores.</p></div></div><div id="categoriesList" class="managed-items"></div></section></div>
       </section>
 
-      <section class="page-view hidden" id="page-recurrences">
-        <div class="page-heading recurrences-page-heading"><div><span class="eyebrow">PLANEJAMENTO RECORRENTE</span><h1>Despesas fixas</h1><p>Tenha uma visão clara das assinaturas e cobranças que se repetem nas suas faturas.</p></div><button class="btn-primary" id="newRecurring"><span data-icon="plus"></span> Nova despesa fixa</button></div>
-        <div class="recurrences-overview-strip"><div><span>Despesas ativas</span><strong id="recurrencesActiveCount">0</strong></div><div><span>Total mensal previsto</span><strong id="recurrencesMonthlyTotal">R$ 0,00</strong></div><div><span>Encerradas</span><strong id="recurrencesArchivedCount">0</strong></div></div>
-        <section class="panel-card recurrences-panel"><div class="section-heading recurrences-list-heading"><div><span class="dashboard-section-kicker">COMPROMISSOS RECORRENTES</span><h2>Suas despesas fixas</h2><p>O sistema projeta os lançamentos nos meses seguintes sem duplicá-los. Encerrar uma recorrência preserva o histórico.</p></div><span class="recurrences-list-caption">Gestão de recorrências</span></div><div id="recurrencesList" class="recurrences-list"><div class="empty-inline">Nenhuma despesa fixa cadastrada.</div></div></section>
-      </section>
-
-      <footer class="app-footer"><span>XTRATO · Controle pessoal de cartões</span><span>Seus dados são privados e ficam na sua conta.</span></footer>
+      </div></div></div><footer class="app-footer"><span>XTRATO · Controle pessoal de cartões</span><span>Seus dados são privados e ficam na sua conta.</span></footer>
     </main>
   </div>
 
