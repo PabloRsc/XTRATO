@@ -102,3 +102,16 @@ Execução: [GitHub Actions #42898386403](https://github.com/PabloRsc/XTRATO/act
 
 **Conclusão atualizada:** CI verde no commit acima. Isso não substitui a inspeção visual manual em navegador nem a validação de uma implantação real com armazenamento persistente, HTTPS e política de backup do provedor.
 
+### Confirmação final de CI — 11/11/2026
+
+**Commit:** `66cdf5dadff05c01ebc0a124d6746566d919725d`  
+**Execução:** [GitHub Actions #42930718601](https://github.com/PabloRsc/XTRATO/actions/runs/42930718601) — conclusão `success`.
+
+- **78 testes Python aprovados** em 2,38 segundos.
+- Compilação Python, migração Alembic em SQLite e verificação de sintaxe JavaScript aprovadas.
+- Build da imagem Docker aprovado.
+- Smoke test completo com PostgreSQL via Docker Compose aprovado.
+- O smoke test autenticou a conta de CI, exportou e restaurou backup, arquivou e reativou cartão, alterou a senha, confirmou invalidação da sessão antiga e autenticou novamente após reiniciar a aplicação sem credenciais de bootstrap.
+
+**Conclusão:** a validação automatizada do commit atual está verde, inclusive no fluxo PostgreSQL. Permanecem fora do alcance desse CI a inspeção visual manual em navegador, o teste com conta real de staging e a confirmação de hospedagem/armazenamento persistente no provedor.
+
